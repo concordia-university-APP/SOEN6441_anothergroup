@@ -11,6 +11,7 @@ project/plugins/project/
 .cache
 .lib/
 
+.classpath
 .metadata
 bin/
 tmp/
