@@ -10,8 +10,6 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import models.Video;
-import models.VideoId;
-import models.VideoIdList;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -32,7 +30,7 @@ public class YoutubeService {
                 .build();
     }
 
-    public static VideoIdList searchResults(String keywords) throws GeneralSecurityException, IOException {
+    public static List<Video> searchResults(String keywords) throws GeneralSecurityException, IOException {
         YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
         try {
             SearchListResponse response = request
@@ -40,15 +38,14 @@ public class YoutubeService {
                     .setQ(keywords)
                     .setType(Collections.singletonList("video"))
                     .setOrder("date")
-                    .setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
+                    .setFields("items(id/videoId)")
                     .setMaxResults(10L)
                     .execute();
             List<SearchResult> items = response.getItems();
-            List<VideoId>  ids = items.stream()
-                            .map(x -> new VideoId(x.getId().getVideoId()))
+            List<Video> videos = items.stream()
+                            .map(x -> getVideo(x.getId().getVideoId()))
                             .collect(Collectors.toList());
-            VideoIdList list = new VideoIdList(ids);
-            return list;
+            return videos;
         } catch (IOException e) {
             throw new IOException("Error occurred while executing YouTube search: " + e.getMessage(), e);
         }

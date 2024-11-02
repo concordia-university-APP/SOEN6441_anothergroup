@@ -1,21 +1,21 @@
-@(results: Option[VideoIdList])
+@(results: Option[List[com.google.api.services.youtube.model.SearchResult]])
 
 @main("YouTube Search") {
     <div class="container">
         <div class="align-items-center">
             <h1 class="">YouTube Video Search</h1>
 
-                <!-- Search Form -->
-            <form action='@routes.YoutubeController.search("")' method="GET">
-                <div>
-                    <label for="query">Enter keyword:</label>
-                    <input type="text" name="query" id="query" required placeholder="Search for videos..." />
-                    <button type="submit">Search</button>
-                </div>
-            </form>
+    <!-- Search Form -->
+    <form action='@routes.YoutubeController.search("")' method="GET">
+        <div>
+            <label for="query">Enter keyword:</label>
+            <input type="text" name="query" id="query" required placeholder="Search for videos..." />
+            <button type="submit">Search</button>
         </div>
-            <!-- Search Results -->
-        <div id="results">
+    </form>
+
+    <!-- Search Results -->
+    <div id="results">
         @results match {
             case Some(videos) if !videos.getVideoIdList.isEmpty => {
                 <h2>Search Results for terms: ADD SEARCH TERMS</h2>
