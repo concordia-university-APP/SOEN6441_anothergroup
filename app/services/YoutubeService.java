@@ -10,6 +10,7 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import models.Video;
+import models.VideoList;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -30,7 +31,7 @@ public class YoutubeService {
                 .build();
     }
 
-    public static List<Video> searchResults(String keywords) throws GeneralSecurityException, IOException {
+    public static VideoList searchResults(String keywords) throws GeneralSecurityException, IOException {
         YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
         try {
             SearchListResponse response = request
@@ -45,7 +46,7 @@ public class YoutubeService {
             List<Video> videos = items.stream()
                             .map(x -> getVideo(x.getId().getVideoId()))
                             .collect(Collectors.toList());
-            return videos;
+            return new VideoList(videos);
         } catch (IOException e) {
             throw new IOException("Error occurred while executing YouTube search: " + e.getMessage(), e);
         }
