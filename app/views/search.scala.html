@@ -1,58 +1,58 @@
 @(results: Option[List[com.google.api.services.youtube.model.SearchResult]])
 
 @main("YouTube Search") {
-    <div class="container">
-        <div class="align-items-center">
-            <h1 class="">YouTube Video Search</h1>
+<div class="container">
+    <h1>YouTube Video Search</h1>
 
-                <!-- Search Form -->
-            <form action='@routes.YoutubeController.search("")' method="GET">
-                <div>
-                    <label for="query">Enter keyword:</label>
-                    <input type="text" name="query" id="query" required placeholder="Search for videos..." />
-                    <button type="submit">Search</button>
-                </div>
-            </form>
+    <!-- Search Form -->
+    <form action='@routes.YoutubeController.search("")' method="GET">
+        <div>
+            <label for="query">Enter keyword:</label>
+            <input type="text" name="query" id="query" required placeholder="Search for videos..." />
+            <button type="submit">Search</button>
         </div>
+    </form>
 
-            <!-- Search Results -->
-        <div id="results">
+    <!-- Search Results -->
+    <div id="results">
         @results match {
-            case Some(videos) if videos.nonEmpty => {
-                <h2>Search Results for terms: ADD SEARCH TERMS</h2>
-                <ol>
-                @for(video <- videos) {
-                    <li>
-                        <div class="row m-auto py-2">
-                            <div class="col-10">
-                                <div>
-                                    <div class="h5 d-inline"> Title: </div>
-                                    <a class="d-inline" href='@("https://www.youtube.com/watch?v=" + video.getId().getVideoId)' target="_blank">
-                                    @video.getSnippet().getTitle()
-                                    </a>
-                                </div>
-                                <div>
-                                    <div class="h5 d-inline"> Channel: </div>
-                                    <!-- route to channel page routes.YoutubeController.channel(video.getSnippet().getChannelId()) -->
-                                    <a class="d-inline" href=""> @video.getSnippet().getChannelTitle() </a>
-                                </div>
-                                <div>
-                                    <div class="h5 d-inline"> Description: </div>
-                                    <p class="d-inline"> "@video.getSnippet().getDescription()". </p>
-                                </div>
-                            </div>
-                            <div class="col-2 my-auto">
-                                <img src="@video.getSnippet().getThumbnails().getDefault().getUrl()" alt="Thumbnail" />
-                            </div>
+        case Some(videos) if videos.nonEmpty => {
+        <h2>All Search Results</h2>
+        <ol>
+            @for(video <- videos) {
+            <li>
+                <div class="row m-auto py-2">
+                    <div class="col-10">
+                        <div>
+                            <strong>Title:</strong>
+                            <a class="d-inline" href='@("https://www.youtube.com/watch?v=" + video.getId().getVideoId)' target="_blank">
+                                @video.getSnippet().getTitle()
+                            </a>
                         </div>
-                    </li>
-                }
-                </ol>
+                        <div>
+                            <div class="h5 d-inline"> Channel: </div>
+                            <a class="d-inline" href='@("https://www.youtube.com/channel/" + video.getSnippet().getChannelId())' target="_blank">
+                                @video.getSnippet().getChannelTitle()
+                            </a>
+                        </div>
+                        <div>
+                            <strong>Description:</strong>
+                            <p>@video.getSnippet().getDescription()</p>
+                        </div>
+                    </div>
+
+                    <div class="col-2 my-auto">
+                        <img src="@video.getSnippet().getThumbnails().getDefault().getUrl()" alt="Thumbnail" />
+                    </div>
+                </div>
+            </li>
             }
-            case _ => {
-                <p>No results found.</p>
-            }
+        </ol>
         }
-        </div>
+        case _ => {
+        <p>No results found.</p>
+        }
+        }
     </div>
+</div>
 }
