@@ -22,7 +22,7 @@ public class SearchService {
     }
 
     public List<VideoSearch> searchKeywords(String keywords) {
-        VideoList results = YoutubeService.searchResults(keywords);
+        VideoList results = YoutubeService.searchResults(keywords, 10L);
 
         VideoSearch search = new VideoSearch(keywords, results);
         videoSearchList.add(0, search);

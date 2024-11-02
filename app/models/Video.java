@@ -1,7 +1,5 @@
 package models;
 
-import com.google.api.services.youtube.model.Thumbnail;
-
 public class Video {
     private final String id;
     private final String title;

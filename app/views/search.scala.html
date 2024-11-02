@@ -15,13 +15,17 @@
                     <button type="submit">Search</button>
                 </div>
             </form>
-
                 <!-- Search Results -->
             <div id="results">
             @results match {
                 case Some(searchList) if !searchList.isEmpty => {
                     @for(item: VideoSearch <- searchList) {
-
+                        
+                        <div>
+                            <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
+                                View Word Frequency Statistics for "@item.getSearchTerms"
+                            </a>
+                        </div>
                         <h2>Search Results for terms: @item.getSearchTerms </h2>
                         <ol>
                         @for(v <- item.getResults.getVideoList) {
