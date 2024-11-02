@@ -13,6 +13,6 @@ public class StatisticsController extends Controller {
         Map<String, Long> wordFrequency = YoutubeService.getWordFrequency(query);
 
         // Pass the word frequency data to the view.
-        return ok(statistics.render(query, wordFrequency));
+        return ok(statistics.render(wordFrequency, query));
     }
 }

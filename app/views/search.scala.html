@@ -1,5 +1,6 @@
+@import models.Video
 @import java.util
-@(results: Option[List[com.google.api.services.youtube.model.SearchResult]], query: String)
+@(results: util.List[Video], query: String)
 
 @main("YouTube Search") {
 <div class="container">
@@ -17,30 +18,30 @@
 
     <!-- Search Results -->
     <div id="results">
-        @results match {
-        case Some(videos) if videos.nonEmpty => {
-        <h2>Search Results for "@query"</h2>
+    @results match {
+        case videos if videos.nonEmpty => {
+            <h2>Search Results for "@query"</h2>
             <div>
                 <a href="@routes.StatisticsController.getStatistics(query)" target="_blank">
-                View Word Frequency Statistics for "@query"
+                    View Word Frequency Statistics for "@query"
                 </a>
             </div>
-        <ul>
+            <ul>
             @for(video <- videos) {
-            <li>
-                <a href='@("https://www.youtube.com/watch?v=" + video.getId().getVideoId)' target="_blank">
-                    @video.getSnippet().getTitle()
-                </a>
-                <br/>
-                <img src="@video.getSnippet().getThumbnails().getDefault().getUrl()" alt="Thumbnail" />
-            </li>
+                <li>
+                    <a href='@("https://www.youtube.com/watch?v=" + video.getId)' target="_blank">
+                    @video.getTitle
+                    </a>
+                    <br/>
+                    <img src="@video.getThumbnailUrl" alt="Thumbnail" />
+                </li>
             }
-        </ul>
+            </ul>
         }
         case _ => {
-        <p>No results found.</p>
+            <p>No results found.</p>
         }
-        }
+    }
     </div>
 </div>
 }

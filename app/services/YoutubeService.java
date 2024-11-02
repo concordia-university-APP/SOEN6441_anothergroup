@@ -8,6 +8,7 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import models.Video;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -27,7 +28,7 @@ public class YoutubeService {
                 .build();
     }
 
-    public static List<SearchResult> searchResults(String keywords, long limit) throws GeneralSecurityException, IOException{
+    public static List<Video> searchResults(String keywords, long limit) throws GeneralSecurityException, IOException{
         YouTube youtubeService = getService();
         YouTube.Search.List request = youtubeService.search().list("id, snippet");
         try {
@@ -39,7 +40,7 @@ public class YoutubeService {
                     .setMaxResults(limit)
                     .execute();
         List<SearchResult> items = response.getItems();
-        return items != null ? items : Collections.emptyList();
+        return items != null ? parseVideos(items) : Collections.emptyList();
         } catch (IOException e) {
             throw new IOException("Error occurred while executing YouTube search: " + e.getMessage(), e);
         }
@@ -47,10 +48,10 @@ public class YoutubeService {
 
     public static Map<String, Long> getWordFrequency(String query) {
         try {
-            List<SearchResult> response = searchResults(query, 50L);
+            List<Video> videos = searchResults(query, 50L);
 
-            List<String> titles = response.stream()
-                    .map(item -> item.getSnippet().getTitle()) // Extract each title
+            List<String> titles = videos.stream()
+                    .map(Video::getTitle) // Extract each title
                     .collect(Collectors.toList());
 
             List<String> listOfWordsFromTiles = extractAndNormalizeWords(titles);
@@ -86,5 +87,20 @@ public class YoutubeService {
     private static Map<String, Long> getWordOccurences(List<String> words) {
         return words.stream()
                 .collect(Collectors.groupingBy(word -> word, Collectors.counting())); // Count occurrences
+    }
+
+    public static List<Video> parseVideos(List<SearchResult> searchResults) throws IOException {
+        List<Video> videos = new ArrayList<>();
+        for (SearchResult result : searchResults) {
+            Video video = new Video();
+            video.setId(String.valueOf(result.getId()));
+            video.setTitle(result.getSnippet().getTitle());
+            video.setDescription(result.getSnippet().getDescription());
+            video.setChannelTitle(result.getSnippet().getChannelTitle());
+            video.setThumbnailUrl(result.getSnippet().getThumbnails().getDefault().getUrl());
+            videos.add(video);
+        }
+
+        return videos;
     }
 }
