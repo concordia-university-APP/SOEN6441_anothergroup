@@ -1,10 +1,11 @@
 package controllers;
 
 import com.google.api.services.youtube.model.SearchResult;
+import models.Video;
+import models.VideoIdList;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.YoutubeService;
-import views.html.search;
 import scala.jdk.javaapi.OptionConverters;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -16,23 +17,23 @@ public class YoutubeController extends Controller {
 
     public Result search(String query) {
         try {
-            List<SearchResult> results = YoutubeService.searchResults(query);
-            Option<List<SearchResult>> scalaResults;
-            if (results.isEmpty()) {
-                scalaResults = Option.empty();
-            } else {
-                scalaResults = OptionConverters.toScala(Optional.of(results));
-            }
-            return ok(search.render(scalaResults));
+            VideoIdList results = YoutubeService.searchResults(query);
+            return ok(views.html.search.render(OptionConverters.toScala(Optional.of(results))));
         } catch (IOException e) {
             return internalServerError("Error occurred while searching YouTube: " + e.getMessage());
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public Result video(String id) {
+        Video video = YoutubeService.getVideo(id);
+        return ok(views.html.video.render(video));
+    }
+
     public Result searchForm() {
-        Optional<List<SearchResult>> results = Optional.empty();
-        return ok(search.render(OptionConverters.toScala(results)));
+        Optional<VideoIdList> results = Optional.empty();
+        return ok(views.html.search.render(OptionConverters.toScala(results)));
     }
 
 }

@@ -1,4 +1,4 @@
-@(results: Option[List[com.google.api.services.youtube.model.SearchResult]])
+@(results: Option[VideoIdList])
 
 @main("YouTube Search") {
     <div class="container">
@@ -14,38 +14,40 @@
                 </div>
             </form>
         </div>
-
             <!-- Search Results -->
         <div id="results">
         @results match {
-            case Some(videos) if videos.nonEmpty => {
+            case Some(videos) if !videos.getVideoIdList.isEmpty => {
                 <h2>Search Results for terms: ADD SEARCH TERMS</h2>
                 <ol>
-                @for(video <- videos) {
-                    <li>
-                        <div class="row m-auto py-2">
-                            <div class="col-10">
-                                <div>
-                                    <div class="h5 d-inline"> Title: </div>
-                                    <a class="d-inline" href='@("https://www.youtube.com/watch?v=" + video.getId().getVideoId)' target="_blank">
-                                    @video.getSnippet().getTitle()
-                                    </a>
-                                </div>
-                                <div>
-                                    <div class="h5 d-inline"> Channel: </div>
-                                    <!-- route to channel page routes.YoutubeController.channel(video.getSnippet().getChannelId()) -->
-                                    <a class="d-inline" href=""> @video.getSnippet().getChannelTitle() </a>
-                                </div>
-                                <div>
-                                    <div class="h5 d-inline"> Description: </div>
-                                    <p class="d-inline"> "@video.getSnippet().getDescription()". </p>
-                                </div>
-                            </div>
-                            <div class="col-2 my-auto">
-                                <img src="@video.getSnippet().getThumbnails().getDefault().getUrl()" alt="Thumbnail" />
-                            </div>
-                        </div>
-                    </li>
+                @for(index <- 0 until videos.getVideoIdList.size) {
+                    @video(services.YoutubeService.getVideo(videos.getVideoIdList.get(index).getId))
+
+                    @* @routes.YoutubeController.video(videoId.) *@
+                    @*                    <li>*@
+@*                        <div class="row m-auto py-2">*@
+@*                            <div class="col-10">*@
+@*                                <div>*@
+@*                                    <div class="h5 d-inline"> Title: </div>*@
+@*                                    <a class="d-inline" href='@("https://www.youtube.com/watch?v=" + video.getId().getVideoId)' target="_blank">*@
+@*                                    @video.getSnippet().getTitle()*@
+@*                                    </a>*@
+@*                                </div>*@
+@*                                <div>*@
+@*                                    <div class="h5 d-inline"> Channel: </div>*@
+@*                                    <!-- route to channel page routes.YoutubeController.channel(video.getSnippet().getChannelId()) -->*@
+@*                                    <a class="d-inline" href=""> @video.getSnippet().getChannelTitle() </a>*@
+@*                                </div>*@
+@*                                <div>*@
+@*                                    <div class="h5 d-inline"> Description: </div>*@
+@*                                    <p class="d-inline"> "@video.getSnippet().getDescription()". </p>*@
+@*                                </div>*@
+@*                            </div>*@
+@*                            <div class="col-2 my-auto">*@
+@*                                <img src="@video.getSnippet().getThumbnails().getDefault().getUrl()" alt="Thumbnail" />*@
+@*                            </div>*@
+@*                        </div>*@
+@*                    </li>*@
                 }
                 </ol>
             }
