@@ -29,13 +29,14 @@ public class YoutubeService {
 
     public static List<SearchResult> searchResults(String keywords) throws GeneralSecurityException, IOException{
         YouTube youtubeService = getService();
-        YouTube.Search.List request = youtubeService.search().list("id, snippet");
+        YouTube.Search.List request = youtubeService.search().list(Collections.singletonList("id, snippet"));
         try {
-            SearchListResponse response = request.setKey(API_KEY)
+            SearchListResponse response = request
+                    .setKey(API_KEY)
                     .setQ(keywords)
-                    .setType("video")
+                    .setType(Collections.singletonList("video"))
                     .setOrder("date")
-                    .setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)")
+                    .setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
                     .setMaxResults(10L)
                     .execute();
         List<SearchResult> items = response.getItems();
@@ -44,4 +45,5 @@ public class YoutubeService {
             throw new IOException("Error occurred while executing YouTube search: " + e.getMessage(), e);
         }
     }
+
 }
