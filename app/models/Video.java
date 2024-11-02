@@ -1,57 +1,26 @@
 package models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Video {
-    private String id;
-    private String title;
-    private String description;
-    private String channelTitle;
-    private String thumbnailUrl;
+    private final String id;
+    private final String title;
+    private final String description;
+    private final String channelId;
+    private final String channelName;
+    private final String thumbnailUrl;
 
-    @JsonProperty("id")
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
+    public Video(String id, String title, String description, String channelId, String channelName, String thumbnailUrl) {
         this.id = id;
-    }
-
-    @JsonProperty("snippet.title")
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
         this.title = title;
-    }
-
-    @JsonProperty("snippet.description")
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
-    }
-
-    @JsonProperty("snippet.channelTitle")
-    public String getChannelTitle() {
-        return channelTitle;
-    }
-
-    public void setChannelTitle(String channelTitle) {
-        this.channelTitle = channelTitle;
-    }
-
-    @JsonProperty("snippet.thumbnails.default.url")
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
+        this.channelId = channelId;
+        this.channelName = channelName;
         this.thumbnailUrl = thumbnailUrl;
     }
-}
 
+    public String getId() { return id;}
+    public String getTitle() { return title;}
+    public String getDescription() { return description;}
+    public String getChannelId() { return channelId;}
+    public String getChannelName() { return channelName;}
+    public String getThumbnailUrl() { return thumbnailUrl;}
+}

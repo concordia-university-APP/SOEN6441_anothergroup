@@ -11,22 +11,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import views.html.statistics;
+import models.VideoList;
+import models.VideoSearch;
+import scala.Option;
+import models.Video;
+import play.mvc.Controller;
+import play.mvc.Result;
+import services.SearchService;
+
+import java.util.Collection;
+import java.util.List;
 
 public class YoutubeController extends Controller {
-
     public Result search(String query) {
-        try {
-            List<Video> results = YoutubeService.searchResults(query, 10L);
-            return ok(search.render(results, query));
-        } catch (IOException e) {
-            return internalServerError("Error occurred while searching YouTube: " + e.getMessage());
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        }
+        List<VideoSearch> searches = SearchService.getInstance().searchKeywords(query);
+        return ok(views.html.search.render(Option.apply(searches)));
+    }
+
+    public Result video(String id) {
+        Video video = SearchService.getInstance().getVideoById(id);
+        return ok(views.html.video.render(video));
     }
 
     public Result searchForm() {
-        List<Video> results = Collections.emptyList();
-        return ok(search.render(results, ""));
+        Option<Collection<VideoSearch>> results = Option.empty();
+        return ok(views.html.search.render(results));
     }
 }
