@@ -14,8 +14,7 @@ import models.VideoList;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class YoutubeService {
@@ -34,7 +33,7 @@ public class YoutubeService {
         }
     }
 
-    public static VideoList searchResults(String keywords) {
+    public static VideoList searchResults(String keywords, Long maxResults) {
         try {
         YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
             SearchListResponse response = request
@@ -43,7 +42,7 @@ public class YoutubeService {
                     .setType(Collections.singletonList("video"))
                     .setOrder("date")
                     .setFields("items(id/videoId)")
-                    .setMaxResults(10L)
+                    .setMaxResults(maxResults)
                     .execute();
             List<SearchResult> items = response.getItems();
             List<Video> videos = items.stream()
@@ -89,27 +88,22 @@ public class YoutubeService {
 
     }
     public static Map<String, Long> getWordFrequency(String query) {
-        try {
-            List<Video> videos = searchResults(query, 50L);
+        VideoList videos = searchResults(query, 50L);
 
-            List<String> titles = videos.stream()
-                    .map(Video::getTitle) // Extract each title
-                    .collect(Collectors.toList());
+        List<String> titles = videos.getVideoList().stream()
+                .map(Video::getTitle) // Extract each title
+                .collect(Collectors.toList());
 
-            List<String> listOfWordsFromTiles = extractAndNormalizeWords(titles);
+        List<String> listOfWordsFromTiles = extractAndNormalizeWords(titles);
 
-            return countAndSortWordFrequencies(listOfWordsFromTiles)
-                    .stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (e1, e2) -> e1, // In case of a key collision, keep the existing entry
-                            LinkedHashMap::new // Use LinkedHashMap to preserve the order
-                    ));
-        } catch (GeneralSecurityException | IOException e) {
-            e.printStackTrace();
-            return Collections.emptyMap();
-        }
+        return countAndSortWordFrequencies(listOfWordsFromTiles)
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1, // In case of a key collision, keep the existing entry
+                        LinkedHashMap::new // Use LinkedHashMap to preserve the order
+                ));
     }
 
     private static List<String> extractAndNormalizeWords(List<String> titles) {
@@ -134,12 +128,13 @@ public class YoutubeService {
     public static List<Video> parseVideos(List<SearchResult> searchResults) throws IOException {
         List<Video> videos = new ArrayList<>();
         for (SearchResult result : searchResults) {
-            Video video = new Video();
-            video.setId(String.valueOf(result.getId()));
-            video.setTitle(result.getSnippet().getTitle());
-            video.setDescription(result.getSnippet().getDescription());
-            video.setChannelTitle(result.getSnippet().getChannelTitle());
-            video.setThumbnailUrl(result.getSnippet().getThumbnails().getDefault().getUrl());
+            Video video = new Video(
+            result.getId().getVideoId(),
+            result.getSnippet().getTitle(),
+            result.getSnippet().getDescription(),
+            result.getSnippet().getChannelId(),
+            result.getSnippet().getChannelTitle(),
+            result.getSnippet().getThumbnails().getDefault().getUrl());
             videos.add(video);
         }
 
