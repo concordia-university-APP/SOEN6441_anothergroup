@@ -1,5 +1,6 @@
+@import java.util.Collection
 @import java.util
-@(results: Option[VideoList])
+@(results: Option[util.Collection[VideoSearch]])
 
 @main("YouTube Search") {
     <div class="container">
@@ -18,15 +19,17 @@
                 <!-- Search Results -->
             <div id="results">
             @results match {
-                case Some(videoList) if !videoList.getVideoList.empty => {
-                    <h2>Search Results for terms: ADD SEARCH TERMS</h2>
-                    <ol>
-                    @for(v <- videoList.getVideoList) {
-                        @video(v)
-                    }
-                    </ol>
-                }
+                case Some(searchList) if !searchList.isEmpty => {
+                    @for(item: VideoSearch <- searchList) {
 
+                        <h2>Search Results for terms: @item.getSearchTerms </h2>
+                        <ol>
+                        @for(v <- item.getResults.getVideoList) {
+                            @video(v)
+                        }
+                        </ol>
+                    }
+                }
                 case _ => {
                     <p>No results found.</p>
                 }

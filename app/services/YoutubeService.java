@@ -25,15 +25,19 @@ public class YoutubeService {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
 
-    public static YouTube getService() throws GeneralSecurityException, IOException {
-        return new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
+    public static YouTube getService() {
+        try {
+            return new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static VideoList searchResults(String keywords) throws GeneralSecurityException, IOException {
-        YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
+    public static VideoList searchResults(String keywords) {
         try {
+        YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
             SearchListResponse response = request
                     .setKey(API_KEY)
                     .setQ(keywords)
@@ -48,7 +52,7 @@ public class YoutubeService {
                             .collect(Collectors.toList());
             return new VideoList(videos);
         } catch (IOException e) {
-            throw new IOException("Error occurred while executing YouTube search: " + e.getMessage(), e);
+            throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
         }
     }
 
@@ -58,7 +62,7 @@ public class YoutubeService {
         YouTube.Videos.List request = null;
         try {
             request = getService().videos().list(Collections.singletonList("snippet"));
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -84,7 +88,4 @@ public class YoutubeService {
                 video.getSnippet().getChannelTitle(),
                 video.getSnippet().getThumbnails().getDefault().getUrl());
     }
-
-
-
 }
