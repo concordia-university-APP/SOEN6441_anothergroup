@@ -1,23 +1,35 @@
 package models;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FleschReadingEaseScore {
 
-    private double readingEaseScore;
-    private double gradeLevel;
+    private final String vowels = "aeiouy";
+    private final double readingEaseScore;
+    private final double gradeLevel;
 
     public FleschReadingEaseScore(String description) {
-        int totalWords = description.split(" ").length;
-        String[] sentences = description.split("\\. ");
-        int totalSentences = sentences.length;
-        int syllablesCount = 1;
-        //int syllablesCount = countSentenceSyllables(description);
+
+        if (description.isEmpty()) {
+            readingEaseScore= 0;
+            gradeLevel= 0;
+            return;
+        }
+        description = description.replaceAll(",", "");
+        List<String> words = Arrays.asList(description.replaceAll("[.]", "").split("\\s+"));
+        List<String> sentences = Arrays.stream(description.split("[.!?]"))
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        int totalSentences = Math.max(1, sentences.size());
+        int syllablesCount = countSentenceSyllables(description);
 
 
-        this.readingEaseScore = 206.835 - 1.015 * ( totalWords / totalSentences ) - 84.6 * ( syllablesCount / totalWords );;
-        this.gradeLevel = 0.39 * ( totalWords / totalSentences ) + 11.8 * ( syllablesCount / totalWords ) - 15.59;
+        this.readingEaseScore = Math.round((206.835 - 1.015 * ((double) words.size() / totalSentences)  - 84.6 * ( (double) syllablesCount / words.size() )) * 10) / 10.0;
+        this.gradeLevel = Math.round((0.39 * ((double) words.size() / totalSentences ) + 11.8 *  ((double) syllablesCount / words.size()) - 15.59) * 10) / 10.0;
     }
 
     public double getReadingEaseScore() {
@@ -26,6 +38,10 @@ public class FleschReadingEaseScore {
 
     public double getGradeLevel() {
         return gradeLevel;
+    }
+
+    private boolean isVowel(char letter) {
+        return vowels.contains(Character.toString(letter));
     }
 
     private int countSentenceSyllables(String sentence) {
@@ -39,38 +55,37 @@ public class FleschReadingEaseScore {
         // first remove last letter if it is e
         if (word.isEmpty()) return 0;
         word = word.toLowerCase();
+
+        // remove when E is at last position of a word since it doesn't count
         word = word.replaceAll("e$", "");
 
         String trimmedWord = Arrays.stream(word.split(""))
                 .reduce("", (string, letter) ->  {
-
                     // if there are two adjacent vowels
-                    if(string.isEmpty()) return string;
-                    if (isVowel(letter.charAt(0)) && isVowel(string.charAt(string.length() - 1))) {
+                    if (!string.isEmpty() && isVowel(letter.charAt(0)) && isVowel(string.charAt(string.length() - 1))) {
                         return string;
                     }
                     return string.concat(letter);
                 });
-        int syllables = (int)Arrays.stream(trimmedWord.split("")).filter((x) -> {
-            return isVowel(x.charAt(0));
-        }).count();
+
+        int syllables = (int)Arrays.stream(trimmedWord.split(""))
+                .filter((x) -> isVowel(x.charAt(0)))
+                .count();
 
 
         return Math.max(syllables, 1);
     }
 
-    private String vowels = "aeiouy";
-    private boolean isVowel(char letter) {
-        return vowels.contains(Character.toString(letter));
+    public List<String> getSentences(String description)
+    {
+        return Arrays.stream(description.split("[.!?]"))
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
-    public Stream<String> getSentences(String description)
+    public List<String> getSentenceWords(String sentence)
     {
-        return Arrays.stream(description.split("\\. "));
-    }
-
-    public Stream<String> getSentenceWords(String sentence)
-    {
-        return Arrays.stream(sentence.split(" "));
+        return Arrays.stream(sentence.replaceAll("\\.", "").trim().split("\\s+"))
+                .collect(Collectors.toList());
     }
 }
