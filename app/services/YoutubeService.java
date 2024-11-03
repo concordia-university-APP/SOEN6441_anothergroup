@@ -57,14 +57,14 @@ public class YoutubeService {
 
 
     public static Video getVideo(String videoId) {
-        YouTube.Videos.List request = null;
+        YouTube.Videos.List request;
         try {
             request = getService().videos().list(Collections.singletonList("snippet"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        VideoListResponse response = null;
+        VideoListResponse response;
         try {
             response = request
                     .setKey(API_KEY)
@@ -124,21 +124,5 @@ public class YoutubeService {
     private static Map<String, Long> getWordOccurences(List<String> words) {
         return words.stream()
                 .collect(Collectors.groupingBy(word -> word, Collectors.counting())); // Count occurrences
-    }
-
-    public static List<Video> parseVideos(List<SearchResult> searchResults) throws IOException {
-        List<Video> videos = new ArrayList<>();
-        for (SearchResult result : searchResults) {
-            Video video = new Video(
-            result.getId().getVideoId(),
-            result.getSnippet().getTitle(),
-            result.getSnippet().getDescription(),
-            result.getSnippet().getChannelId(),
-            result.getSnippet().getChannelTitle(),
-            result.getSnippet().getThumbnails().getDefault().getUrl());
-            videos.add(video);
-        }
-
-        return videos;
     }
 }
