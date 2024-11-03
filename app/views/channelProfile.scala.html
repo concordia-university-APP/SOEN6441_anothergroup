@@ -1,0 +1,36 @@
+@(channel: Option[com.google.api.services.youtube.model.Channel], videos: Option[List[models.Video]])
+
+@main("Channel Profile") {
+<div class="container">
+    @channel match {
+    case Some(ch) => {
+    <h1>@ch.getSnippet.getTitle</h1>
+    <p>@ch.getSnippet.getDescription</p>
+    <img src="@ch.getSnippet.getThumbnails.getDefault.getUrl" alt="Channel Thumbnail" />
+    <h2>Last 10 Videos:</h2>
+
+    @videos match {
+    case Some(videoList) if videoList.nonEmpty => {
+    <ul>
+        @for(video <- videoList) {
+        <li>
+            <a href='@("https://www.youtube.com/watch?v=" + video.getId)' target="_blank">
+                @video.getTitle
+            </a>
+            <br/>
+            <img src="@video.getThumbnailUrl" alt="Thumbnail" />
+        </li>
+        }
+    </ul>
+    }
+    case _ => {
+    <p>No videos found for this channel.</p>
+    }
+    }
+    }
+    case None => {
+    <p>Channel not found.</p>
+    }
+    }
+</div>
+}

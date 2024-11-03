@@ -10,8 +10,9 @@
         </div>
         <div>
             <div class="h5 d-inline"> Channel: </div>
-                <!-- route to channel page routes.YoutubeController.channel(video.getSnippet().getChannelId()) -->
-            <a class="d-inline" href=""> @video.getChannelName </a>
+            <a href="@routes.YoutubeController.showChannelProfile(video.getChannelId)">
+                @video.getChannelName()
+            </a>
         </div>
         <div>
             <div class="h5 d-inline"> Description: </div>
