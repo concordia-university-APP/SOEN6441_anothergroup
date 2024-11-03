@@ -20,13 +20,12 @@
             @results match {
                 case Some(searchList) if !searchList.isEmpty => {
                     @for(item: VideoSearch <- searchList) {
-                        
+                        <h2>Search Results for terms: @item.getSearchTerms </h2>
                         <div>
                             <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
                                 View Word Frequency Statistics for "@item.getSearchTerms"
                             </a>
                         </div>
-                        <h2>Search Results for terms: @item.getSearchTerms </h2>
                         <ol>
                         @for(v <- item.getResults.getVideoList) {
                             @video(v)

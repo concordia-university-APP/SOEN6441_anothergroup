@@ -116,7 +116,8 @@ public class YoutubeService {
 
     private static List<Map.Entry<String, Long>> countAndSortWordFrequencies(List<String> words) {
         return getWordOccurences(words).entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey()))
                 .collect(Collectors.toList());
     }
 
