@@ -1,0 +1,24 @@
+@(video: Video)
+
+<div class="row m-auto py-2">
+    <div class="col-10">
+        <div>
+            <div class="h5 d-inline"> Title: </div>
+            <a class="d-inline" href='@("https://www.youtube.com/watch?v=" + video.getId)' target="_blank">
+            @video.getTitle
+            </a>
+        </div>
+        <div>
+            <div class="h5 d-inline"> Channel: </div>
+                <!-- route to channel page routes.YoutubeController.channel(video.getSnippet().getChannelId()) -->
+            <a class="d-inline" href=""> @video.getChannelName </a>
+        </div>
+        <div>
+            <div class="h5 d-inline"> Description: </div>
+            <p class="d-inline"> "@video.getDescription". </p>
+        </div>
+    </div>
+    <div class="col-2 my-auto">
+        <img src="@video.getThumbnailUrl" alt="Thumbnail" />
+    </div>
+</div>

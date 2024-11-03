@@ -1,0 +1,44 @@
+@import java.util.Collection
+@import java.util
+@(results: Option[util.Collection[VideoSearch]])
+
+@main("YouTube Search") {
+    <div class="container">
+        <div class="align-items-center">
+            <h1 class="">YouTube Video Search</h1>
+
+                <!-- Search Form -->
+            <form action='@routes.YoutubeController.search("")' method="GET">
+                <div>
+                    <label for="query">Enter keyword:</label>
+                    <input type="text" name="query" id="query" required placeholder="Search for videos..." />
+                    <button type="submit">Search</button>
+                </div>
+            </form>
+                <!-- Search Results -->
+            <div id="results">
+            @results match {
+                case Some(searchList) if !searchList.isEmpty => {
+                    @for(item: VideoSearch <- searchList) {
+                        
+                        <div>
+                            <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
+                                View Word Frequency Statistics for "@item.getSearchTerms"
+                            </a>
+                        </div>
+                        <h2>Search Results for terms: @item.getSearchTerms </h2>
+                        <ol>
+                        @for(v <- item.getResults.getVideoList) {
+                            @video(v)
+                        }
+                        </ol>
+                    }
+                }
+                case _ => {
+                    <p>No results found.</p>
+                }
+            }
+            </div>
+        </div>
+    </div>
+}

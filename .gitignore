@@ -10,6 +10,8 @@ project/plugins/project/
 .history
 .cache
 .lib/
+.idea
+.bsp
 
 .classpath
 .metadata
