@@ -21,6 +21,7 @@ public class YoutubeController extends Controller {
     private final StatisticsService statisticsService;
     private final SearchService searchService;
     private final HttpExecutionContext ec;
+    private final int DISPLAY_COUNT = 10;
 
     @Inject
     public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec) {
@@ -46,8 +47,11 @@ public class YoutubeController extends Controller {
                     -> redirect("/").addingToSession(request,"user", searchService.createSessionSearchList()));
         }
 
-        return searchService.searchKeywords(query, user.get())
-                .thenApplyAsync(searches -> ok(views.html.search.render(Option.apply(searches))), ec.current());
+        return searchService.searchKeywords(query, user.get(), DISPLAY_COUNT)
+                .thenApplyAsync(searches -> ok(views.html.search.render(
+                        Option.apply(searches),
+                        DISPLAY_COUNT)),
+                        ec.current());
     }
 
     /**
@@ -61,7 +65,8 @@ public class YoutubeController extends Controller {
 
         return user.map(s -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
-                        Option.apply(searchService.getSessionSearchList(s))
+                        Option.apply(searchService.getSessionSearchList(s)),
+                        DISPLAY_COUNT
                 ))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->
                 redirect("/").addingToSession(request, "user", searchService.createSessionSearchList())));

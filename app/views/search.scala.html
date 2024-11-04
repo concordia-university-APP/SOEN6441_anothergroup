@@ -1,6 +1,7 @@
 @import java.util.Collection
 @import java.util
-@(results: Option[util.Collection[VideoSearch]])
+@(results: Option[util.Collection[VideoSearch]], maxDisplay: Integer)
+
 
 @main("YouTube Search") {
     <div class="container">
@@ -27,8 +28,8 @@
                             </a>
                         </div>
                         <ol>
-                        @for(v <- item.getResults.getVideoList) {
-                            @video(v)
+                        @for(i <- 0 to Math.max(0, Math.min(maxDisplay - 1, item.getResults.getVideoList.size() - 1))) {
+                            @video(item.getResults.getVideoList.get(i))
                         }
                         </ol>
                     }

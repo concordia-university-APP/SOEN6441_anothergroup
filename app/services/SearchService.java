@@ -5,11 +5,12 @@ import models.VideoSearch;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 
 public class SearchService {
     private int userSessionCounter = 0;
-    private final int MAX_RESULTS = 10;
+    private final long MAX_RESULTS = 50;
     private final HashMap<String, List<VideoSearch>> sessionVideoSearchList = new HashMap<>();
 
     /**
@@ -21,7 +22,7 @@ public class SearchService {
      * @param sessionId user session id
      * @return list of the last 10 or less searches made
      */
-    public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId) {
+    public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId, long displayCount) {
         Optional<VideoSearch> existingSearch = sessionVideoSearchList.get(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
@@ -32,16 +33,16 @@ public class SearchService {
             return CompletableFuture.completedFuture(sessionVideoSearchList.get(sessionId));
         }
 
-        return YoutubeService.searchResults(keywords, 10L).thenApply(results -> {
+        return YoutubeService.searchResults(keywords, MAX_RESULTS).thenApply(results -> {
 
             VideoSearch search = new VideoSearch(keywords, results);
             sessionVideoSearchList.get(sessionId).add(0, search);
 
             if (sessionVideoSearchList.get(sessionId).size() > MAX_RESULTS) {
-                sessionVideoSearchList.get(sessionId).remove(MAX_RESULTS);
+                sessionVideoSearchList.get(sessionId).remove((int)MAX_RESULTS);
             }
 
-            return sessionVideoSearchList.get(sessionId);
+            return getSessionSearchList(sessionId);
         });
     }
 
@@ -60,7 +61,7 @@ public class SearchService {
     /**
      * @author Laurent Voisard
      * Create a new session search list
-     * @return
+     * @return created ID
      */
     public String createSessionSearchList() {
         int sessionId = userSessionCounter++;
