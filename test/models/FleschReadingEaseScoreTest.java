@@ -46,4 +46,16 @@ public class FleschReadingEaseScoreTest {
         assertEquals(expectedReadingScore, fleschReadingEaseScore.getReadingEaseScore(), 1.0);
 
     }
+
+    @Test
+    public void testComputeFleschReadingEaseOnlyE() {
+        final double expectedGradeLevel = 0;
+        final double expectedReadingScore = 100;
+        String s = "e";
+        FleschReadingEaseScore fleschReadingEaseScore = new FleschReadingEaseScore(s);
+
+        assertEquals(expectedReadingScore, fleschReadingEaseScore.getReadingEaseScore(), 1.0);
+        assertEquals(expectedGradeLevel, fleschReadingEaseScore.getGradeLevel(), 0.2);
+
+    }
 }

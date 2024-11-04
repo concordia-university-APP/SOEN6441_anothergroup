@@ -25,9 +25,10 @@ public class FleschReadingEaseScore {
         int totalSentences = Math.max(1, sentences.size());
         int syllablesCount = countSentenceSyllables(description);
 
-
-        this.readingEaseScore = Math.round((206.835 - 1.015 * ((double) words.size() / totalSentences)  - 84.6 * ( (double) syllablesCount / words.size() )) * 10) / 10.0;
-        this.gradeLevel = Math.round((0.39 * ((double) words.size() / totalSentences ) + 11.8 *  ((double) syllablesCount / words.size()) - 15.59) * 10) / 10.0;
+        double score = Math.round((206.835 - 1.015 * ((double) words.size() / totalSentences)  - 84.6 * ( (double) syllablesCount / words.size() )) * 10) / 10.0;
+        double grade = Math.round((0.39 * ((double) words.size() / totalSentences ) + 11.8 *  ((double) syllablesCount / words.size()) - 15.59) * 10) / 10.0;
+        this.readingEaseScore = Math.min(100, Math.max(score, 0));
+        this.gradeLevel = Math.max(grade, 0);
     }
 
     public double getReadingEaseScore() {
@@ -50,14 +51,17 @@ public class FleschReadingEaseScore {
     }
 
     private int countWordSyllables(String word) {
-        // first remove last letter if it is e
-        word = word.toLowerCase();
 
-        // remove when E is at last position of a word since it doesn't count
+        word = word.toLowerCase();
+        // first remove last letter if it is e
         word = word.replaceAll("e$", "");
 
+        if (word.isEmpty()) return 1;
+
+        // remove when E is at last position of a word since it doesn't count
+
         String trimmedWord = Arrays.stream(word.split(""))
-                .reduce("", (string, letter) ->  {
+                .reduce("", (string, letter) -> {
                     // if there are two adjacent vowels
                     if (!string.isEmpty() && isVowel(letter.charAt(0)) && isVowel(string.charAt(string.length() - 1))) {
                         return string;
@@ -65,9 +69,10 @@ public class FleschReadingEaseScore {
                     return string.concat(letter);
                 });
 
-        int syllables = (int)Arrays.stream(trimmedWord.split(""))
+        int syllables = (int) Arrays.stream(trimmedWord.split(""))
                 .filter((x) -> isVowel(x.charAt(0)))
                 .count();
+
 
 
         return Math.max(syllables, 1);
