@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static services.YoutubeService.searchResults;
@@ -18,31 +19,31 @@ import static services.YoutubeService.searchResults;
  */
 public class StatisticsService {
     /**
-     * @Author: Tanveer Reza
+     * Author: Tanveer Reza
      * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
      */
-    public Map<String, Long> getWordFrequency(String query) {
-        VideoList videos = searchResults(query, 50L);
+    public CompletableFuture<Map<String, Long>> getWordFrequency(String query) {
+        return searchResults(query, 50L).thenApply(videos -> {
+            List<String> titles = videos.getVideoList().stream()
+                    .map(Video::getTitle) // Extract each title
+                    .collect(Collectors.toList());
 
-        List<String> titles = videos.getVideoList().stream()
-                .map(Video::getTitle) // Extract each title
-                .collect(Collectors.toList());
+            List<String> listOfWordsFromTitles = extractAndNormalizeWords(titles);
 
-        List<String> listOfWordsFromTiles = extractAndNormalizeWords(titles);
-
-        return countAndSortWordFrequencies(listOfWordsFromTiles)
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1, // In case of a key collision, keep the existing entry
-                        LinkedHashMap::new // Use LinkedHashMap to preserve the order
-                ));
+            return countAndSortWordFrequencies(listOfWordsFromTitles)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (e1, e2) -> e1, // In case of a key collision, keep the existing entry
+                            LinkedHashMap::new // Use LinkedHashMap to preserve the order
+                    ));
+        });
     }
 
     /**
-     * @Author Tanveer Reza
+     * Author : Tanveer Reza
      * @param titles list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      */
@@ -55,7 +56,7 @@ public class StatisticsService {
     }
 
     /**
-     * @Author Tanveer Reza
+     * Author : Tanveer Reza
      * @param words list of words gathered from titles
      * @return all unique words with their frequency, sorted by frequency and then alphabets
      */
@@ -67,7 +68,7 @@ public class StatisticsService {
     }
 
     /**
-     * @Author Tanveer Reza
+     * Author : Tanveer Reza
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
      */

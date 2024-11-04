@@ -6,6 +6,7 @@ import models.VideoSearch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SearchService {
     private static final int MAX_RESULTS = 10;
@@ -21,20 +22,20 @@ public class SearchService {
     private SearchService() {
     }
 
-    public List<VideoSearch> searchKeywords(String keywords) {
-        VideoList results = YoutubeService.searchResults(keywords, 10L);
+    public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords) {
+        return YoutubeService.searchResults(keywords, 10L).thenApply(results -> {
+            VideoSearch search = new VideoSearch(keywords, results);
+            videoSearchList.add(0, search);
 
-        VideoSearch search = new VideoSearch(keywords, results);
-        videoSearchList.add(0, search);
+            if (videoSearchList.size() > MAX_RESULTS) {
+                videoSearchList.remove(MAX_RESULTS);
+            }
 
-        if (videoSearchList.size() > MAX_RESULTS) {
-            videoSearchList.remove(MAX_RESULTS);
-        }
-
-        return videoSearchList;
+            return videoSearchList;
+        });
     }
 
-    public Video getVideoById(String id) {
+    public CompletableFuture<Video> getVideoById(String id) {
         return YoutubeService.getVideo(id);
     }
 }

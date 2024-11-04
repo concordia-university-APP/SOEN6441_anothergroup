@@ -22,7 +22,7 @@
                     @for(item: VideoSearch <- searchList) {
                         <h2>Search Results for terms: @item.getSearchTerms </h2>
                         <div>
-                            <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
+                            <a href="@routes.YoutubeController.getStatistics(item.getSearchTerms)" target="_blank">
                                 View Word Frequency Statistics for "@item.getSearchTerms"
                             </a>
                         </div>

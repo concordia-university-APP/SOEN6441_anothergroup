@@ -15,6 +15,7 @@ import models.VideoList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class YoutubeService {
@@ -33,58 +34,68 @@ public class YoutubeService {
         }
     }
 
-    public static VideoList searchResults(String keywords, Long maxResults) {
-        try {
-        YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
-            SearchListResponse response = request
-                    .setKey(API_KEY)
-                    .setQ(keywords)
-                    .setType(Collections.singletonList("video"))
-                    .setOrder("date")
-                    .setFields("items(id/videoId)")
-                    .setMaxResults(maxResults)
-                    .execute();
-            List<SearchResult> items = response.getItems();
-            List<Video> videos = items.stream()
-                            .map(x -> getVideo(x.getId().getVideoId()))
-                            .collect(Collectors.toList());
-            return new VideoList(videos);
-        } catch (IOException e) {
-            throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
-        }
+    /**
+     * Author: Tanveer Reza
+     * @param keywords search query
+     * @param maxResults number of results to return
+     * @return a list of videos based on the search query
+     */
+    public static CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
+                SearchListResponse response = request
+                        .setKey(API_KEY)
+                        .setQ(keywords)
+                        .setType(Collections.singletonList("video"))
+                        .setOrder("date")
+                        .setFields("items(id/videoId)")
+                        .setMaxResults(maxResults)
+                        .execute();
+                List<SearchResult> items = response.getItems();
+                List<CompletableFuture<Video>> videoFutures = items.stream()
+                        .map(x -> getVideo(x.getId().getVideoId()))
+                        .collect(Collectors.toList());
+                List<Video> videos = videoFutures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList());
+                return new VideoList(videos);
+            } catch (IOException e) {
+                throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
+            }
+        });
     }
 
+    public static CompletableFuture<Video> getVideo(String videoId) {
+        return CompletableFuture.supplyAsync(() -> {
+            YouTube.Videos.List request;
+            try {
+                request = getService().videos().list(Collections.singletonList("snippet"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
+            VideoListResponse response;
+            try {
+                response = request
+                        .setKey(API_KEY)
+                        .setId(Collections.singletonList(videoId))
+                        .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
+                        .execute();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-    public static Video getVideo(String videoId) {
-        YouTube.Videos.List request;
-        try {
-            request = getService().videos().list(Collections.singletonList("snippet"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        VideoListResponse response;
-        try {
-            response = request
-                    .setKey(API_KEY)
-                    .setId(Collections.singletonList(videoId))
-                    .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
-                    .execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // make sure we only have 1 video
-        assert response.getItems().size() == 1;
-        com.google.api.services.youtube.model.Video video = response.getItems().get(0);
-        return new Video(
-                video.getId(),
-                video.getSnippet().getTitle(),
-                video.getSnippet().getDescription(),
-                video.getSnippet().getChannelId(),
-                video.getSnippet().getChannelTitle(),
-                video.getSnippet().getThumbnails().getDefault().getUrl());
-
+            // make sure we only have 1 video
+            assert response.getItems().size() == 1;
+            com.google.api.services.youtube.model.Video video = response.getItems().get(0);
+            return new Video(
+                    video.getId(),
+                    video.getSnippet().getTitle(),
+                    video.getSnippet().getDescription(),
+                    video.getSnippet().getChannelId(),
+                    video.getSnippet().getChannelTitle(),
+                    video.getSnippet().getThumbnails().getDefault().getUrl());
+        });
     }
 }

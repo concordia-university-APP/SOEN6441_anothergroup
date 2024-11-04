@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,15 +36,14 @@ class StatisticsServiceTest {
             Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
             youtubeServiceMock.when(() -> YoutubeService.getVideo("Java programming tutorial"))
-                    .thenReturn(video1);
+                    .thenReturn(CompletableFuture.completedFuture(video1));
             youtubeServiceMock.when(() -> YoutubeService.getVideo("Java and Python comparison"))
-                    .thenReturn(video2);
+                    .thenReturn(CompletableFuture.completedFuture(video2));
             youtubeServiceMock.when(() -> YoutubeService.getVideo("Introduction to Java programming"))
-                    .thenReturn(video3);
+                    .thenReturn(CompletableFuture.completedFuture(video3));
 
             // Create VideoList with mocked videos
             sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
-
 
             // Prepare expected word frequency
             expectedWordFrequency = new LinkedHashMap<>();
@@ -62,9 +62,10 @@ class StatisticsServiceTest {
     void testGetWordFrequency_basicCase() {
         try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("Java"), anyLong()))
-                    .thenReturn(sampleVideoList);
+                    .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
 
-            Map<String, Long> wordFrequency = statisticsService.getWordFrequency("Java");
+            CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java");
+            Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
             assertEquals(expectedWordFrequency, wordFrequency);
         }
@@ -74,9 +75,11 @@ class StatisticsServiceTest {
     void testGetWordFrequency_emptyQueryResults() {
         try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             VideoList emptyVideoList = new VideoList(Collections.emptyList());
-            youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("NonexistentQuery"), anyLong())).thenReturn(emptyVideoList);
+            youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("NonexistentQuery"), anyLong()))
+                    .thenReturn(CompletableFuture.completedFuture(emptyVideoList));
 
-            Map<String, Long> wordFrequency = statisticsService.getWordFrequency("NonexistentQuery");
+            CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("NonexistentQuery");
+            Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
             assertTrue(wordFrequency.isEmpty());
         }
