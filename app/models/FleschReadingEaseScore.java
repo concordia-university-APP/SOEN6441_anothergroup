@@ -18,11 +18,9 @@ public class FleschReadingEaseScore {
             gradeLevel= 0;
             return;
         }
-        description = description.replaceAll(",", "");
-        List<String> words = Arrays.asList(description.replaceAll("[.]", "").split("\\s+"));
-        List<String> sentences = Arrays.stream(description.split("[.!?]"))
-                .map(String::trim)
-                .collect(Collectors.toList());
+        description = description.replaceAll("/[^A-Za-z,.!?]/", "");
+        List<String> words = getDescriptionWords (description);
+        List<String> sentences = getSentences(description);
 
         int totalSentences = Math.max(1, sentences.size());
         int syllablesCount = countSentenceSyllables(description);
@@ -51,9 +49,8 @@ public class FleschReadingEaseScore {
                 .sum();
     }
 
-    public int countWordSyllables(String word) {
+    private int countWordSyllables(String word) {
         // first remove last letter if it is e
-        if (word.isEmpty()) return 0;
         word = word.toLowerCase();
 
         // remove when E is at last position of a word since it doesn't count
@@ -76,16 +73,15 @@ public class FleschReadingEaseScore {
         return Math.max(syllables, 1);
     }
 
-    public List<String> getSentences(String description)
+    private List<String> getSentences(String description)
     {
         return Arrays.stream(description.split("[.!?]"))
                 .map(String::trim)
                 .collect(Collectors.toList());
     }
 
-    public List<String> getSentenceWords(String sentence)
+    private List<String> getDescriptionWords(String description)
     {
-        return Arrays.stream(sentence.replaceAll("\\.", "").trim().split("\\s+"))
-                .collect(Collectors.toList());
+        return Arrays.asList(description.replaceAll("[.!?]", "").split("\\s+"));
     }
 }

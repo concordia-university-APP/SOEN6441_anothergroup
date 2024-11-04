@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
  * Version : 1
  * Unit tests for statistic service class
  */
-class StatisticsServiceTest {
+public class StatisticsServiceTest {
 
     private StatisticsService statisticsService;
     private VideoList sampleVideoList;
