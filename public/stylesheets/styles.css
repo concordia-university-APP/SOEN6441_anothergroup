@@ -1,0 +1,55 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+    justify-content: flex-start; /* Align items at the top of the page */
+    height: 100vh; /* Use full height of the viewport */
+    margin: 0; /* Remove default margin */
+    font-family: Arial, sans-serif; /* Set a default font */
+    padding: 20px; /* Add padding around the body */
+}
+
+h1 {
+    text-align: center; /* Center the title text */
+    margin-bottom: 10px; /* Space below the title */
+}
+
+p {
+    text-align: center; /* Center paragraph text */
+    margin-bottom: 20px; /* Space below the paragraph */
+}
+
+table {
+    width: 80%; /* Set table width */
+    border-collapse: collapse; /* Collapse borders */
+    margin: 20px 0; /* Add space above and below the table */
+}
+
+th, td {
+    padding: 10px; /* Cell padding */
+    text-align: left; /* Align text to the left */
+    border: 1px solid #ddd; /* Border styling */
+}
+
+th {
+    background-color: #f2f2f2; /* Header background color */
+    color: #333; /* Header text color */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Striped rows */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* Hover effect */
+}
+
+div {
+    margin-top: 20px; /* Space above pagination buttons */
+}
+
+button {
+    padding: 5px 10px; /* Button padding */
+    margin: 0 5px; /* Button margin */
+    cursor: pointer; /* Change cursor to pointer */
+}
