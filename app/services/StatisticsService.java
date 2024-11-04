@@ -18,7 +18,7 @@ import static services.YoutubeService.searchResults;
  */
 public class StatisticsService {
     /**
-     * Author: Tanveer Reza
+     * @author Tanveer Reza
      * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
      */
@@ -42,7 +42,7 @@ public class StatisticsService {
     }
 
     /**
-     * Author : Tanveer Reza
+     * @author : Tanveer Reza
      * @param titles list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      */
@@ -55,7 +55,7 @@ public class StatisticsService {
     }
 
     /**
-     * Author : Tanveer Reza
+     * @author : Tanveer Reza
      * @param words list of words gathered from titles
      * @return all unique words with their frequency, sorted by frequency and then alphabets
      */
@@ -67,7 +67,7 @@ public class StatisticsService {
     }
 
     /**
-     * Author : Tanveer Reza
+     * @author : Tanveer Reza
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
      */
