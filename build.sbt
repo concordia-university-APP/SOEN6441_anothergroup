@@ -20,3 +20,10 @@ libraryDependencies ++= Seq(
   // Jackson for JSON parsing
   "com.google.http-client" % "google-http-client-jackson2" % "1.44.2"
 )
+
+libraryDependencies ++= Seq(
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.9.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.9.2" % Test,
+  "org.mockito" % "mockito-core" % "5.4.0" % Test,
+  "org.mockito" % "mockito-junit-jupiter" % "5.4.0" % Test
+)
