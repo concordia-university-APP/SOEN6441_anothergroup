@@ -27,3 +27,18 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "5.4.0" % Test,
   "org.mockito" % "mockito-junit-jupiter" % "5.4.0" % Test
 )
+
+jacocoReportSettings := JacocoReportSettings()
+  .withThresholds(
+    JacocoThresholds(
+      instruction = 80,
+      method = 100,
+      branch = 100,
+      complexity = 100,
+      line = 90,
+      clazz = 100)
+  )
+
+jacocoExcludes in Test := Seq(
+  "controllers.javascript.*",
+)

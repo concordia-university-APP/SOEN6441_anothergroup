@@ -1,7 +1,8 @@
 package controllers;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
@@ -40,7 +41,7 @@ public class YoutubeControllerTest extends WithApplication {
      * Author : Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      */
-    @BeforeEach
+    @Before
     public void setUp() {
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
