@@ -87,42 +87,4 @@ public class YoutubeService {
                 video.getSnippet().getThumbnails().getDefault().getUrl());
 
     }
-    public static Map<String, Long> getWordFrequency(String query) {
-        VideoList videos = searchResults(query, 50L);
-
-        List<String> titles = videos.getVideoList().stream()
-                .map(Video::getTitle) // Extract each title
-                .collect(Collectors.toList());
-
-        List<String> listOfWordsFromTiles = extractAndNormalizeWords(titles);
-
-        return countAndSortWordFrequencies(listOfWordsFromTiles)
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1, // In case of a key collision, keep the existing entry
-                        LinkedHashMap::new // Use LinkedHashMap to preserve the order
-                ));
-    }
-
-    private static List<String> extractAndNormalizeWords(List<String> titles) {
-        return titles.stream()
-                .flatMap(title -> Arrays.stream(title.split("\\W+"))) // Split titles into words
-                .filter(word -> !word.isEmpty()) // Filter out empty words
-                .map(String::toLowerCase)
-                .collect(Collectors.toList()); // Collect to list
-    }
-
-    private static List<Map.Entry<String, Long>> countAndSortWordFrequencies(List<String> words) {
-        return getWordOccurences(words).entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
-                        .thenComparing(Map.Entry.comparingByKey()))
-                .collect(Collectors.toList());
-    }
-
-    private static Map<String, Long> getWordOccurences(List<String> words) {
-        return words.stream()
-                .collect(Collectors.groupingBy(word -> word, Collectors.counting())); // Count occurrences
-    }
 }
