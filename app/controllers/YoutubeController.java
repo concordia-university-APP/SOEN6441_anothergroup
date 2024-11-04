@@ -1,6 +1,8 @@
 package controllers;
 
+import services.SentimentAnalyzer;
 import models.Video;
+import java.util.ArrayList;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.YoutubeService;
@@ -25,7 +27,17 @@ import java.util.List;
 public class YoutubeController extends Controller {
     public Result search(String query) {
         List<VideoSearch> searches = SearchService.getInstance().searchKeywords(query);
-        return ok(views.html.search.render(Option.apply(searches)));
+
+        // Aggregate video descriptions from search results
+        List<Video> allVideos = new ArrayList<>();
+        for (VideoSearch search : searches) {
+            allVideos.addAll(search.getResults().getVideoList());
+        }
+        // Analyze sentiment
+        String overallSentiment = SentimentAnalyzer.analyzeSentiment(allVideos);
+
+        // Pass the sentiment to the view
+        return ok(views.html.search.render(Option.apply(searches), overallSentiment));
     }
 
     public Result video(String id) {
@@ -35,6 +47,8 @@ public class YoutubeController extends Controller {
 
     public Result searchForm() {
         Option<Collection<VideoSearch>> results = Option.empty();
-        return ok(views.html.search.render(results));
+        String overallSentiment = "";
+        return ok(views.html.search.render(results, overallSentiment));
+
     }
 }

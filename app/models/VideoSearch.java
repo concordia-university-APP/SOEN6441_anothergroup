@@ -12,4 +12,3 @@ public class VideoSearch {
     public String getSearchTerms() { return searchTerms;}
     public VideoList getResults() { return results;}
 }
-

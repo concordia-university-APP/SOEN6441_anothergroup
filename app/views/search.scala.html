@@ -1,6 +1,8 @@
 @import java.util.Collection
 @import java.util
-@(results: Option[util.Collection[VideoSearch]])
+@import models.VideoSearch
+
+@(results: Option[util.Collection[VideoSearch]], overallSentiment: String)
 
 @main("YouTube Search") {
     <div class="container">
@@ -15,12 +17,18 @@
                     <button type="submit">Search</button>
                 </div>
             </form>
+
+                <!-- Display Overall Sentiment -->
+            <div>
+                <h2>Overall Sentiment: @overallSentiment</h2>
+            </div>
+
                 <!-- Search Results -->
             <div id="results">
             @results match {
                 case Some(searchList) if !searchList.isEmpty => {
                     @for(item: VideoSearch <- searchList) {
-                        
+
                         <div>
                             <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
                                 View Word Frequency Statistics for "@item.getSearchTerms"
