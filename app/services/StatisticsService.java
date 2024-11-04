@@ -19,7 +19,7 @@ import static services.YoutubeService.searchResults;
 public class StatisticsService {
     /**
      * @Author: Tanveer Reza
-     * @param query
+     * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
      */
     public Map<String, Long> getWordFrequency(String query) {
@@ -42,8 +42,8 @@ public class StatisticsService {
     }
 
     /**
-     * @Author: Tanveer Reza
-     * @param titles
+     * @Author Tanveer Reza
+     * @param titles list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      */
     public List<String> extractAndNormalizeWords(List<String> titles) {
@@ -55,8 +55,8 @@ public class StatisticsService {
     }
 
     /**
-     * @Author: Tanveer Reza
-     * @param words
+     * @Author Tanveer Reza
+     * @param words list of words gathered from titles
      * @return all unique words with their frequency, sorted by frequency and then alphabets
      */
     public List<Map.Entry<String, Long>> countAndSortWordFrequencies(List<String> words) {
@@ -67,8 +67,8 @@ public class StatisticsService {
     }
 
     /**
-     * @Author: Tanveer Reza
-     * @param words
+     * @Author Tanveer Reza
+     * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
      */
     public Map<String, Long> getWordOccurences(List<String> words) {
