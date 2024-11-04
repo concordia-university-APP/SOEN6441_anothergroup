@@ -35,7 +35,7 @@ public class YoutubeService {
     }
 
     /**
-     * Author: Tanveer Reza
+     * Author: Tanveer Reza & Laurent Voisard & Yehia
      * @param keywords search query
      * @param maxResults number of results to return
      * @return a list of videos based on the search query
@@ -53,19 +53,20 @@ public class YoutubeService {
                         .setMaxResults(maxResults)
                         .execute();
                 List<SearchResult> items = response.getItems();
-                List<CompletableFuture<Video>> videoFutures = items.stream()
-                        .map(x -> getVideo(x.getId().getVideoId()))
-                        .collect(Collectors.toList());
-                List<Video> videos = videoFutures.stream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toList());
-                return new VideoList(videos);
+                CompletableFuture<List<Video>> videoFutures = getVideos(items.stream().map(item -> item.getId().getVideoId()).collect(Collectors.toList()));
+                return new VideoList(videoFutures.join());
             } catch (IOException e) {
                 throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
             }
         });
     }
 
+    /**
+     * @author Laurent Voisard
+     * Get video by id
+     * @param videoId video id
+     * @return video model
+     */
     public static CompletableFuture<Video> getVideo(String videoId) {
         return CompletableFuture.supplyAsync(() -> {
             YouTube.Videos.List request;
@@ -96,6 +97,43 @@ public class YoutubeService {
                     video.getSnippet().getChannelId(),
                     video.getSnippet().getChannelTitle(),
                     video.getSnippet().getThumbnails().getDefault().getUrl());
+        });
+    }
+
+    /**
+     * @author Laurent Voisard
+     * get a list of videos
+     * @param videoIds a list of video ids
+     * @return list of videos from ids
+     */
+    public static CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
+        return CompletableFuture.supplyAsync(() -> {
+            YouTube.Videos.List request;
+            try {
+                request = getService().videos().list(Collections.singletonList("snippet"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            VideoListResponse response;
+            try {
+                response = request
+                        .setKey(API_KEY)
+                        .setId(videoIds)
+                        .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
+                        .execute();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            return response.getItems().stream().map(video -> new Video(
+                    video.getId(),
+                    video.getSnippet().getTitle(),
+                    video.getSnippet().getDescription(),
+                    video.getSnippet().getChannelId(),
+                    video.getSnippet().getChannelTitle(),
+                    video.getSnippet().getThumbnails().getDefault().getUrl()))
+                    .collect(Collectors.toList());
         });
     }
 }

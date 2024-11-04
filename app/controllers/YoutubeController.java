@@ -1,6 +1,5 @@
 package controllers;
 
-import models.VideoSearch;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -11,49 +10,83 @@ import services.StatisticsService;
 import views.html.statistics;
 
 import javax.inject.Inject;
-import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+/**
+ *
+ */
 public class YoutubeController extends Controller {
     private final StatisticsService statisticsService;
+    private final SearchService searchService;
     private final HttpExecutionContext ec;
-    private final Http.Session session;
 
     @Inject
-    public YoutubeController(StatisticsService statisticsService, HttpExecutionContext ec, Http.Session session) {
+    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec) {
+        this.searchService = searchService;
         this.statisticsService = statisticsService;
         this.ec = ec;
-        this.session = session;
     }
 
-    public CompletionStage<Result> search(String query) {
-        // Store the search query in the session
-        session.adding("lastSearchQuery", query);
+    /**
+     * @author Laurent & Yehia
+     * Search for videos with keywords
+     * creates a new session if one doesn't exist
+     * @param query string query to send to youtube api
+     * @param request Http request of the browser
+     * @return returns the search page populated with the last 10 or less requests made
+     */
+    public CompletionStage<Result> search(String query, Http.Request request) {
 
-        return SearchService.getInstance().searchKeywords(query)
+        Optional<String> user = request.session().get("user");
+
+        if(user.isEmpty()) {
+            return CompletableFuture.supplyAsync(()
+                    -> redirect("/").addingToSession(request,"user", searchService.createSessionSearchList()));
+        }
+
+        return searchService.searchKeywords(query, user.get())
                 .thenApplyAsync(searches -> ok(views.html.search.render(Option.apply(searches))), ec.current());
     }
 
+    /**
+     * @author Laurent & Yehia
+     * Creates a user session or retrieves an existing one
+     * @param request browser http request
+     * @return redirects to search page only the form is visible unless a user session exists
+     */
+    public CompletionStage<Result> searchForm(Http.Request request) {
+        Optional<String> user = request.session().get("user");
+
+        return user.map(s -> CompletableFuture.supplyAsync(() ->
+                ok(views.html.search.render(
+                        Option.apply(searchService.getSessionSearchList(s))
+                ))
+        )).orElseGet(() -> CompletableFuture.supplyAsync(() ->
+                redirect("/").addingToSession(request, "user", searchService.createSessionSearchList())));
+
+    }
+
+    /**
+     * @author Laurent Voisard
+     * Get the youtube video from youtube api
+     * @param id video Id
+     * @return video model
+     */
     public CompletionStage<Result> video(String id) {
-        return SearchService.getInstance().getVideoById(id)
+        return searchService.getVideoById(id)
                 .thenApplyAsync(video -> ok(views.html.video.render(video)), ec.current());
     }
 
-    public Result searchForm() {
-        Option<Collection<VideoSearch>> results = Option.empty();
-        return ok(views.html.search.render(results));
-    }
-
-
     /**
-     * Author : Tanveer Reza
+     * @author : Tanveer Reza
      * Get the word frequency statistics for the given query
      * @param query The search query
      * @return The word frequency statistics
      */
     public CompletionStage<Result> getStatistics(String query) {
         // Retrieve the last search query from the session
-        session.adding("lastSearchQuery", query);
         return statisticsService.getWordFrequency(query)
                 .thenApplyAsync(wordFrequency -> ok(statistics.render(wordFrequency, query)), ec.current());
     }

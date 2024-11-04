@@ -9,6 +9,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.WithApplication;
+import services.SearchService;
 import services.StatisticsService;
 
 import java.util.LinkedHashMap;
@@ -27,7 +28,7 @@ import static play.test.Helpers.route;
 public class YoutubeControllerTest extends WithApplication {
     private YoutubeController youtubeController;
     private StatisticsService statisticsService;
-    private Http.Session session;
+    private SearchService searchService;
 
     @Override
     protected Application provideApplication() {
@@ -41,9 +42,9 @@ public class YoutubeControllerTest extends WithApplication {
     @BeforeEach
     public void setUp() {
         statisticsService = Mockito.mock(StatisticsService.class);
+        searchService = Mockito.mock(SearchService.class);
         HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
-        session = Mockito.mock(Http.Session.class);
-        youtubeController = new YoutubeController(statisticsService, ec, session);
+        youtubeController = new YoutubeController(statisticsService, searchService, ec);
 
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
@@ -76,7 +77,6 @@ public class YoutubeControllerTest extends WithApplication {
 
         // Mock the behavior of statisticsService
         when(statisticsService.getWordFrequency(anyString())).thenReturn(CompletableFuture.completedFuture(mockWordFrequency));
-        when(session.get("lastSearchQuery")).thenReturn(Optional.of("Java"));
 
         // Act
         CompletionStage<Result> resultStage = youtubeController.getStatistics(query);
