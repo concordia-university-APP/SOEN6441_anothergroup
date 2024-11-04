@@ -1,7 +1,6 @@
 package services;
 
 import models.Video;
-import models.VideoList;
 import models.VideoSearch;
 
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class SearchService {
     private static final int MAX_RESULTS = 10;
-    private static List<VideoSearch> videoSearchList = new ArrayList<VideoSearch>();
+    private static final List<VideoSearch> videoSearchList = new ArrayList<>();
     private static class SearchServiceInstanceHolder {
         private static final SearchService INSTANCE = new SearchService();
     }

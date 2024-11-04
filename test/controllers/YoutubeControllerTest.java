@@ -28,7 +28,6 @@ import static play.test.Helpers.route;
 public class YoutubeControllerTest extends WithApplication {
     private YoutubeController youtubeController;
     private StatisticsService statisticsService;
-    private HttpExecutionContext ec;
     private Http.Session session;
 
     @Override
@@ -43,17 +42,12 @@ public class YoutubeControllerTest extends WithApplication {
     @BeforeEach
     public void setUp() {
         statisticsService = Mockito.mock(StatisticsService.class);
-        ec = Mockito.mock(HttpExecutionContext.class);
+        HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
         session = Mockito.mock(Http.Session.class);
         youtubeController = new YoutubeController(statisticsService, ec, session);
 
         // Mock the HttpExecutionContext to return a direct executor
-        when(ec.current()).thenReturn(new Executor() {
-            @Override
-            public void execute(Runnable command) {
-                command.run();
-            }
-        });
+        when(ec.current()).thenReturn(Runnable::run);
     }
 
     @Test
@@ -83,7 +77,7 @@ public class YoutubeControllerTest extends WithApplication {
 
         // Mock the behavior of statisticsService
         when(statisticsService.getWordFrequency(anyString())).thenReturn(CompletableFuture.completedFuture(mockWordFrequency));
-        when(session.getOptional("lastSearchQuery")).thenReturn(Optional.of("Java"));
+        when(session.get("lastSearchQuery")).thenReturn(Optional.of("Java"));
 
         // Act
         CompletionStage<Result> resultStage = youtubeController.getStatistics(query);

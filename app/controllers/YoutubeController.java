@@ -53,8 +53,7 @@ public class YoutubeController extends Controller {
      */
     public CompletionStage<Result> getStatistics(String query) {
         // Retrieve the last search query from the session
-        String lastSearchQuery = session.getOptional("lastSearchQuery").orElse("No previous search");
-
+        session.adding("lastSearchQuery", query);
         return statisticsService.getWordFrequency(query)
                 .thenApplyAsync(wordFrequency -> ok(statistics.render(wordFrequency, query)), ec.current());
     }
