@@ -1,17 +1,12 @@
 package controllers;
 
 import play.libs.concurrent.HttpExecutionContext;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.Channel;
-import com.google.api.services.youtube.model.SearchResult;
 import com.google.inject.Inject;
 import models.*;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import scala.compat.java8.OptionConverters;
 import services.YoutubeService;
-import views.html.search;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -19,17 +14,12 @@ import views.html.statistics;
 import scala.Option;
 import services.SearchService;
 import services.StatisticsService;
-import views.html.statistics;
-import com.google.api.services.youtube.model.VideoSnippet;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 
 /**
  *
@@ -122,9 +112,7 @@ public class YoutubeController extends Controller {
                     }
 
                     // Prepare the response if no issues were found
-                    Option<YoutubeChannel> scalaChannel = Option.apply(channel);
-                    Option<List<Video>> scalaVideos = Option.apply(videos);
-                    return ok(views.html.channelProfile.render(scalaChannel, scalaVideos));
+                    return ok(views.html.channelProfile.render(Option.apply(channel), Option.apply(videos)));
                 })
                 .exceptionally(e -> {
                     // Enhanced error logging
@@ -133,7 +121,6 @@ public class YoutubeController extends Controller {
                     return internalServerError("Error occurred while retrieving channel profile: " + e.getMessage());
                 });
     }
-}
 
     /**
      * @author : Tanveer Reza
