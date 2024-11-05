@@ -9,10 +9,14 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import models.Video;
 import models.VideoList;
+import models.YoutubeChannel;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 public class YoutubeService {
@@ -140,82 +144,66 @@ public class YoutubeService {
     }
 
 //    Channel-Page Task A
-public static List<com.google.api.services.youtube.model.Video> getVideoDetails(List<SearchResult> searchResults) throws GeneralSecurityException, IOException {
-    YouTube youtubeService = getService();
+    public static CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException, GeneralSecurityException {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                YouTube youtubeService = getService();
 
-    // Collect video IDs from the search results
-    List<String> videoIds = searchResults.stream()
-            .map(result -> result.getId().getVideoId())
-            .collect(Collectors.toList());
+                YouTube.Search.List request = youtubeService.search().list(Collections.singletonList("id,snippet"));
+                request.setKey(API_KEY);
+                request.setChannelId(channelId);
+                request.setMaxResults(10L);
+                request.setOrder("date");
+                request.setType(Collections.singletonList("video"));
 
-    // Request full video details for each video ID
-    YouTube.Videos.List request = youtubeService.videos().list(Collections.singletonList("id,snippet,statistics"));
+                SearchListResponse response = request.execute();
+                List<SearchResult> searchResults = response.getItems();
 
-    VideoListResponse videoResponse = request
-            .setKey(API_KEY)
-            .setId(Collections.singletonList(String.join(",", videoIds)))  // Join video IDs into a comma-separated string
-            .execute();
-
-    return videoResponse.getItems();
-}
-    public static Channel getChannelInfo(String channelId) throws GeneralSecurityException, IOException {
-        YouTube youtubeService = getService();
-        YouTube.Channels.List request = youtubeService.channels().list(Collections.singletonList("snippet,statistics"));
-        ChannelListResponse response = request.setId(Collections.singletonList(channelId)).setKey(API_KEY).execute();
-        return response.getItems().isEmpty() ? null : response.getItems().get(0);
+                // Convert SearchResult to Video objects
+                return searchResults.stream()
+                        .map(sr -> new Video(
+                                sr.getId().getVideoId(),
+                                sr.getSnippet().getTitle(),
+                                sr.getSnippet().getDescription(),
+                                sr.getSnippet().getChannelId(),
+                                sr.getSnippet().getChannelTitle(),
+                                sr.getSnippet().getThumbnails().getDefault().getUrl()
+                        ))
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
     }
-    public static List<SearchResult> getLatestVideos(String channelId, int maxResults) throws GeneralSecurityException, IOException {
-        YouTube youtubeService = getService();
-        YouTube.Search.List request = youtubeService.search().list(Collections.singletonList("id,snippet"));
-        SearchListResponse response = request
-                .setChannelId(channelId)
-                .setOrder("date")
-                .setMaxResults((long) maxResults)
-                .setKey(API_KEY)
-                .execute();
-        return response.getItems();
+    public static CompletionStage<YoutubeChannel> getChannelById(String channelId)throws IOException, GeneralSecurityException  {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                YouTube youtubeService = getService();
+
+                YouTube.Channels.List request = youtubeService.channels().list(Collections.singletonList("snippet"));
+                request.setId(Collections.singletonList(channelId));
+                request.setKey(API_KEY);
+
+                ChannelListResponse response = request.execute();
+                List<Channel> channelsFromApi = response.getItems();
+                List<YoutubeChannel> channels = channelsFromApi.stream()
+                        .map(channel -> new YoutubeChannel(
+                                channel.getId(),
+                                channel.getSnippet().getTitle(),
+                                channel.getSnippet().getDescription(),
+                                channel.getSnippet().getThumbnails().getDefault().getUrl(),
+                                null))
+                        .collect(Collectors.toList());
+
+                if (channels != null && !channels.isEmpty()) {
+                    return channels.get(0);
+                } else {
+                    return null;
+                }
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
     }
 
-    public static List<Video> getChannelVideos(String channelId) throws IOException, GeneralSecurityException {
-        YouTube youtubeService = getService();
-
-        YouTube.Search.List request = youtubeService.search().list(Collections.singletonList("id,snippet"));
-        request.setKey(API_KEY);
-        request.setChannelId(channelId);
-        request.setMaxResults(10L);
-        request.setOrder("date"); // Sort by date to get the latest videos
-        request.setType(Collections.singletonList("video"));
-
-        SearchListResponse response = request.execute();
-        List<SearchResult> searchResults = response.getItems();
-
-        // Convert SearchResult to Video objects
-        return searchResults.stream()
-                .map(sr -> new Video(
-                        sr.getId().getVideoId(),
-                        sr.getSnippet().getTitle(),
-                        sr.getSnippet().getDescription(),
-                        sr.getSnippet().getChannelId(),
-                        sr.getSnippet().getChannelTitle(),
-                        sr.getSnippet().getThumbnails().getDefault().getUrl()
-                ))
-                .collect(Collectors.toList());
-    }
-    public static Channel getChannelById(String channelId) throws IOException {
-        YouTube youtubeService = getService();
-
-        // Correctly specify the part parameter
-        YouTube.Channels.List request = youtubeService.channels().list(Collections.singletonList("snippet"));
-        request.setId(Collections.singletonList(channelId));
-        request.setKey(API_KEY);
-
-        ChannelListResponse response = request.execute();
-        List<Channel> channels = response.getItems();
-
-        if (channels != null && !channels.isEmpty()) {
-            return channels.get(0); // Return the first channel found
-        } else {
-            return null; // No channel found for the given ID
-        }
-    }
 }

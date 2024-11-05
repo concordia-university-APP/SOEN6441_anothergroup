@@ -1,12 +1,13 @@
-@(channel: Option[com.google.api.services.youtube.model.Channel], videos: Option[List[models.Video]])
+@(channel: Option[models.YoutubeChannel], videos: Option[List[models.Video]])
 
 @main("Channel Profile") {
 <div class="container">
     @channel match {
     case Some(ch) => {
-    <h1>@ch.getSnippet.getTitle</h1>
-    <p>@ch.getSnippet.getDescription</p>
-    <img src="@ch.getSnippet.getThumbnails.getDefault.getUrl" alt="Channel Thumbnail" />
+    <h1>@ch.getTitle</h1>
+    <p>@ch.getDescription</p>
+    <img src="@ch.getThumbnailUrl" alt="Channel Thumbnail" />
+
     <h2>Last 10 Videos:</h2>
 
     @videos match {

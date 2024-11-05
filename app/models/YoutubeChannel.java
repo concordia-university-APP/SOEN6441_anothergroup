@@ -1,13 +1,13 @@
 package models;
-import java.util.List;
-public class Channel {
+
+public class YoutubeChannel {
     private final String id;
     private final String title;
     private final String description;
     private final String thumbnailUrl;
     private final VideoList recentVideos;
 
-    public Channel(String id, String title, String description, String thumbnailUrl, VideoList recentVideos) {
+    public YoutubeChannel(String id, String title, String description, String thumbnailUrl, VideoList recentVideos) {
         this.id = id;
         this.title = title;
         this.description = description;

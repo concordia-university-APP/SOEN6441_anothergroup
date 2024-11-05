@@ -1,20 +1,20 @@
 package controllers;
 
+import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.SearchResult;
-import models.Video;
+import com.google.inject.Inject;
+import models.*;
+import play.core.j.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.OptionConverters;
-import services.ChannelService;
 import services.YoutubeService;
 import views.html.search;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import views.html.statistics;
-import models.VideoList;
-import models.VideoSearch;
 import scala.Option;
 import models.Video;
 import play.mvc.Controller;
@@ -24,6 +24,9 @@ import com.google.api.services.youtube.model.VideoSnippet;
 
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 
 public class YoutubeController extends Controller {
     public Result search(String query) {
@@ -41,20 +44,36 @@ public class YoutubeController extends Controller {
         return ok(views.html.search.render(results));
     }
 
-    public Result showChannelProfile(String channelId) {
-        try {
-            // Get the channel details
-            Channel channel = YoutubeService.getChannelById(channelId);
-            // Get the last 10 videos for the channel
-            List<Video> videos = YoutubeService.getChannelVideos(channelId);
+    public CompletionStage<Result> showChannelProfile(String channelId) throws GeneralSecurityException, IOException {
+        CompletionStage<YoutubeChannel> channelFuture = YoutubeService.getChannelById(channelId);
+        CompletionStage<List<Video>> videosFuture = YoutubeService.getChannelVideos(channelId);
 
-            // Convert videos to an Option<List<Video>>
-            Option<List<Video>> scalaVideos = Option.apply(videos);
+        // Debugging logs to check if the futures are not null
+        System.out.println("Channel Future: " + channelFuture);
+        System.out.println("Videos Future: " + videosFuture);
 
-            // Render the channel profile view with the channel details and the video list
-            return ok(views.html.channelProfile.render(Option.apply(channel), scalaVideos));
-        } catch (GeneralSecurityException | IOException e) {
-            return internalServerError("Error occurred while retrieving channel profile: " + e.getMessage());
-        }
+        return channelFuture
+                .thenCombine(videosFuture, (channel, videos) -> {
+                    // Check if the channel is null
+                    if (channel == null) {
+                        return badRequest("Channel not found");
+                    }
+
+                    // Check if the videos list is null or empty
+                    if (videos == null || videos.isEmpty()) {
+                        return badRequest("No videos found for this channel");
+                    }
+
+                    // Prepare the response if no issues were found
+                    Option<YoutubeChannel> scalaChannel = Option.apply(channel);
+                    Option<List<Video>> scalaVideos = Option.apply(videos);
+                    return ok(views.html.channelProfile.render(scalaChannel, scalaVideos));
+                })
+                .exceptionally(e -> {
+                    // Enhanced error logging
+                    System.err.println("Error retrieving channel profile: " + e.getMessage());
+                    e.printStackTrace();
+                    return internalServerError("Error occurred while retrieving channel profile: " + e.getMessage());
+                });
     }
 }
