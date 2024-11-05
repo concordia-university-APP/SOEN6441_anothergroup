@@ -13,13 +13,9 @@
     @videos match {
     case Some(videoList) if videoList.nonEmpty => {
     <ul>
-        @for(video <- videoList) {
+        @for(v<- videoList) {
         <li>
-            <a href='@("https://www.youtube.com/watch?v=" + video.getId)' target="_blank">
-                @video.getTitle
-            </a>
-            <br/>
-            <img src="@video.getThumbnailUrl" alt="Thumbnail" />
+            @video(v)
         </li>
         }
     </ul>
