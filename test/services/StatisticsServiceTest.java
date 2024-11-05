@@ -3,14 +3,15 @@ package services;
 
 import models.Video;
 import models.VideoList;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -18,14 +19,14 @@ import static org.mockito.Mockito.*;
  * Version : 1
  * Unit tests for statistic service class
  */
-class StatisticsServiceTest {
+public class StatisticsServiceTest {
 
     private StatisticsService statisticsService;
     private VideoList sampleVideoList;
     private Map<String, Long> expectedWordFrequency;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         statisticsService = new StatisticsService();
 
         // Mock static calls to YoutubeService.getVideo
@@ -59,7 +60,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testGetWordFrequency_basicCase() {
+    public void testGetWordFrequency_basicCase() {
         try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("Java"), anyLong()))
                     .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
@@ -72,7 +73,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testGetWordFrequency_emptyQueryResults() {
+    public void testGetWordFrequency_emptyQueryResults() {
         try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             VideoList emptyVideoList = new VideoList(Collections.emptyList());
             youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("NonexistentQuery"), anyLong()))
@@ -86,7 +87,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testExtractAndNormalizeWords_basicCase() {
+    public void testExtractAndNormalizeWords_basicCase() {
         List<String> titles = Arrays.asList("Java Programming", "Python Tutorial");
         List<String> words = statisticsService.extractAndNormalizeWords(titles);
 
@@ -96,7 +97,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testExtractAndNormalizeWords_handlesEmptyTitles() {
+    public void testExtractAndNormalizeWords_handlesEmptyTitles() {
         List<String> titles = Arrays.asList("", "   ");
         List<String> words = statisticsService.extractAndNormalizeWords(titles);
 
@@ -104,7 +105,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testExtractAndNormalizeWords_specialCharacters() {
+    public void testExtractAndNormalizeWords_specialCharacters() {
         List<String> titles = Arrays.asList("Java & Python!", "Programming: Tips & Tricks");
         List<String> words = statisticsService.extractAndNormalizeWords(titles);
 
@@ -114,7 +115,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testCountAndSortWordFrequencies_basicCase() {
+    public void testCountAndSortWordFrequencies_basicCase() {
         List<String> words = Arrays.asList("java", "programming", "java", "tutorial");
         List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
 
@@ -127,7 +128,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testCountAndSortWordFrequencies_tieBreakerAlphabetical() {
+    public void testCountAndSortWordFrequencies_tieBreakerAlphabetical() {
         List<String> words = Arrays.asList("java", "python", "java", "python");
         List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
 
@@ -139,14 +140,14 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testCountAndSortWordFrequencies_emptyList() {
+    public void testCountAndSortWordFrequencies_emptyList() {
         List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(Collections.emptyList());
 
         assertTrue(sortedFrequencies.isEmpty());
     }
 
     @Test
-    void testGetWordOccurrences_basicCase() {
+    public void testGetWordOccurrences_basicCase() {
         List<String> words = Arrays.asList("java", "programming", "java", "tutorial");
         Map<String, Long> wordOccurrences = statisticsService.getWordOccurences(words);
 
@@ -159,14 +160,14 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void testGetWordOccurrences_emptyList() {
+    public void testGetWordOccurrences_emptyList() {
         Map<String, Long> wordOccurrences = statisticsService.getWordOccurences(Collections.emptyList());
 
         assertTrue(wordOccurrences.isEmpty());
     }
 
     @Test
-    void testGetWordOccurrences_caseSensitivity() {
+    public void testGetWordOccurrences_caseSensitivity() {
         List<String> words = Arrays.asList("Java", "java", "JAVA");
         Map<String, Long> wordOccurrences = statisticsService.getWordOccurences(words);
 
@@ -177,4 +178,5 @@ class StatisticsServiceTest {
 
         assertEquals(expected, wordOccurrences);
     }
+
 }

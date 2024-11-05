@@ -1,7 +1,8 @@
 package controllers;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
+import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.GET;
 import static play.test.Helpers.route;
 
@@ -39,7 +41,7 @@ public class YoutubeControllerTest extends WithApplication {
      * Author : Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      */
-    @BeforeEach
+    @Before
     public void setUp() {
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
@@ -51,10 +53,24 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     @Test
-    public void testIndex() {
+    public void testIndexRedirectWhenNoUserSession() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
                 .uri("/");
+
+        // Ensure the application is properly initialized
+        Application app = provideApplication();
+        Result result = route(app, request);
+        assertEquals(SEE_OTHER, result.status());
+    }
+
+    @Test
+    public void testIndexWithUserSession() {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri("/")
+                .session("user", "1");
+
 
         // Ensure the application is properly initialized
         Application app = provideApplication();
