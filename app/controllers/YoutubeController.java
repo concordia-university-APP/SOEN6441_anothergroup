@@ -63,9 +63,9 @@ public class YoutubeController extends Controller {
     public CompletionStage<Result> searchForm(Http.Request request) {
         Optional<String> user = request.session().get("user");
 
-        return user.map(s -> CompletableFuture.supplyAsync(() ->
+        return user.map(sessionId -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
-                        Option.apply(searchService.getSessionSearchList(s)),
+                        Option.apply(searchService.getSessionSearchList(sessionId)),
                         DISPLAY_COUNT
                 ))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->

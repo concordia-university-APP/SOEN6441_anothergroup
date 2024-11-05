@@ -1,7 +1,9 @@
 package controllers;
 
 
+import models.Video;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import play.Application;
@@ -9,6 +11,7 @@ import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.test.Helpers;
 import play.test.WithApplication;
 import services.SearchService;
 import services.StatisticsService;
@@ -24,25 +27,19 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
-import static play.test.Helpers.GET;
-import static play.test.Helpers.route;
+import static play.test.Helpers.*;
 
 public class YoutubeControllerTest extends WithApplication {
-    private YoutubeController youtubeController;
-    private StatisticsService statisticsService;
-    private SearchService searchService;
-
-    @Override
-    protected Application provideApplication() {
-        return new GuiceApplicationBuilder().build();
-    }
+    private static YoutubeController youtubeController;
+    private static StatisticsService statisticsService;
+    private static SearchService searchService;
 
     /**
-     * Author : Tanveer Reza
+     * @author Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      */
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
         HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
@@ -54,28 +51,61 @@ public class YoutubeControllerTest extends WithApplication {
 
     @Test
     public void testIndexRedirectWhenNoUserSession() {
-        Http.RequestBuilder request = new Http.RequestBuilder()
+        Http.RequestBuilder request = Helpers.fakeRequest()
                 .method(GET)
                 .uri("/");
 
         // Ensure the application is properly initialized
-        Application app = provideApplication();
+        Application app = fakeApplication();
         Result result = route(app, request);
         assertEquals(SEE_OTHER, result.status());
     }
 
     @Test
     public void testIndexWithUserSession() {
-        Http.RequestBuilder request = new Http.RequestBuilder()
+        Http.RequestBuilder request = Helpers.fakeRequest()
                 .method(GET)
                 .uri("/")
                 .session("user", "1");
 
 
         // Ensure the application is properly initialized
-        Application app = provideApplication();
+        Application app = fakeApplication();
         Result result = route(app, request);
         assertEquals(OK, result.status());
+    }
+
+    @Test
+    public void testSearchWithoutUserSession() {
+        Http.RequestBuilder request = Helpers.fakeRequest()
+                .method(GET)
+                .uri("/search?query=test");
+
+        // Ensure the application is properly initialized
+        Application app = fakeApplication();
+        Result result = route(app, request);
+        assertEquals(SEE_OTHER, result.status());
+    }
+
+    @Test
+    public void testSearchWithUserSession() {
+        Http.RequestBuilder request = Helpers.fakeRequest()
+                .method(GET)
+                .uri("/search?query=test")
+                .session("user", "1");
+
+        // Ensure the application is properly initialized
+        Application app = fakeApplication();
+        Result result = route(app, request);
+        assertEquals(OK, result.status());
+    }
+
+    @Test
+    public void testVideo() {
+        Video v = new Video("test","test","test","test","test","test");
+        when(searchService.getVideoById(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(v));
+        Result res = youtubeController.video("id").toCompletableFuture().join();
+        assertEquals(OK, res.status());
     }
 
     /**

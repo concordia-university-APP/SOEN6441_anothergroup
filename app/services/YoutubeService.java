@@ -53,6 +53,7 @@ public class YoutubeService {
                         .setMaxResults(maxResults)
                         .execute();
                 List<SearchResult> items = response.getItems();
+                // TODO remove .join()
                 CompletableFuture<List<Video>> videoFutures = getVideos(items.stream().map(item -> item.getId().getVideoId()).collect(Collectors.toList()));
                 return new VideoList(videoFutures.join());
             } catch (IOException e) {

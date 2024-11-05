@@ -35,10 +35,15 @@ jacocoReportSettings := JacocoReportSettings()
       method = 100,
       branch = 100,
       complexity = 100,
-      line = 90,
+      line = 100,
       clazz = 100)
   )
 
 jacocoExcludes in Test := Seq(
   "controllers.javascript.*",
+  "views.html.*",
+  "router.*",
+  "controllers.routes",
+  "controllers.routes.javascript",
+  "controllers.ReverseYoutubeController",
 )

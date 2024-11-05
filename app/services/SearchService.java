@@ -23,23 +23,23 @@ public class SearchService {
      * @return list of the last 10 or less searches made
      */
     public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId, long displayCount) {
-        Optional<VideoSearch> existingSearch = sessionVideoSearchList.get(sessionId).stream()
+        Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
 
         if (existingSearch.isPresent()) {
-            sessionVideoSearchList.get(sessionId).remove(existingSearch.get());
-            sessionVideoSearchList.get(sessionId).add(0, existingSearch.get());
-            return CompletableFuture.completedFuture(sessionVideoSearchList.get(sessionId));
+            getSessionSearchList(sessionId).remove(existingSearch.get());
+            getSessionSearchList(sessionId).add(0, existingSearch.get());
+            return CompletableFuture.completedFuture(getSessionSearchList(sessionId));
         }
 
         return YoutubeService.searchResults(keywords, MAX_RESULTS).thenApply(results -> {
 
             VideoSearch search = new VideoSearch(keywords, results);
-            sessionVideoSearchList.get(sessionId).add(0, search);
+            getSessionSearchList(sessionId).add(0, search);
 
-            if (sessionVideoSearchList.get(sessionId).size() > MAX_RESULTS) {
-                sessionVideoSearchList.get(sessionId).remove((int)MAX_RESULTS);
+            if (getSessionSearchList(sessionId).size() > MAX_RESULTS) {
+                getSessionSearchList(sessionId).remove((int)MAX_RESULTS);
             }
 
             return getSessionSearchList(sessionId);
