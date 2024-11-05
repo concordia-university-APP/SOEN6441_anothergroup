@@ -1,6 +1,7 @@
 @import java.util.Collection
 @import java.util
-@(results: Option[util.Collection[VideoSearch]])
+@import java.text.DecimalFormat
+@(results: Option[util.Collection[VideoSearch]], maxDisplay: Integer)
 
 @main("YouTube Search") {
     <div class="container">
@@ -20,16 +21,16 @@
             @results match {
                 case Some(searchList) if !searchList.isEmpty => {
                     @for(item: VideoSearch <- searchList) {
-                        
+                        <h2>Search Results for terms: @item.getSearchTerms </h2>
                         <div>
-                            <a href="@routes.StatisticsController.getStatistics(item.getSearchTerms)" target="_blank">
+                            <a href="@routes.YoutubeController.getStatistics(item.getSearchTerms)" target="_blank">
                                 View Word Frequency Statistics for "@item.getSearchTerms"
                             </a>
                         </div>
-                        <h2>Search Results for terms: @item.getSearchTerms </h2>
+                        <p> Flecsh-Kincaid Grade Level Avg. = @("%.1f".format(item.getFleschGradeLevelAverage)), Flecsh-Kincaid Reading Score Avg. =  @("%.1f".format(item.getFleschEaseScoreAverage)) </p>
                         <ol>
-                        @for(v <- item.getResults.getVideoList) {
-                            @video(v)
+                        @for(i <- 0 to Math.max(0, Math.min(maxDisplay - 1, item.getResults.getVideoList.size() - 1))) {
+                            @video(item.getResults.getVideoList.get(i))
                         }
                         </ol>
                     }

@@ -18,13 +18,27 @@ libraryDependencies ++= Seq(
   "com.google.apis" % "google-api-services-youtube" % "v3-rev20240514-2.0.0",
 
   // Jackson for JSON parsing
-  "com.google.http-client" % "google-http-client-jackson2" % "1.44.2",
+  "com.google.http-client" % "google-http-client-jackson2" % "1.44.2"
+)
 
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.8.1" % Test,
+libraryDependencies ++= Seq(
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.9.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.9.2" % Test,
+  "org.mockito" % "mockito-core" % "5.4.0" % Test,
+  "org.mockito" % "mockito-junit-jupiter" % "5.4.0" % Test
+)
 
-  "org.mockito" %% "mockito-scala" % "1.17.7" % Test,
+jacocoReportSettings := JacocoReportSettings()
+  .withThresholds(
+    JacocoThresholds(
+      instruction = 80,
+      method = 100,
+      branch = 100,
+      complexity = 100,
+      line = 90,
+      clazz = 100)
+  )
 
-  "org.mockito" % "mockito-junit-jupiter" % "3.12.4" % Test,
-
-  "org.mockito" % "mockito-inline" % "3.12.4" % Test
+jacocoExcludes in Test := Seq(
+  "controllers.javascript.*",
 )

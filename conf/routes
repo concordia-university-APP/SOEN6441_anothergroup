@@ -3,11 +3,11 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.YoutubeController.searchForm
-GET     /search                     controllers.YoutubeController.search(query: String)
+GET     /                           controllers.YoutubeController.searchForm(request: Request)
+GET     /search                     controllers.YoutubeController.search(query: String, request: Request)
 GET     /video                     controllers.YoutubeController.video(id: String)
 GET     /channel/:channelId     controllers.YoutubeController.showChannelProfile(channelId: String)
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /statistics/:query       controllers.StatisticsController.getStatistics(query: String)
+GET     /statistics/:query       controllers.YoutubeController.getStatistics(query: String)
