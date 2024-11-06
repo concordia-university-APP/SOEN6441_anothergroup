@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -39,23 +40,20 @@ public class SearchServiceTest {
 
         VideoList videoList = new VideoList(List.of( new Video[] {
                 new Video("1","1","1","1","1","1"),
-                new Video("2","1","1","1","1","1"),
-                new Video("3","1","1","1","1","1"),
-                new Video("4","1","1","1","1","1"),
-                new Video("5","1","1","1","1","1"),
-                new Video("6","1","1","1","1","1"),
-                new Video("7","1","1","1","1","1"),
-                new Video("8","1","1","1","1","1"),
-                new Video("9","1","1","1","1","1"),
-                new Video("10","1","1","1","1","1"),
+                new Video("2","2","1","1","1","1"),
+                new Video("3","3","1","1","1","1"),
+                new Video("4","4","1","1","1","1"),
+                new Video("5","5","1","1","1","1"),
+                new Video("6","6","1","1","1","1"),
+                new Video("7","7","1","1","1","1"),
+                new Video("8","8","1","1","1","1"),
+                new Video("9","9","1","1","1","1"),
+                new Video("10","10","1","1","1","1"),
         }));
-
-        VideoSearch search = new VideoSearch("test", videoList);
 
 
         when(youtubeService.searchResults(anyString(), anyLong()))
                     .thenReturn(CompletableFuture.completedFuture(videoList));
-
     }
 
     /**
@@ -110,5 +108,44 @@ public class SearchServiceTest {
         when(youtubeService.getVideo("id")).thenReturn(CompletableFuture.completedFuture(vid));
         Video v = searchService.getVideoById("id").join();
         assertEquals(vid, v);
+    }
+
+    /**
+     * @author Tanveer Reza
+     * Tests the `getVideosBySearchTerm` method when an existing search term is used.
+     * It verifies that the cached results are returned instead of making a new request.
+     */
+    @Test
+    public void testGetVideosBySearchTerm_existingSearch() {
+        Video video1 = new Video("1","1","1","1","1","1");
+        VideoList videoList = new VideoList(Arrays.asList(video1));
+        VideoSearch videoSearch = new VideoSearch("test", videoList);
+        searchService.getSessionSearchList("1").add(videoSearch);
+
+        CompletableFuture<VideoList> result = searchService.getVideosBySearchTerm("test", "1");
+        assertEquals(videoList, result.join());
+    }
+
+    /**
+     * @author Tanveer Reza
+     * Tests the `getVideosBySearchTerm` method when a new search term is used.
+     * It verifies that the correct number of videos are returned and that the titles match the expected values.
+     */
+    @Test
+    public void testGetVideosBySearchTerm_newSearch() {
+        CompletableFuture<VideoList> result = searchService.getVideosBySearchTerm("newSearch", "1");
+        VideoList videoList = result.join();
+
+        assertEquals(10, videoList.getVideoList().size());
+        assertEquals("1", videoList.getVideoList().get(0).getTitle());
+        assertEquals("2", videoList.getVideoList().get(1).getTitle());
+        assertEquals("3", videoList.getVideoList().get(2).getTitle());
+        assertEquals("4", videoList.getVideoList().get(3).getTitle());
+        assertEquals("5", videoList.getVideoList().get(4).getTitle());
+        assertEquals("6", videoList.getVideoList().get(5).getTitle());
+        assertEquals("7", videoList.getVideoList().get(6).getTitle());
+        assertEquals("8", videoList.getVideoList().get(7).getTitle());
+        assertEquals("9", videoList.getVideoList().get(8).getTitle());
+        assertEquals("10", videoList.getVideoList().get(9).getTitle());
     }
 }

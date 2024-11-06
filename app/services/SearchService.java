@@ -1,6 +1,7 @@
 package services;
 
 import models.Video;
+import models.VideoList;
 import models.VideoSearch;
 
 import javax.inject.Inject;
@@ -17,6 +18,11 @@ public class SearchService {
     private final HashMap<String, List<VideoSearch>> sessionVideoSearchList = new HashMap<>();
     private final YoutubeService youtubeService;
 
+    /**
+     * author Laurent Voisard
+     * Constructor for the SearchService class.
+     * @param youtubeService the YouTube service to use for fetching videos
+     */
     @Inject
     public SearchService(YoutubeService youtubeService) {
         this.youtubeService = youtubeService;
@@ -89,7 +95,29 @@ public class SearchService {
         sessionVideoSearchList.put(sessionId, new ArrayList<>());
     }
 
+    /**
+     * Retrieves a video by its ID.
+     * @author Laurent Voisard
+     * @param id the ID of the video to retrieve
+     * @return a CompletableFuture containing the video with the specified ID
+     */
     public CompletableFuture<Video> getVideoById(String id) {
         return youtubeService.getVideo(id);
+    }
+
+    /**
+     * Retrieves a list of videos based on the search term. If the search term has already been made in the current session,
+     * it returns the cached results. Otherwise, it makes a request to the YouTube API to get the results.
+     * @author Tanveer Reza
+     * @param keywords the search terms for the video
+     * @param sessionId the user session id
+     * @return a CompletableFuture containing the list of videos based on the search term
+     */
+    public CompletableFuture<VideoList> getVideosBySearchTerm(String keywords, String sessionId) {
+        Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
+                .filter(x -> x.getSearchTerms().equals(keywords))
+                .findFirst();
+        return existingSearch.map(videoSearch -> CompletableFuture.completedFuture(videoSearch.getResults()))
+                .orElseGet(() -> youtubeService.searchResults(keywords, MAX_VIDEO_COUNT).thenApply(videoList -> videoList));
     }
 }

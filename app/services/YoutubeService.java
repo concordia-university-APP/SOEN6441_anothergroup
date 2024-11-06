@@ -25,6 +25,10 @@ public class YoutubeService {
     private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private final YouTube youtube;
 
+    /**
+     * @author Tanveer Reza
+     * Constructor for the YoutubeService class.
+     */
     public YoutubeService() {
         try {
             youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
