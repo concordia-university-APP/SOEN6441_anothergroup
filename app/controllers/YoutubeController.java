@@ -29,12 +29,14 @@ public class YoutubeController extends Controller {
     private final SearchService searchService;
     private final HttpExecutionContext ec;
     private final int DISPLAY_COUNT = 10;
+    private final YoutubeService youtubeService;
 
     @Inject
-    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec) {
+    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec, YoutubeService youtubeService) {
         this.searchService = searchService;
         this.statisticsService = statisticsService;
         this.ec = ec;
+        this.youtubeService = youtubeService;
     }
 
     /**
@@ -56,8 +58,8 @@ public class YoutubeController extends Controller {
 
         return searchService.searchKeywords(query, user.get())
                 .thenApplyAsync(searches -> ok(views.html.search.render(
-                        Option.apply(searches),
-                        DISPLAY_COUNT)),
+                                Option.apply(searches),
+                                DISPLAY_COUNT))
                         ec.current());
     }
 
@@ -73,8 +75,7 @@ public class YoutubeController extends Controller {
         return user.map(sessionId -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
                         Option.apply(searchService.getSessionSearchList(sessionId)),
-                        DISPLAY_COUNT
-                ))
+                        DISPLAY_COUNT))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->
                 redirect("/").addingToSession(request, "user", searchService.createSessionSearchList())));
 
@@ -92,8 +93,8 @@ public class YoutubeController extends Controller {
     }
 
     public CompletionStage<Result> showChannelProfile(String channelId) throws GeneralSecurityException, IOException {
-        CompletionStage<YoutubeChannel> channelFuture = YoutubeService.getChannelById(channelId);
-        CompletionStage<List<Video>> videosFuture = YoutubeService.getChannelVideos(channelId);
+        CompletionStage<YoutubeChannel> channelFuture = youtubeService.getChannelById(channelId);
+        CompletionStage<List<Video>> videosFuture = youtubeService.getChannelVideos(channelId);
 
         // Debugging logs to check if the futures are not null
         System.out.println("Channel Future: " + channelFuture);

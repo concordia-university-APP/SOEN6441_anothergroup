@@ -1,5 +1,6 @@
 package services;
 
+import akka.japi.Pair;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -10,6 +11,7 @@ import com.typesafe.config.ConfigFactory;
 import models.Video;
 import models.VideoList;
 import models.YoutubeChannel;
+import scala.util.Either;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -17,7 +19,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class YoutubeService {
@@ -27,7 +28,7 @@ public class YoutubeService {
     private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private final YouTube youtube;
 
-    public YoutubeService() {
+    public YoutubeService(YouTube mockYouTube) {
         try {
             youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
@@ -160,43 +161,39 @@ public class YoutubeService {
     }
 
 //    Channel-Page Task A
-    public static CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException, GeneralSecurityException {
+public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
+    return CompletableFuture.supplyAsync(() -> {
+        try {
+            YouTube.Search.List request = youtube.search().list(Collections.singletonList("id,snippet"));
+            request.setKey(API_KEY);
+            request.setChannelId(channelId);
+            request.setMaxResults(10L);
+            request.setOrder("date");
+            request.setType(Collections.singletonList("video"));
+
+            SearchListResponse response = request.execute();
+            List<SearchResult> searchResults = response.getItems();
+
+            // Convert SearchResult to Video objects
+            return searchResults.stream()
+                    .map(sr -> new Video(
+                            sr.getId().getVideoId(),
+                            sr.getSnippet().getTitle(),
+                            sr.getSnippet().getDescription(),
+                            sr.getSnippet().getChannelId(),
+                            sr.getSnippet().getChannelTitle(),
+                            sr.getSnippet().getThumbnails().getDefault().getUrl()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        }
+    });
+}
+    public CompletionStage<YoutubeChannel> getChannelById(String channelId) throws IOException {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                YouTube youtubeService = getService();
-
-                YouTube.Search.List request = youtubeService.search().list(Collections.singletonList("id,snippet"));
-                request.setKey(API_KEY);
-                request.setChannelId(channelId);
-                request.setMaxResults(10L);
-                request.setOrder("date");
-                request.setType(Collections.singletonList("video"));
-
-                SearchListResponse response = request.execute();
-                List<SearchResult> searchResults = response.getItems();
-
-                // Convert SearchResult to Video objects
-                return searchResults.stream()
-                        .map(sr -> new Video(
-                                sr.getId().getVideoId(),
-                                sr.getSnippet().getTitle(),
-                                sr.getSnippet().getDescription(),
-                                sr.getSnippet().getChannelId(),
-                                sr.getSnippet().getChannelTitle(),
-                                sr.getSnippet().getThumbnails().getDefault().getUrl()
-                        ))
-                        .collect(Collectors.toList());
-            } catch (IOException e) {
-                throw new CompletionException(e);
-            }
-        });
-    }
-    public static CompletionStage<YoutubeChannel> getChannelById(String channelId)throws IOException, GeneralSecurityException  {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                YouTube youtubeService = getService();
-
-                YouTube.Channels.List request = youtubeService.channels().list(Collections.singletonList("snippet"));
+                YouTube.Channels.List request = youtube.channels().list(Collections.singletonList("snippet"));
                 request.setId(Collections.singletonList(channelId));
                 request.setKey(API_KEY);
 
@@ -211,11 +208,7 @@ public class YoutubeService {
                                 null))
                         .collect(Collectors.toList());
 
-                if (channels != null && !channels.isEmpty()) {
-                    return channels.get(0);
-                } else {
-                    return null;
-                }
+                return channels.isEmpty() ? null : channels.get(0);
             } catch (IOException e) {
                 throw new CompletionException(e);
             }

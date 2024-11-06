@@ -15,6 +15,7 @@ import play.test.Helpers;
 import play.test.WithApplication;
 import services.SearchService;
 import services.StatisticsService;
+import services.YoutubeService;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,17 +33,18 @@ public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;
     private static StatisticsService statisticsService;
     private static SearchService searchService;
-
+    private static YoutubeService mockYoutubeService;
     /**
      * @author Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      */
     @BeforeClass
     public static void setUp() {
+        mockYoutubeService = Mockito.mock(YoutubeService.class);
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
         HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
-        youtubeController = new YoutubeController(statisticsService, searchService, ec);
+        youtubeController = new YoutubeController(statisticsService, searchService, ec , mockYoutubeService);
 
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
