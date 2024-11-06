@@ -2,6 +2,8 @@ package services;
 
 import models.Video;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,22 +11,28 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static services.YoutubeService.searchResults;
-
 /**
  * Author : Tanveer Reza
  * Version : 1
  * A service class for handling word-stats of a video
  */
+@Singleton
 public class StatisticsService {
+    private final SearchService searchService;
+
+    @Inject
+    public StatisticsService(SearchService searchService) {
+        this.searchService = searchService;
+    }
     /**
      * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
      * @author Tanveer Reza
      */
-    public CompletableFuture<Map<String, Long>> getWordFrequency(String query) {
-        return searchResults(query, 50L).thenApply(videos -> {
-            List<String> titles = videos.getVideoList().stream()
+    public CompletableFuture<Map<String, Long>> getWordFrequency(String query, String sessionId) {
+        return searchService.searchKeywords(query, sessionId,50L).thenApply(videos -> {
+            List<String> titles = videos.stream()
+                    .flatMap(videoSearch -> videoSearch.getResults().getVideoList().stream())
                     .map(Video::getTitle) // Extract each title
                     .collect(Collectors.toList());
 

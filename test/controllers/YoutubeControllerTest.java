@@ -92,10 +92,18 @@ public class YoutubeControllerTest extends WithApplication {
         mockWordFrequency.put("tutorial", 1L);
 
         // Mock the behavior of statisticsService
-        when(statisticsService.getWordFrequency(anyString())).thenReturn(CompletableFuture.completedFuture(mockWordFrequency));
+        when(statisticsService.getWordFrequency(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(mockWordFrequency));
+
+        // Create a mock request with a session
+        Http.RequestBuilder requestBuilder = new Http.RequestBuilder()
+                .method(GET)
+                .uri("/statistics?query=" + query)
+                .session("user", "1");
+
+        Http.Request request = requestBuilder.build();
 
         // Act
-        CompletionStage<Result> resultStage = youtubeController.getStatistics(query);
+        CompletionStage<Result> resultStage = youtubeController.getStatistics(query, request);
         Result result = resultStage.toCompletableFuture().join();
 
         // Assert

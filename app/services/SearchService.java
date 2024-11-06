@@ -3,11 +3,12 @@ package services;
 import models.Video;
 import models.VideoSearch;
 
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 
+@Singleton
 public class SearchService {
     private int userSessionCounter = 0;
     private final long MAX_RESULTS = 50;
