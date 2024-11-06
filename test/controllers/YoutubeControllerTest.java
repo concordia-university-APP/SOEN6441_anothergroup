@@ -94,10 +94,10 @@ public class YoutubeControllerTest extends WithApplication {
                 .uri("/search?query=test")
                 .session("user", "1");
 
+        when(searchService.searchKeywords(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
         // Ensure the application is properly initialized
-        Application app = fakeApplication();
-        Result result = route(app, request);
-        assertEquals(OK, result.status());
+        Result res = youtubeController.search("test", request.build()).toCompletableFuture().join();
+        assertEquals(OK, res.status());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * Author : Tanveer Reza
+     * @author Tanveer Reza
      * Test the getStatistics method of YoutubeController
      */
     @Test

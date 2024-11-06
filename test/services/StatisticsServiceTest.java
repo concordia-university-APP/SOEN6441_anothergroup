@@ -6,6 +6,7 @@ import models.VideoList;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -15,32 +16,32 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
- * Author : Tanveer Reza
+ * @author Tanveer Reza
  * Version : 1
  * Unit tests for statistic service class
  */
 public class StatisticsServiceTest {
 
     private StatisticsService statisticsService;
+    private YoutubeService youtubeService;
     private VideoList sampleVideoList;
     private Map<String, Long> expectedWordFrequency;
 
     @Before
     public void setUp() {
-        statisticsService = new StatisticsService();
+        youtubeService = Mockito.mock(YoutubeService.class);
+        statisticsService = new StatisticsService(youtubeService);
 
-        // Mock static calls to YoutubeService.getVideo
-        try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             // Create mock Video objects with complete data
             Video video1 = new Video("1", "Java programming tutorial", "Learn Java programming.", "101", "Java Channel", "http://example.com/thumb1.jpg");
             Video video2 = new Video("2", "Java and Python comparison", "Comparing Java and Python.", "102", "Comparison Channel", "http://example.com/thumb2.jpg");
             Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
-            youtubeServiceMock.when(() -> YoutubeService.getVideo("Java programming tutorial"))
+            when(youtubeService.getVideo("Java programming tutorial"))
                     .thenReturn(CompletableFuture.completedFuture(video1));
-            youtubeServiceMock.when(() -> YoutubeService.getVideo("Java and Python comparison"))
+            when(youtubeService.getVideo("Java and Python comparison"))
                     .thenReturn(CompletableFuture.completedFuture(video2));
-            youtubeServiceMock.when(() -> YoutubeService.getVideo("Introduction to Java programming"))
+            when(youtubeService.getVideo("Introduction to Java programming"))
                     .thenReturn(CompletableFuture.completedFuture(video3));
 
             // Create VideoList with mocked videos
@@ -56,34 +57,32 @@ public class StatisticsServiceTest {
             expectedWordFrequency.put("comparison", 1L);
             expectedWordFrequency.put("introduction", 1L);
             expectedWordFrequency.put("to", 1L);
-        }
+
     }
 
     @Test
     public void testGetWordFrequency_basicCase() {
-        try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
-            youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("Java"), anyLong()))
+            when(youtubeService.searchResults(eq("Java"), anyLong()))
                     .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
 
             CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java");
             Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
             assertEquals(expectedWordFrequency, wordFrequency);
-        }
+
     }
 
     @Test
     public void testGetWordFrequency_emptyQueryResults() {
-        try (MockedStatic<YoutubeService> youtubeServiceMock = mockStatic(YoutubeService.class)) {
             VideoList emptyVideoList = new VideoList(Collections.emptyList());
-            youtubeServiceMock.when(() -> YoutubeService.searchResults(eq("NonexistentQuery"), anyLong()))
+            when( youtubeService.searchResults(eq("NonexistentQuery"), anyLong()))
                     .thenReturn(CompletableFuture.completedFuture(emptyVideoList));
 
             CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("NonexistentQuery");
             Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
             assertTrue(wordFrequency.isEmpty());
-        }
+
     }
 
     @Test

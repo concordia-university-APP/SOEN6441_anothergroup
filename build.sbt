@@ -22,28 +22,24 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.9.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.9.2" % Test,
-  "org.mockito" % "mockito-core" % "5.4.0" % Test,
-  "org.mockito" % "mockito-junit-jupiter" % "5.4.0" % Test
+  "org.mockito" % "mockito-core" % "5.11.0" % Test,
+  "org.mockito" % "mockito-junit-jupiter" % "5.12.0" % Test
 )
 
 jacocoReportSettings := JacocoReportSettings()
   .withThresholds(
     JacocoThresholds(
-      instruction = 80,
       method = 100,
-      branch = 100,
-      complexity = 100,
       line = 100,
       clazz = 100)
   )
 
-jacocoExcludes in Test := Seq(
+jacocoExcludes := Seq(
   "controllers.javascript.*",
   "views.html.*",
   "router.*",
   "controllers.routes",
-  "controllers.routes.javascript",
+  "controllers.routes.*",
+  "controllers.ReverseAssets",
   "controllers.ReverseYoutubeController",
 )

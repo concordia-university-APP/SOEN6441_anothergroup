@@ -3,6 +3,7 @@ package services;
 import models.Video;
 import models.VideoSearch;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -10,11 +11,18 @@ import java.util.stream.Collectors;
 
 public class SearchService {
     private int userSessionCounter = 0;
-    private final long MAX_RESULTS = 50;
+    private final long MAX_VIDEO_COUNT = 50;
+    private final long MAX_SEARCHES_PER_SESSION = 10;
     private final HashMap<String, List<VideoSearch>> sessionVideoSearchList = new HashMap<>();
+    private final YoutubeService youtubeService;
+
+    @Inject
+    public SearchService(YoutubeService youtubeService) {
+        this.youtubeService = youtubeService;
+    }
 
     /**
-     * Author: Laurent Voisard
+     * @author Laurent Voisard
      * Indirection level to youtube service search, we store the search results in the correct user session search result list
      * We also handle if a search term has already been made, if so put it back to the top of the list without making a request
      * to the api. Otherwise request from the youtube api
@@ -22,7 +30,7 @@ public class SearchService {
      * @param sessionId user session id
      * @return list of the last 10 or less searches made
      */
-    public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId, long displayCount) {
+    public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId) {
         Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
@@ -33,13 +41,13 @@ public class SearchService {
             return CompletableFuture.completedFuture(getSessionSearchList(sessionId));
         }
 
-        return YoutubeService.searchResults(keywords, MAX_RESULTS).thenApply(results -> {
+        return youtubeService.searchResults(keywords, MAX_VIDEO_COUNT).thenApply(results -> {
 
             VideoSearch search = new VideoSearch(keywords, results);
             getSessionSearchList(sessionId).add(0, search);
 
-            if (getSessionSearchList(sessionId).size() > MAX_RESULTS) {
-                getSessionSearchList(sessionId).remove((int)MAX_RESULTS);
+            if (getSessionSearchList(sessionId).size() > MAX_SEARCHES_PER_SESSION) {
+                getSessionSearchList(sessionId).remove((int)MAX_SEARCHES_PER_SESSION);
             }
 
             return getSessionSearchList(sessionId);
@@ -81,6 +89,6 @@ public class SearchService {
     }
 
     public CompletableFuture<Video> getVideoById(String id) {
-        return YoutubeService.getVideo(id);
+        return youtubeService.getVideo(id);
     }
 }

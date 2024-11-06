@@ -2,6 +2,7 @@ package services;
 
 import models.Video;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,21 +10,27 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static services.YoutubeService.searchResults;
-
 /**
- * Author : Tanveer Reza
+ * @author Tanveer Reza
  * Version : 1
  * A service class for handling word-stats of a video
  */
 public class StatisticsService {
+    private YoutubeService youtubeService;
+
+    @Inject
+    public StatisticsService(YoutubeService youtubeService) {
+        this.youtubeService = youtubeService;
+    }
+
+
     /**
      * @author Tanveer Reza
      * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
      */
     public CompletableFuture<Map<String, Long>> getWordFrequency(String query) {
-        return searchResults(query, 50L).thenApply(videos -> {
+        return youtubeService.searchResults(query, 50L).thenApply(videos -> {
             List<String> titles = videos.getVideoList().stream()
                     .map(Video::getTitle) // Extract each title
                     .collect(Collectors.toList());
@@ -42,7 +49,7 @@ public class StatisticsService {
     }
 
     /**
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      * @param titles list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      */
@@ -55,7 +62,7 @@ public class StatisticsService {
     }
 
     /**
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      * @param words list of words gathered from titles
      * @return all unique words with their frequency, sorted by frequency and then alphabets
      */
@@ -67,7 +74,7 @@ public class StatisticsService {
     }
 
     /**
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
      */
