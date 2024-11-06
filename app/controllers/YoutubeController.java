@@ -90,9 +90,16 @@ public class YoutubeController extends Controller {
      * @param query The search query
      * @return The word frequency statistics
      */
-    public CompletionStage<Result> getStatistics(String query) {
+    public CompletionStage<Result> getStatistics(String query, Http.Request request) {
+        Optional<String> user = request.session().get("user");
+
+        if(user.isEmpty()) {
+            return CompletableFuture.supplyAsync(()
+                    -> redirect(request.uri()).addingToSession(request,"user", searchService.createSessionSearchList()));
+        } else {
+            return statisticsService.getWordFrequency(query, user.get())
+                    .thenApplyAsync(wordFrequency -> ok(statistics.render(wordFrequency, query)), ec.current());
+        }
         // Retrieve the last search query from the session
-        return statisticsService.getWordFrequency(query)
-                .thenApplyAsync(wordFrequency -> ok(views.html.statistics.render(wordFrequency, query)), ec.current());
     }
 }

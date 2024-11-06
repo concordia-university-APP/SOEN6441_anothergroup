@@ -4,11 +4,12 @@ import models.Video;
 import models.VideoSearch;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 
+@Singleton
 public class SearchService {
     private int userSessionCounter = 0;
     private final long MAX_VIDEO_COUNT = 50;

@@ -1,12 +1,10 @@
 package services;
 
-
 import models.Video;
 import models.VideoList;
+import models.VideoSearch;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -18,71 +16,58 @@ import static org.mockito.Mockito.*;
 /**
  * @author Tanveer Reza
  * Version : 1
- * Unit tests for statistic service class
+ * Unit tests for StatisticsService class
  */
 public class StatisticsServiceTest {
 
     private StatisticsService statisticsService;
-    private YoutubeService youtubeService;
+    private SearchService searchService;
     private VideoList sampleVideoList;
     private Map<String, Long> expectedWordFrequency;
 
     @Before
     public void setUp() {
-        youtubeService = Mockito.mock(YoutubeService.class);
-        statisticsService = new StatisticsService(youtubeService);
+        searchService = mock(SearchService.class);
+        statisticsService = new StatisticsService(searchService);
 
-            // Create mock Video objects with complete data
-            Video video1 = new Video("1", "Java programming tutorial", "Learn Java programming.", "101", "Java Channel", "http://example.com/thumb1.jpg");
-            Video video2 = new Video("2", "Java and Python comparison", "Comparing Java and Python.", "102", "Comparison Channel", "http://example.com/thumb2.jpg");
-            Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
+        Video video1 = new Video("1", "Java programming tutorial", "Learn Java programming.", "101", "Java Channel", "http://example.com/thumb1.jpg");
+        Video video2 = new Video("2", "Java and Python comparison", "Comparing Java and Python.", "102", "Comparison Channel", "http://example.com/thumb2.jpg");
+        Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
-            when(youtubeService.getVideo("Java programming tutorial"))
-                    .thenReturn(CompletableFuture.completedFuture(video1));
-            when(youtubeService.getVideo("Java and Python comparison"))
-                    .thenReturn(CompletableFuture.completedFuture(video2));
-            when(youtubeService.getVideo("Introduction to Java programming"))
-                    .thenReturn(CompletableFuture.completedFuture(video3));
+        sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
+        VideoSearch videoSearch = new VideoSearch("Java", sampleVideoList);
 
-            // Create VideoList with mocked videos
-            sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
+        when(searchService.searchKeywords(eq("Java"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(videoSearch)));
 
-            // Prepare expected word frequency
-            expectedWordFrequency = new LinkedHashMap<>();
-            expectedWordFrequency.put("java", 3L);
-            expectedWordFrequency.put("programming", 2L);
-            expectedWordFrequency.put("tutorial", 1L);
-            expectedWordFrequency.put("and", 1L);
-            expectedWordFrequency.put("python", 1L);
-            expectedWordFrequency.put("comparison", 1L);
-            expectedWordFrequency.put("introduction", 1L);
-            expectedWordFrequency.put("to", 1L);
-
+        expectedWordFrequency = new LinkedHashMap<>();
+        expectedWordFrequency.put("java", 3L);
+        expectedWordFrequency.put("programming", 2L);
+        expectedWordFrequency.put("tutorial", 1L);
+        expectedWordFrequency.put("and", 1L);
+        expectedWordFrequency.put("python", 1L);
+        expectedWordFrequency.put("comparison", 1L);
+        expectedWordFrequency.put("introduction", 1L);
+        expectedWordFrequency.put("to", 1L);
     }
 
     @Test
     public void testGetWordFrequency_basicCase() {
-            when(youtubeService.searchResults(eq("Java"), anyLong()))
-                    .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
+        CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java", "1");
+        Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
-            CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java");
-            Map<String, Long> wordFrequency = wordFrequencyFuture.join();
-
-            assertEquals(expectedWordFrequency, wordFrequency);
-
+        assertEquals(expectedWordFrequency, wordFrequency);
     }
 
     @Test
     public void testGetWordFrequency_emptyQueryResults() {
-            VideoList emptyVideoList = new VideoList(Collections.emptyList());
-            when( youtubeService.searchResults(eq("NonexistentQuery"), anyLong()))
-                    .thenReturn(CompletableFuture.completedFuture(emptyVideoList));
+        when(searchService.searchKeywords(eq("NonexistentQuery"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-            CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("NonexistentQuery");
-            Map<String, Long> wordFrequency = wordFrequencyFuture.join();
+        CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("NonexistentQuery", "1");
+        Map<String, Long> wordFrequency = wordFrequencyFuture.join();
 
-            assertTrue(wordFrequency.isEmpty());
-
+        assertTrue(wordFrequency.isEmpty());
     }
 
     @Test
@@ -116,12 +101,12 @@ public class StatisticsServiceTest {
     @Test
     public void testCountAndSortWordFrequencies_basicCase() {
         List<String> words = Arrays.asList("java", "programming", "java", "tutorial");
-        List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
+        Map<String, Long> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
 
-        List<Map.Entry<String, Long>> expected = new ArrayList<>();
-        expected.add(new AbstractMap.SimpleEntry<>("java", 2L));
-        expected.add(new AbstractMap.SimpleEntry<>("programming", 1L));
-        expected.add(new AbstractMap.SimpleEntry<>("tutorial", 1L));
+        Map<String, Long> expected = new LinkedHashMap<>();
+        expected.put("java", 2L);
+        expected.put("programming", 1L);
+        expected.put("tutorial", 1L);
 
         assertEquals(expected, sortedFrequencies);
     }
@@ -129,18 +114,18 @@ public class StatisticsServiceTest {
     @Test
     public void testCountAndSortWordFrequencies_tieBreakerAlphabetical() {
         List<String> words = Arrays.asList("java", "python", "java", "python");
-        List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
+        Map<String, Long> sortedFrequencies = statisticsService.countAndSortWordFrequencies(words);
 
-        List<Map.Entry<String, Long>> expected = new ArrayList<>();
-        expected.add(new AbstractMap.SimpleEntry<>("java", 2L));
-        expected.add(new AbstractMap.SimpleEntry<>("python", 2L));
+        Map<String, Long> expected = new LinkedHashMap<>();
+        expected.put("java", 2L);
+        expected.put("python", 2L);
 
         assertEquals(expected, sortedFrequencies);
     }
 
     @Test
     public void testCountAndSortWordFrequencies_emptyList() {
-        List<Map.Entry<String, Long>> sortedFrequencies = statisticsService.countAndSortWordFrequencies(Collections.emptyList());
+        Map<String, Long> sortedFrequencies = statisticsService.countAndSortWordFrequencies(Collections.emptyList());
 
         assertTrue(sortedFrequencies.isEmpty());
     }
@@ -178,4 +163,24 @@ public class StatisticsServiceTest {
         assertEquals(expected, wordOccurrences);
     }
 
+    @Test
+    public void testGetWordFrequency_keyCollision() {
+        Video video1 = new Video("1", "Java programming", "Content 1", "101", "Channel A", "http://example.com/thumb1.jpg");
+        Video video2 = new Video("2", "Java Java", "Content 2", "102", "Channel B", "http://example.com/thumb2.jpg");
+
+        VideoList videoList = new VideoList(Arrays.asList(video1, video2));
+        VideoSearch videoSearch = new VideoSearch("Java", videoList);
+
+        when(searchService.searchKeywords(eq("Java"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(videoSearch)));
+
+        CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java", "1");
+        Map<String, Long> wordFrequency = wordFrequencyFuture.join();
+
+        Map<String, Long> expected = new LinkedHashMap<>();
+        expected.put("java", 3L);
+        expected.put("programming", 1L);
+
+        assertEquals(expected, wordFrequency);
+    }
 }

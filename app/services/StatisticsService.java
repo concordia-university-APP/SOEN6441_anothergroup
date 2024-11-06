@@ -3,6 +3,7 @@ package services;
 import models.Video;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,43 +16,36 @@ import java.util.stream.Collectors;
  * Version : 1
  * A service class for handling word-stats of a video
  */
+@Singleton
 public class StatisticsService {
-    private YoutubeService youtubeService;
+    private final SearchService searchService;
 
     @Inject
-    public StatisticsService(YoutubeService youtubeService) {
-        this.youtubeService = youtubeService;
+    public StatisticsService(SearchService searchService) {
+        this.searchService = searchService;
     }
-
-
     /**
-     * @author Tanveer Reza
      * @param query the search terms for the video
      * @return frequency of all unique words from top 50 videos based on search query
+     * @author Tanveer Reza
      */
-    public CompletableFuture<Map<String, Long>> getWordFrequency(String query) {
-        return youtubeService.searchResults(query, 50L).thenApply(videos -> {
-            List<String> titles = videos.getVideoList().stream()
+    public CompletableFuture<Map<String, Long>> getWordFrequency(String query, String sessionId) {
+        return searchService.searchKeywords(query, sessionId).thenApply(videos -> {
+            List<String> titles = videos.stream()
+                    .flatMap(videoSearch -> videoSearch.getResults().getVideoList().stream())
                     .map(Video::getTitle) // Extract each title
                     .collect(Collectors.toList());
 
             List<String> listOfWordsFromTitles = extractAndNormalizeWords(titles);
 
-            return countAndSortWordFrequencies(listOfWordsFromTitles)
-                    .stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (e1, e2) -> e1, // In case of a key collision, keep the existing entry
-                            LinkedHashMap::new // Use LinkedHashMap to preserve the order
-                    ));
+            return countAndSortWordFrequencies(listOfWordsFromTitles);
         });
     }
 
     /**
-     * @author Tanveer Reza
      * @param titles list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
+     * @author : Tanveer Reza
      */
     public List<String> extractAndNormalizeWords(List<String> titles) {
         return titles.stream()
@@ -62,21 +56,28 @@ public class StatisticsService {
     }
 
     /**
-     * @author Tanveer Reza
      * @param words list of words gathered from titles
      * @return all unique words with their frequency, sorted by frequency and then alphabets
+     * @author : Tanveer Reza
      */
-    public List<Map.Entry<String, Long>> countAndSortWordFrequencies(List<String> words) {
+    public Map<String, Long> countAndSortWordFrequencies(List<String> words) {
         return getWordOccurences(words).entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
                         .thenComparing(Map.Entry.comparingByKey()))
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> {
+                            Map<String, Long> result = new LinkedHashMap<>();
+                            list.forEach(entry -> result.put(entry.getKey(), entry.getValue()));
+                            return result;
+                        }
+                ));
     }
 
     /**
-     * @author Tanveer Reza
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
+     * @author : Tanveer Reza
      */
     public Map<String, Long> getWordOccurences(List<String> words) {
         return words.stream()
