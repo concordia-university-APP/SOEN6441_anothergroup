@@ -5,7 +5,17 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * @author Laurent
+ * Test class for Video model
+ */
 public class VideoTest {
+
+    /**
+     * @author Laurent Voisard
+     *
+     * Assert that getters work properly
+     */
     @Test
     public void testVideoGetters() {
         final String id = "1";
@@ -22,6 +32,6 @@ public class VideoTest {
         assertEquals(channelId, video.getChannelId());
         assertEquals(channelName, video.getChannelName());
         assertEquals(thumbnailUrl, video.getThumbnailUrl());
-        assertNotNull(video.getFleschReadingEaseScore());
+        assertEquals(FleschReadingEaseScore.class, video.getFleschReadingEaseScore().getClass());
     }
 }
