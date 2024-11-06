@@ -20,3 +20,26 @@ libraryDependencies ++= Seq(
   // Jackson for JSON parsing
   "com.google.http-client" % "google-http-client-jackson2" % "1.44.2"
 )
+
+libraryDependencies ++= Seq(
+  "org.mockito" % "mockito-core" % "5.11.0" % Test,
+  "org.mockito" % "mockito-junit-jupiter" % "5.12.0" % Test
+)
+
+jacocoReportSettings := JacocoReportSettings()
+  .withThresholds(
+    JacocoThresholds(
+      method = 100,
+      line = 100,
+      clazz = 100)
+  )
+
+jacocoExcludes := Seq(
+  "controllers.javascript.*",
+  "views.html.*",
+  "router.*",
+  "controllers.routes",
+  "controllers.routes.*",
+  "controllers.ReverseAssets",
+  "controllers.ReverseYoutubeController",
+)
