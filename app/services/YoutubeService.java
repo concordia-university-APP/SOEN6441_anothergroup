@@ -19,31 +19,34 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class YoutubeService {
-    private static final Config config = ConfigFactory.load();
-    private static final String API_KEY = config.getString("youtube.apiKey");
-    private static final String APPLICATION_NAME = config.getString("youtube.applicationName");
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final Config config = ConfigFactory.load();
+    private final String API_KEY = config.getString("youtube.apiKey");
+    private final String APPLICATION_NAME = config.getString("youtube.applicationName");
+    private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final YouTube youtube;
 
-    public static YouTube getService() {
+    public YoutubeService() {
         try {
-            return new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+            youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Author: Tanveer Reza & Laurent Voisard & Yehia
+     * @author Tanveer Reza, Laurent Voisard, Yehia
      * @param keywords search query
      * @param maxResults number of results to return
      * @return a list of videos based on the search query
      */
-    public static CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
+    public CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                YouTube.Search.List request = getService().search().list(Collections.singletonList("id, snippet"));
+                YouTube.Search.List request = youtube.search().list(Collections.singletonList("id, snippet"));
                 SearchListResponse response = request
                         .setKey(API_KEY)
                         .setQ(keywords)
@@ -53,6 +56,7 @@ public class YoutubeService {
                         .setMaxResults(maxResults)
                         .execute();
                 List<SearchResult> items = response.getItems();
+                // TODO remove .join()
                 CompletableFuture<List<Video>> videoFutures = getVideos(items.stream().map(item -> item.getId().getVideoId()).collect(Collectors.toList()));
                 return new VideoList(videoFutures.join());
             } catch (IOException e) {
@@ -67,11 +71,11 @@ public class YoutubeService {
      * @param videoId video id
      * @return video model
      */
-    public static CompletableFuture<Video> getVideo(String videoId) {
+    public CompletableFuture<Video> getVideo(String videoId) {
         return CompletableFuture.supplyAsync(() -> {
             YouTube.Videos.List request;
             try {
-                request = getService().videos().list(Collections.singletonList("snippet"));
+                request = youtube.videos().list(Collections.singletonList("snippet"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -106,11 +110,11 @@ public class YoutubeService {
      * @param videoIds a list of video ids
      * @return list of videos from ids
      */
-    public static CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
+    public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
         return CompletableFuture.supplyAsync(() -> {
             YouTube.Videos.List request;
             try {
-                request = getService().videos().list(Collections.singletonList("snippet"));
+                request = youtube.videos().list(Collections.singletonList("snippet"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

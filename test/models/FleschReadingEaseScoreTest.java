@@ -6,8 +6,18 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Laurent Voisard
+ * Unit test class for flesch reading score feature
+ * all tests have about a 1% precision fault
+ */
 public class FleschReadingEaseScoreTest {
 
+    /**
+     * @author Laurent Voisard
+     *
+     * Test that the scores are accurate, multi sentences
+     */
     @Test
     public void testComputeFleschReadingEaseScore1() {
         final double expectedGradeLevel = 11.1;
@@ -20,6 +30,11 @@ public class FleschReadingEaseScoreTest {
         assertEquals(expectedReadingScore, fleschReadingEaseScore.getReadingEaseScore(), 1.0);
     }
 
+    /**
+     * @author Laurent Voisard
+     *
+     * Test that the scores are accurate, on sentence
+     */
     @Test
     public void testComputeFleschReadingEaseScore2() {
         final double expectedGradeLevel = 2.5;
@@ -32,6 +47,11 @@ public class FleschReadingEaseScoreTest {
 
     }
 
+    /**
+     * @author Laurent Voisard
+     *
+     * Test that the scores are 0 when the description is empty
+     */
     @Test
     public void testComputeFleschReadingEaseEmpty() {
         final double expectedGradeLevel = 0;
@@ -44,6 +64,11 @@ public class FleschReadingEaseScoreTest {
 
     }
 
+    /**
+     * @author Laurent Voisard
+     *
+     * Test that the scores are 100 when a description is e
+     */
     @Test
     public void testComputeFleschReadingEaseOnlyE() {
         final double expectedGradeLevel = 0;
@@ -51,8 +76,8 @@ public class FleschReadingEaseScoreTest {
         String s = "e";
         FleschReadingEaseScore fleschReadingEaseScore = new FleschReadingEaseScore(s);
 
-        assertEquals(expectedReadingScore, fleschReadingEaseScore.getReadingEaseScore(), 1.0);
         assertEquals(expectedGradeLevel, fleschReadingEaseScore.getGradeLevel(), 0.2);
+        assertEquals(expectedReadingScore, fleschReadingEaseScore.getReadingEaseScore(), 1.0);
 
     }
 }

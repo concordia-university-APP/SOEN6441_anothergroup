@@ -31,7 +31,7 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Laurent & Yehia
+     * @author Laurent, Yehia
      * Search for videos with keywords
      * creates a new session if one doesn't exist
      * @param query string query to send to youtube api
@@ -47,7 +47,7 @@ public class YoutubeController extends Controller {
                     -> redirect("/").addingToSession(request,"user", searchService.createSessionSearchList()));
         }
 
-        return searchService.searchKeywords(query, user.get(), DISPLAY_COUNT)
+        return searchService.searchKeywords(query, user.get())
                 .thenApplyAsync(searches -> ok(views.html.search.render(
                         Option.apply(searches),
                         DISPLAY_COUNT)),
@@ -55,7 +55,7 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Laurent & Yehia
+     * @author Laurent, Yehia
      * Creates a user session or retrieves an existing one
      * @param request browser http request
      * @return redirects to search page only the form is visible unless a user session exists
@@ -63,9 +63,9 @@ public class YoutubeController extends Controller {
     public CompletionStage<Result> searchForm(Http.Request request) {
         Optional<String> user = request.session().get("user");
 
-        return user.map(s -> CompletableFuture.supplyAsync(() ->
+        return user.map(sessionId -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
-                        Option.apply(searchService.getSessionSearchList(s)),
+                        Option.apply(searchService.getSessionSearchList(sessionId)),
                         DISPLAY_COUNT
                 ))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->
@@ -75,7 +75,7 @@ public class YoutubeController extends Controller {
 
     /**
      * @author Laurent Voisard
-     * Get the youtube video from youtube api
+     * Get a video with the specified id from youtube api
      * @param id video Id
      * @return video model
      */
@@ -85,14 +85,21 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      * Get the word frequency statistics for the given query
      * @param query The search query
      * @return The word frequency statistics
      */
-    public CompletionStage<Result> getStatistics(String query) {
+    public CompletionStage<Result> getStatistics(String query, Http.Request request) {
+        Optional<String> user = request.session().get("user");
+
+        if(user.isEmpty()) {
+            return CompletableFuture.supplyAsync(()
+                    -> redirect(request.uri()).addingToSession(request,"user", searchService.createSessionSearchList()));
+        } else {
+            return statisticsService.getWordFrequency(query, user.get())
+                    .thenApplyAsync(wordFrequency -> ok(statistics.render(wordFrequency, query)), ec.current());
+        }
         // Retrieve the last search query from the session
-        return statisticsService.getWordFrequency(query)
-                .thenApplyAsync(wordFrequency -> ok(statistics.render(wordFrequency, query)), ec.current());
     }
 }
