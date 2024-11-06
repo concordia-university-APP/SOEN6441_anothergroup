@@ -1,12 +1,6 @@
 package controllers;
 
-<<<<<<< HEAD
-import services.SentimentAnalyzer;
-import models.Video;
-import java.util.ArrayList;
-=======
 import play.libs.concurrent.HttpExecutionContext;
->>>>>>> c56fecad28e49361d9822388b741a299aebbfb30
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -24,21 +18,6 @@ import java.util.concurrent.CompletionStage;
  *
  */
 public class YoutubeController extends Controller {
-<<<<<<< HEAD
-    public Result search(String query) {
-        List<VideoSearch> searches = SearchService.getInstance().searchKeywords(query);
-
-        // Aggregate video descriptions from search results
-        List<Video> allVideos = new ArrayList<>();
-        for (VideoSearch search : searches) {
-            allVideos.addAll(search.getResults().getVideoList());
-        }
-        // Analyze sentiment
-        String overallSentiment = SentimentAnalyzer.analyzeSentiment(allVideos);
-
-        // Pass the sentiment to the view
-        return ok(views.html.search.render(Option.apply(searches), overallSentiment));
-=======
     private final StatisticsService statisticsService;
     private final SearchService searchService;
     private final HttpExecutionContext ec;
@@ -49,7 +28,6 @@ public class YoutubeController extends Controller {
         this.searchService = searchService;
         this.statisticsService = statisticsService;
         this.ec = ec;
->>>>>>> c56fecad28e49361d9822388b741a299aebbfb30
     }
 
     /**
@@ -70,19 +48,20 @@ public class YoutubeController extends Controller {
         }
 
         return searchService.searchKeywords(query, user.get())
-                .thenApplyAsync(searches -> {
-                    List<Video> allVideos = new ArrayList<>();
-        for (VideoSearch search : searches) {
-            allVideos.addAll(search.getResults().getVideoList());
-        }
-        // Analyze sentiment
-        String overallSentiment = SentimentAnalyzer.analyzeSentiment(allVideos);
+                .thenApplyAsync(searches ->
+//                    List<Video> allVideos = new ArrayList<>();
+//        for (VideoSearch search : searches) {
+//            allVideos.addAll(search.getResults().getVideoList());
+//        }
+//        // Analyze sentiment
+//        String overallSentiment = SentimentAnalyzer.analyzeSentiment(allVideos);
                     ok(views.html.search.render(
                         Option.apply(searches),
+                        "",
                         DISPLAY_COUNT)),
-                        ec.current();
+                        ec.current()
                         
-        });
+        );
     }
 
     /**
@@ -97,6 +76,7 @@ public class YoutubeController extends Controller {
         return user.map(sessionId -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
                         Option.apply(searchService.getSessionSearchList(sessionId)),
+                        "",
                         DISPLAY_COUNT
                 ))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->
