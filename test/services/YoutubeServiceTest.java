@@ -5,6 +5,8 @@ import com.google.api.services.youtube.model.*;
 import models.YoutubeChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import models.Video;
 import java.util.Collections;
@@ -18,15 +20,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class YoutubeServiceTest {
-    private YoutubeService youtubeService;
-    private YouTube mockYouTube;
+    @Mock
+    private YouTube youtubeMock;
+
+    @InjectMocks
+    private YoutubeService youtubeService = new YoutubeService();
 
     @BeforeEach
     void setUp() {
-        mockYouTube = mock(YouTube.class);
-        youtubeService = new YoutubeService();
+
         //Initialize with mock YouTube
-        when(youtubeService.youtube.videos()).thenReturn(mock(YouTube.Videos.class));
     }
 
     @Test
@@ -55,7 +58,7 @@ public class YoutubeServiceTest {
         mockResponse.setItems(Collections.singletonList(mockResult));
 
         // Mock `youtube.search().list`
-        when(mockYouTube.search().list(Collections.singletonList("id,snippet"))).thenReturn(mockSearchList);
+        when(youtubeMock.search().list(Collections.singletonList("id,snippet"))).thenReturn(mockSearchList);
         when(mockSearchList.setKey(anyString())).thenReturn(mockSearchList);
         when(mockSearchList.setChannelId(anyString())).thenReturn(mockSearchList);
         when(mockSearchList.setMaxResults(anyLong())).thenReturn(mockSearchList);
@@ -94,7 +97,7 @@ public class YoutubeServiceTest {
         mockResponse.setItems(Collections.singletonList(mockChannel));
 
         // Mock `youtube.channels().list`
-        when(mockYouTube.channels().list(Collections.singletonList("snippet"))).thenReturn(mockChannelsList);
+        when(youtubeMock.channels().list(Collections.singletonList("snippet"))).thenReturn(mockChannelsList);
         when(mockChannelsList.setId(anyList())).thenReturn(mockChannelsList);
         when(mockChannelsList.setKey(anyString())).thenReturn(mockChannelsList);
         when(mockChannelsList.execute()).thenReturn(mockResponse);

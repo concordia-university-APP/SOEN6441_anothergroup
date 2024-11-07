@@ -27,19 +27,27 @@ public class YoutubeService {
     private final String API_KEY = config.getString("youtube.apiKey");
     private final String APPLICATION_NAME = config.getString("youtube.applicationName");
     private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    public final YouTube youtube;
+    private YouTube youtube;
 
     @Inject
     public YoutubeService() {
         try {
-            youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+            setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
-                    .build();
+                    .build());
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public YouTube getYoutubeService() {
+        return youtube;
+    }
+
+    public void setYoutubeService(YouTube youtube) {
+        this.youtube = youtube;
     }
 
     /**
@@ -51,7 +59,7 @@ public class YoutubeService {
     public CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                YouTube.Search.List request = youtube.search().list(Collections.singletonList("id, snippet"));
+                YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
                 SearchListResponse response = request
                         .setKey(API_KEY)
                         .setQ(keywords)
@@ -80,7 +88,7 @@ public class YoutubeService {
         return CompletableFuture.supplyAsync(() -> {
             YouTube.Videos.List request;
             try {
-                request = youtube.videos().list(Collections.singletonList("snippet"));
+                request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -119,7 +127,7 @@ public class YoutubeService {
         return CompletableFuture.supplyAsync(() -> {
             YouTube.Videos.List request;
             try {
-                request = youtube.videos().list(Collections.singletonList("snippet"));
+                request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -166,7 +174,7 @@ public class YoutubeService {
 public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
     return CompletableFuture.supplyAsync(() -> {
         try {
-            YouTube.Search.List request = youtube.search().list(Collections.singletonList("id,snippet"));
+            YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
             request.setKey(API_KEY);
             request.setChannelId(channelId);
             request.setMaxResults(10L);
@@ -195,7 +203,7 @@ public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IO
     public CompletionStage<YoutubeChannel> getChannelById(String channelId) throws IOException {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                YouTube.Channels.List request = youtube.channels().list(Collections.singletonList("snippet"));
+                YouTube.Channels.List request = getYoutubeService().channels().list(Collections.singletonList("snippet"));
                 request.setId(Collections.singletonList(channelId));
                 request.setKey(API_KEY);
 
