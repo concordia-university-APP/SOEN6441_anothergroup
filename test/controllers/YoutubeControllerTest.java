@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import play.Application;
-import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -118,21 +117,38 @@ public class YoutubeControllerTest extends WithApplication {
 
     /**
      * @author Tanveer Reza
-     * Test the getStatistics method of YoutubeController
+     * Test the getStatistics method of YoutubeController with no user session
      */
     @Test
-    public void testGetStatistics() {
-        // Arrange
+    public void testGetStatisticsWithoutUserSession() {
+        String query = "Java";
+        Http.RequestBuilder requestBuilder = Helpers.fakeRequest()
+                .session("user", null) // No user session
+                .uri("/statistics?query=" + query);
+
+        when(searchService.createSessionSearchList()).thenReturn("sessionList");
+
+        Result result = youtubeController.getStatistics(query, requestBuilder.build()).toCompletableFuture().join();
+
+        assertEquals(SEE_OTHER, result.status()); // Expecting a redirect
+        assertEquals(requestBuilder.build().uri(), result.redirectLocation().orElse(null)); // Redirects to the same URI
+        assertEquals("sessionList", result.session().get("user").orElse(null));
+    }
+
+    /**
+     * @author Tanveer Reza
+     * Test the getStatistics method of YoutubeController with user session
+     */
+    @Test
+    public void testGetStatisticsWithUserSession() {
         String query = "Java";
         Map<String, Long> mockWordFrequency = new LinkedHashMap<>();
         mockWordFrequency.put("java", 3L);
         mockWordFrequency.put("programming", 2L);
         mockWordFrequency.put("tutorial", 1L);
 
-        // Mock the behavior of statisticsService
         when(statisticsService.getWordFrequency(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(mockWordFrequency));
 
-        // Create a mock request with a session
         Http.RequestBuilder requestBuilder = new Http.RequestBuilder()
                 .method(GET)
                 .uri("/statistics?query=" + query)
@@ -140,11 +156,8 @@ public class YoutubeControllerTest extends WithApplication {
 
         Http.Request request = requestBuilder.build();
 
-        // Act
-        CompletionStage<Result> resultStage = youtubeController.getStatistics(query, request);
-        Result result = resultStage.toCompletableFuture().join();
+        Result result = youtubeController.getStatistics(query, request).toCompletableFuture().join();
 
-        // Assert
         assertEquals(OK, result.status());
     }
 

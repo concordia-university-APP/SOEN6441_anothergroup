@@ -2,7 +2,6 @@ package services;
 
 import models.Video;
 import models.VideoList;
-import models.VideoSearch;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +14,6 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author Tanveer Reza
- * Version : 1
  * Unit tests for StatisticsService class
  */
 public class StatisticsServiceTest {
@@ -35,10 +33,9 @@ public class StatisticsServiceTest {
         Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
         sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
-        VideoSearch videoSearch = new VideoSearch("Java", sampleVideoList);
 
-        when(searchService.searchKeywords(eq("Java"), anyString()))
-                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(videoSearch)));
+        when(searchService.getVideosBySearchTerm(eq("Java"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
 
         expectedWordFrequency = new LinkedHashMap<>();
         expectedWordFrequency.put("java", 3L);
@@ -61,8 +58,8 @@ public class StatisticsServiceTest {
 
     @Test
     public void testGetWordFrequency_emptyQueryResults() {
-        when(searchService.searchKeywords(eq("NonexistentQuery"), anyString()))
-                .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(searchService.getVideosBySearchTerm(eq("NonexistentQuery"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(new VideoList(Collections.emptyList())));
 
         CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("NonexistentQuery", "1");
         Map<String, Long> wordFrequency = wordFrequencyFuture.join();
@@ -169,10 +166,9 @@ public class StatisticsServiceTest {
         Video video2 = new Video("2", "Java Java", "Content 2", "102", "Channel B", "http://example.com/thumb2.jpg");
 
         VideoList videoList = new VideoList(Arrays.asList(video1, video2));
-        VideoSearch videoSearch = new VideoSearch("Java", videoList);
 
-        when(searchService.searchKeywords(eq("Java"), anyString()))
-                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(videoSearch)));
+        when(searchService.getVideosBySearchTerm(eq("Java"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(videoList));
 
         CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java", "1");
         Map<String, Long> wordFrequency = wordFrequencyFuture.join();

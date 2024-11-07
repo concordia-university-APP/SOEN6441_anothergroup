@@ -29,7 +29,6 @@ public class YoutubeService {
     private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private YouTube youtube;
 
-    @Inject
     public YoutubeService() throws GeneralSecurityException, IOException {
 
             setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
