@@ -3,22 +3,24 @@ package services;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import models.YoutubeChannel;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import models.Video;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -27,8 +29,8 @@ public class YoutubeServiceTest {
 
     private YoutubeService youtubeService;
 
-    @BeforeEach
-    void setUp() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    @Before
+    public void setUp() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, GeneralSecurityException, IOException {
         youtubeMock = mock(YouTube.class);
 
         youtubeService = new YoutubeService();
@@ -39,7 +41,7 @@ public class YoutubeServiceTest {
     }
 
     @Test
-    void testGetChannelVideos_Success() throws Exception {
+    public void testGetChannelVideos_Success() throws Exception {
 
         SearchListResponse mockResponse = new SearchListResponse();
 
@@ -79,7 +81,7 @@ public class YoutubeServiceTest {
         CompletionStage<List<Video>> videosFuture = youtubeService.getChannelVideos("sampleChannelId");
         List<Video> videos = videosFuture.toCompletableFuture().join();
 
-        assertEquals(1, videos.size(), "Expected one video in the result");
+        assertEquals(1, videos.size());
         Video video = videos.get(0);
         assertEquals("sampleVideoId", video.getId());
         assertEquals("Sample Title", video.getTitle());
@@ -87,7 +89,7 @@ public class YoutubeServiceTest {
     }
 
     @Test
-    void testGetChannelById_Success() throws Exception {
+    public void testGetChannelById_Success() throws Exception {
         YouTube.Channels.List mockChannelsList = mock(YouTube.Channels.List.class);
         ChannelListResponse mockResponse = new ChannelListResponse();
 
@@ -119,7 +121,7 @@ public class YoutubeServiceTest {
         CompletableFuture<YoutubeChannel> channelFuture = (CompletableFuture<YoutubeChannel>) youtubeService.getChannelById("sampleChannelId");
         YoutubeChannel channel = channelFuture.join();
 
-        assertNotNull(channel, "Expected non-null channel result");
+        Assert.assertNotNull("Expected non-null channel result",channel);
         assertEquals("sampleChannelId", channel.getId());
         assertEquals("Sample Channel", channel.getTitle());
         assertEquals("Sample Channel Description", channel.getDescription());

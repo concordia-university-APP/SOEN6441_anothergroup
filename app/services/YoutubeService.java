@@ -30,16 +30,11 @@ public class YoutubeService {
     private YouTube youtube;
 
     @Inject
-    public YoutubeService() {
-        try {
+    public YoutubeService() throws GeneralSecurityException, IOException {
+
             setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
                     .build());
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public YouTube getYoutubeService() {
@@ -200,7 +195,7 @@ public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IO
         }
     });
 }
-    public CompletionStage<YoutubeChannel> getChannelById(String channelId) throws IOException {
+    public CompletionStage<YoutubeChannel> getChannelById(String channelId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 YouTube.Channels.List request = getYoutubeService().channels().list(Collections.singletonList("snippet"));

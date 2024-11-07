@@ -24,8 +24,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
@@ -160,9 +159,9 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals(Http.Status.OK, result.status(), "Expected status to be OK");
-        assertNotNull(result.contentType(), "Content type should not be null");
-        assertTrue(Helpers.contentAsString(result).contains("Test Channel"), "Response should contain channel name");
+        assertEquals("Expected status to be OK", Http.Status.OK, result.status());
+        assertNotNull("Content type should not be null",result.contentType());
+        assertTrue("Response should contain channel name",Helpers.contentAsString(result).contains("Test Channel"));
     }
 
     @Test
@@ -173,8 +172,8 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals(Http.Status.BAD_REQUEST, result.status(), "Expected status to be BAD REQUEST");
-        assertTrue(Helpers.contentAsString(result).contains("Channel not found"), "Response should indicate channel not found");
+        assertEquals("Expected status to be BAD REQUEST",Http.Status.BAD_REQUEST, result.status());
+        assertTrue("Response should indicate channel not found",Helpers.contentAsString(result).contains("Channel not found"));
     }
 
     @Test
@@ -188,8 +187,8 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals(Http.Status.BAD_REQUEST, result.status(), "Expected status to be BAD REQUEST when no videos found");
-        assertTrue(Helpers.contentAsString(result).contains("No videos found for this channel"), "Response should indicate no videos found");
+        assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
+        assertTrue( "Response should indicate no videos found",Helpers.contentAsString(result).contains("No videos found for this channel"));
     }
 
     @Test
@@ -203,8 +202,7 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals(Http.Status.INTERNAL_SERVER_ERROR, result.status(), "Expected status to be Internal Server Error");
-        assertTrue(Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"),
-                "Response should indicate an error");
+        assertEquals("Expected status to be Internal Server Error",Http.Status.INTERNAL_SERVER_ERROR, result.status());
+        assertTrue("Response should indicate an error", Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"));
     }
 }
