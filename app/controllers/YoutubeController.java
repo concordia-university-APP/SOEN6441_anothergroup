@@ -59,7 +59,7 @@ public class YoutubeController extends Controller {
         return searchService.searchKeywords(query, user.get())
                 .thenApplyAsync(searches -> ok(views.html.search.render(
                                 Option.apply(searches),
-                                DISPLAY_COUNT))
+                                DISPLAY_COUNT)),
                         ec.current());
     }
 
