@@ -30,6 +30,10 @@ import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.*;
 
+/**
+ * @author Laurent Voisard, Yehia, Tanveer Reza
+ * Test class for the Youtube Controller
+ */
 public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;
     private static StatisticsService statisticsService;
@@ -56,6 +60,10 @@ public class YoutubeControllerTest extends WithApplication {
         when(ec.current()).thenReturn(Runnable::run);
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user has no session and opens the app
+     */
     @Test
     public void testIndexRedirectWhenNoUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -68,6 +76,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(SEE_OTHER, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user has a session and opens the app
+     */
     @Test
     public void testIndexWithUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -82,6 +94,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(OK, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user searches without a session
+     */
     @Test
     public void testSearchWithoutUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -94,6 +110,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(SEE_OTHER, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user searches without a session
+     */
     @Test
     public void testSearchWithUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -107,6 +127,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(OK, res.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test the video route
+     */
     @Test
     public void testVideo() {
         Video v = new Video("test","test","test","test","test","test");

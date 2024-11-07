@@ -22,6 +22,9 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * @author Yehia, Laurent, Tanveer Reza
+ */
 public class YoutubeService {
     private final Config config = ConfigFactory.load();
     private final String API_KEY = config.getString("youtube.apiKey");
@@ -36,10 +39,19 @@ public class YoutubeService {
                     .build());
     }
 
+    /**
+     * @author Laurent Voisard
+     * @return youtube service
+     */
     public YouTube getYoutubeService() {
         return youtube;
     }
 
+    /**
+     * @author Laurent Voisard
+     * private setter, only used in tests to mock behavior
+     * @param youtube youtube service
+     */
     private void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
