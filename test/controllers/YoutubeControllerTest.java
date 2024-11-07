@@ -2,6 +2,7 @@ package controllers;
 
 
 import models.Video;
+import models.YoutubeChannel;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,13 +16,15 @@ import play.test.Helpers;
 import play.test.WithApplication;
 import services.SearchService;
 import services.StatisticsService;
+import services.YoutubeService;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
@@ -32,17 +35,23 @@ public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;
     private static StatisticsService statisticsService;
     private static SearchService searchService;
-
+    private static YoutubeService mockYoutubeService;
+    private static final String TEST_CHANNEL_ID = "none";
+    private static YoutubeChannel testChannel;
+    private static List<Video> testVideos;
     /**
      * @author Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      */
     @BeforeClass
     public static void setUp() {
+        mockYoutubeService = Mockito.mock(YoutubeService.class);
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
         HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
-        youtubeController = new YoutubeController(statisticsService, searchService, ec);
+        youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService);
+        testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
+        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
 
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
@@ -93,7 +102,7 @@ public class YoutubeControllerTest extends WithApplication {
                 .uri("/search?query=test")
                 .session("user", "1");
 
-        when(searchService.searchKeywords(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
+        when(searchService.searchKeywords(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(List.of()));
         // Ensure the application is properly initialized
         Result res = youtubeController.search("test", request.build()).toCompletableFuture().join();
         assertEquals(OK, res.status());
@@ -102,7 +111,7 @@ public class YoutubeControllerTest extends WithApplication {
     @Test
     public void testVideo() {
         Video v = new Video("test","test","test","test","test","test");
-        when(searchService.getVideoById(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(v));
+        when(searchService.getVideoById(anyString())).thenReturn(CompletableFuture.completedFuture(v));
         Result res = youtubeController.video("id").toCompletableFuture().join();
         assertEquals(OK, res.status());
     }
@@ -137,5 +146,63 @@ public class YoutubeControllerTest extends WithApplication {
 
         // Assert
         assertEquals(OK, result.status());
+    }
+
+    @Test
+    public void testShowChannelProfile_Success() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(testChannel));
+
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(testVideos));
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be OK", Http.Status.OK, result.status());
+        assertNotNull("Content type should not be null",result.contentType());
+        assertTrue("Response should contain channel name",Helpers.contentAsString(result).contains("Test Channel"));
+    }
+
+    @Test
+    public void testShowChannelProfile_ChannelNotFound() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be BAD REQUEST",Http.Status.BAD_REQUEST, result.status());
+        assertTrue("Response should indicate channel not found",Helpers.contentAsString(result).contains("Channel not found"));
+    }
+
+    @Test
+    public void testShowChannelProfile_NoVideosFound() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(testChannel));
+
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(List.of())); // Simulate no videos found
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
+        assertTrue( "Response should indicate no videos found",Helpers.contentAsString(result).contains("No videos found for this channel"));
+    }
+
+    @Test
+    public void testShowChannelProfile_Exception() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Exception")));
+
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be Internal Server Error",Http.Status.INTERNAL_SERVER_ERROR, result.status());
+        assertTrue("Response should indicate an error", Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"));
     }
 }

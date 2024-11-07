@@ -17,7 +17,7 @@ public class VideoSearch {
                 .map(Video::getFleschReadingEaseScore)
                 .mapToDouble(FleschReadingEaseScore::getReadingEaseScore)
                 .average()
-                .orElse(-1.0f);
+                .orElse(0.0f);
     }
 
     public double getFleschGradeLevelAverage() {
@@ -25,7 +25,8 @@ public class VideoSearch {
                 .map(Video::getFleschReadingEaseScore)
                 .mapToDouble(FleschReadingEaseScore::getGradeLevel)
                 .average()
-                .orElse(-1.0f);
+                .orElse(0.0f);
     }
+
 }
 
