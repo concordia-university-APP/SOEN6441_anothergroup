@@ -37,7 +37,6 @@ public class YoutubeControllerTest extends WithApplication {
     private static StatisticsService statisticsService;
     private static SearchService searchService;
     private static YoutubeService mockYoutubeService;
-    private static YoutubeController controller;
     private static final String TEST_CHANNEL_ID = "none";
     private static YoutubeChannel testChannel;
     private static List<Video> testVideos;
@@ -51,7 +50,7 @@ public class YoutubeControllerTest extends WithApplication {
         statisticsService = Mockito.mock(StatisticsService.class);
         searchService = Mockito.mock(SearchService.class);
         HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
-        controller = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService);
+        youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
 
@@ -104,7 +103,7 @@ public class YoutubeControllerTest extends WithApplication {
                 .uri("/search?query=test")
                 .session("user", "1");
 
-        when(searchService.searchKeywords(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
+        when(searchService.searchKeywords(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(List.of()));
         // Ensure the application is properly initialized
         Result res = youtubeController.search("test", request.build()).toCompletableFuture().join();
         assertEquals(OK, res.status());
@@ -113,7 +112,7 @@ public class YoutubeControllerTest extends WithApplication {
     @Test
     public void testVideo() {
         Video v = new Video("test","test","test","test","test","test");
-        when(searchService.getVideoById(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(v));
+        when(searchService.getVideoById(anyString())).thenReturn(CompletableFuture.completedFuture(v));
         Result res = youtubeController.video("id").toCompletableFuture().join();
         assertEquals(OK, res.status());
     }
@@ -158,7 +157,7 @@ public class YoutubeControllerTest extends WithApplication {
         when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
                 .thenReturn(CompletableFuture.completedFuture(testVideos));
 
-        CompletionStage<Result> resultStage = controller.showChannelProfile(TEST_CHANNEL_ID);
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals(Http.Status.OK, result.status(), "Expected status to be OK");
@@ -171,7 +170,7 @@ public class YoutubeControllerTest extends WithApplication {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
-        CompletionStage<Result> resultStage = controller.showChannelProfile(TEST_CHANNEL_ID);
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals(Http.Status.BAD_REQUEST, result.status(), "Expected status to be BAD REQUEST");
@@ -186,7 +185,7 @@ public class YoutubeControllerTest extends WithApplication {
         when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
                 .thenReturn(CompletableFuture.completedFuture(List.of())); // Simulate no videos found
 
-        CompletionStage<Result> resultStage = controller.showChannelProfile(TEST_CHANNEL_ID);
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals(Http.Status.BAD_REQUEST, result.status(), "Expected status to be BAD REQUEST when no videos found");
@@ -201,7 +200,7 @@ public class YoutubeControllerTest extends WithApplication {
         when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
                 .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-        CompletionStage<Result> resultStage = controller.showChannelProfile(TEST_CHANNEL_ID);
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals(Http.Status.INTERNAL_SERVER_ERROR, result.status(), "Expected status to be Internal Server Error");

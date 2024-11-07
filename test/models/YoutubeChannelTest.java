@@ -1,7 +1,7 @@
 package models;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ public class YoutubeChannelTest {
     private final String TEST_THUMBNAIL_URL = "http://example.com/thumbnail.jpg";
     private VideoList testVideoList;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         // Assume testVideoList is initialized if VideoList is a complex object
         testVideoList = new VideoList(List.of(new Video[]{
                 new Video("1", "1", "My pants were falling down so I added a belt.", "1", "1", "1"),
@@ -27,39 +27,39 @@ public class YoutubeChannelTest {
     }
 
     @Test
-    void testGetId() {
-        assertEquals(TEST_ID, youtubeChannel.getId(), "Expected ID to match the initialized value");
+    public void testGetId() {
+        assertEquals( "Expected ID to match the initialized value", TEST_ID, youtubeChannel.getId());
     }
 
     @Test
-    void testGetTitle() {
-        assertEquals(TEST_TITLE, youtubeChannel.getTitle(), "Expected title to match the initialized value");
+    public void testGetTitle() {
+        assertEquals( "Expected title to match the initialized value", TEST_TITLE, youtubeChannel.getTitle());
     }
 
     @Test
-    void testGetDescription() {
-        assertEquals(TEST_DESCRIPTION, youtubeChannel.getDescription(), "Expected description to match the initialized value");
+    public void testGetDescription() {
+        assertEquals("Expected description to match the initialized value", TEST_DESCRIPTION, youtubeChannel.getDescription());
     }
 
     @Test
-    void testGetThumbnailUrl() {
-        assertEquals(TEST_THUMBNAIL_URL, youtubeChannel.getThumbnailUrl(), "Expected thumbnail URL to match the initialized value");
+    public void testGetThumbnailUrl() {
+        assertEquals("Expected thumbnail URL to match the initialized value", TEST_THUMBNAIL_URL, youtubeChannel.getThumbnailUrl());
     }
 
     @Test
-    void testGetRecentVideos() {
-        assertSame(testVideoList, youtubeChannel.getRecentVideos(), "Expected recent videos to match the initialized VideoList");
+    public void testGetRecentVideos() {
+        assertEquals("Expected recent videos to match the initialized VideoList", testVideoList, youtubeChannel.getRecentVideos());
     }
 
     @Test
-    void testConstructor() {
+    public void testConstructor() {
         // Test that all fields are correctly initialized
         YoutubeChannel channel = new YoutubeChannel(TEST_ID, TEST_TITLE, TEST_DESCRIPTION, TEST_THUMBNAIL_URL, testVideoList);
 
-        assertEquals(TEST_ID, channel.getId(), "ID should match the input");
-        assertEquals(TEST_TITLE, channel.getTitle(), "Title should match the input");
-        assertEquals(TEST_DESCRIPTION, channel.getDescription(), "Description should match the input");
-        assertEquals(TEST_THUMBNAIL_URL, channel.getThumbnailUrl(), "Thumbnail URL should match the input");
-        assertSame(testVideoList, channel.getRecentVideos(), "VideoList should match the input");
+        assertEquals("ID should match the input", TEST_ID, channel.getId());
+        assertEquals("Title should match the input", TEST_TITLE, channel.getTitle());
+        assertEquals("Description should match the input", TEST_DESCRIPTION, channel.getDescription());
+        assertEquals("Thumbnail URL should match the input", TEST_THUMBNAIL_URL, channel.getThumbnailUrl());
+        assertEquals("VideoList should match the input", testVideoList, channel.getRecentVideos());
     }
 }

@@ -46,7 +46,7 @@ public class YoutubeService {
         return youtube;
     }
 
-    public void setYoutubeService(YouTube youtube) {
+    private void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
 

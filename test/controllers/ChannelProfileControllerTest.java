@@ -63,6 +63,8 @@ public class ChannelProfileControllerTest {
     void testShowChannelProfile_ChannelNotFound() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
                 .thenReturn(CompletableFuture.completedFuture(null));
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
         CompletionStage<Result> resultStage = controller.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();

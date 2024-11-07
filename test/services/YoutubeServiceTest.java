@@ -9,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import models.Video;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,21 +23,24 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class YoutubeServiceTest {
-    @Mock
     private YouTube youtubeMock;
 
-    @InjectMocks
-    private YoutubeService youtubeService = new YoutubeService();
+    private YoutubeService youtubeService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        youtubeMock = mock(YouTube.class);
 
+        youtubeService = new YoutubeService();
+        Method setServiceMethod = youtubeService.getClass().getDeclaredMethod("setYoutubeService", YouTube.class);
+        setServiceMethod.setAccessible(true);
+        setServiceMethod.invoke(youtubeService, youtubeMock);
         //Initialize with mock YouTube
     }
 
     @Test
     void testGetChannelVideos_Success() throws Exception {
-        YouTube.Search.List mockSearchList = mock(YouTube.Search.List.class);
+
         SearchListResponse mockResponse = new SearchListResponse();
 
         // Mock search result with sample data
@@ -57,8 +63,12 @@ public class YoutubeServiceTest {
 
         mockResponse.setItems(Collections.singletonList(mockResult));
 
+
+        YouTube.Search searchMock = mock(YouTube.Search.class);
+        when(youtubeMock.search()).thenReturn(searchMock);
+        YouTube.Search.List mockSearchList = mock(YouTube.Search.List.class);
         // Mock `youtube.search().list`
-        when(youtubeMock.search().list(Collections.singletonList("id,snippet"))).thenReturn(mockSearchList);
+        when(searchMock.list(Collections.singletonList("id,snippet"))).thenReturn(mockSearchList);
         when(mockSearchList.setKey(anyString())).thenReturn(mockSearchList);
         when(mockSearchList.setChannelId(anyString())).thenReturn(mockSearchList);
         when(mockSearchList.setMaxResults(anyLong())).thenReturn(mockSearchList);
@@ -97,10 +107,14 @@ public class YoutubeServiceTest {
         mockResponse.setItems(Collections.singletonList(mockChannel));
 
         // Mock `youtube.channels().list`
-        when(youtubeMock.channels().list(Collections.singletonList("snippet"))).thenReturn(mockChannelsList);
-        when(mockChannelsList.setId(anyList())).thenReturn(mockChannelsList);
-        when(mockChannelsList.setKey(anyString())).thenReturn(mockChannelsList);
-        when(mockChannelsList.execute()).thenReturn(mockResponse);
+        YouTube.Channels channels = mock(YouTube.Channels.class);
+        when(youtubeMock.channels()).thenReturn(channels);
+        YouTube.Channels.List channelLists = mock(YouTube.Channels.List.class);
+        when(channels.list(anyList())).thenReturn(channelLists);
+
+        when(channelLists.setId(anyList())).thenReturn(channelLists);
+        when(channelLists.setKey(anyString())).thenReturn(channelLists);
+        when(channelLists.execute()).thenReturn(mockResponse);
 
         CompletableFuture<YoutubeChannel> channelFuture = (CompletableFuture<YoutubeChannel>) youtubeService.getChannelById("sampleChannelId");
         YoutubeChannel channel = channelFuture.join();
