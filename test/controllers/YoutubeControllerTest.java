@@ -25,6 +25,7 @@ import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
@@ -48,10 +49,10 @@ public class YoutubeControllerTest extends WithApplication {
      */
     @BeforeClass
     public static void setUp() {
-        mockYoutubeService = Mockito.mock(YoutubeService.class);
-        statisticsService = Mockito.mock(StatisticsService.class);
-        searchService = Mockito.mock(SearchService.class);
-        HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
+        mockYoutubeService = mock(YoutubeService.class);
+        statisticsService = mock(StatisticsService.class);
+        searchService = mock(SearchService.class);
+        HttpExecutionContext ec = mock(HttpExecutionContext.class);
         youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
@@ -241,5 +242,20 @@ public class YoutubeControllerTest extends WithApplication {
 
         assertEquals("Expected status to be Internal Server Error",Http.Status.INTERNAL_SERVER_ERROR, result.status());
         assertTrue("Response should indicate an error", Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"));
+    }
+
+    @Test
+    public void testShowChannelProfile_NotFoundNull() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(testChannel));
+
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
+
     }
 }
