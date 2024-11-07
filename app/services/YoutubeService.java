@@ -13,6 +13,7 @@ import models.VideoList;
 import models.YoutubeChannel;
 import scala.util.Either;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -26,9 +27,10 @@ public class YoutubeService {
     private final String API_KEY = config.getString("youtube.apiKey");
     private final String APPLICATION_NAME = config.getString("youtube.applicationName");
     private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private final YouTube youtube;
+    public final YouTube youtube;
 
-    public YoutubeService(YouTube mockYouTube) {
+    @Inject
+    public YoutubeService() {
         try {
             youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)

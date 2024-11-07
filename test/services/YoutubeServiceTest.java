@@ -24,7 +24,9 @@ public class YoutubeServiceTest {
     @BeforeEach
     void setUp() {
         mockYouTube = mock(YouTube.class);
-        youtubeService = new YoutubeService(mockYouTube); // Initialize with mock YouTube
+        youtubeService = new YoutubeService();
+        //Initialize with mock YouTube
+        when(youtubeService.youtube.videos()).thenReturn(mock(YouTube.Videos.class));
     }
 
     @Test
