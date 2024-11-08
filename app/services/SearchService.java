@@ -42,11 +42,13 @@ public class SearchService {
      * @return list of the last 10 or less searches made
      */
     public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId) {
+
         Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
 
         if (existingSearch.isPresent()) {
+            System.out.println("Search already made");
             getSessionSearchList(sessionId).remove(existingSearch.get());
             getSessionSearchList(sessionId).add(0, existingSearch.get());
             return CompletableFuture.completedFuture(getSessionSearchList(sessionId));

@@ -28,9 +28,9 @@ public class StatisticsServiceTest {
         searchService = mock(SearchService.class);
         statisticsService = new StatisticsService(searchService);
 
-        Video video1 = new Video("1", "Java programming tutorial", "Learn Java programming.", "101", "Java Channel", "http://example.com/thumb1.jpg");
-        Video video2 = new Video("2", "Java and Python comparison", "Comparing Java and Python.", "102", "Comparison Channel", "http://example.com/thumb2.jpg");
-        Video video3 = new Video("3", "Introduction to Java programming", "An intro to Java programming.", "103", "Intro Channel", "http://example.com/thumb3.jpg");
+        Video video1 = new Video("1", "Java programming tutorial", "Java programming tutorial", "101", "Java Channel", "http://example.com/thumb1.jpg");
+        Video video2 = new Video("2", "Java and Python comparison", "Java and Python comparison", "102", "Comparison Channel", "http://example.com/thumb2.jpg");
+        Video video3 = new Video("3", "Introduction to Java programming", "Introduction to Java programming", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
         sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
 
@@ -162,8 +162,8 @@ public class StatisticsServiceTest {
 
     @Test
     public void testGetWordFrequency_keyCollision() {
-        Video video1 = new Video("1", "Java programming", "Content 1", "101", "Channel A", "http://example.com/thumb1.jpg");
-        Video video2 = new Video("2", "Java Java", "Content 2", "102", "Channel B", "http://example.com/thumb2.jpg");
+        Video video1 = new Video("1", "Java programming", "Java programming", "101", "Channel A", "http://example.com/thumb1.jpg");
+        Video video2 = new Video("2", "Java Java", "Java Java", "102", "Channel B", "http://example.com/thumb2.jpg");
 
         VideoList videoList = new VideoList(Arrays.asList(video1, video2));
 

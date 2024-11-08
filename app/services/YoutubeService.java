@@ -1,6 +1,5 @@
 package services;
 
-import akka.japi.Pair;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -11,9 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import models.Video;
 import models.VideoList;
 import models.YoutubeChannel;
-import scala.util.Either;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -64,24 +61,44 @@ public class YoutubeService {
      */
     public CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
-                SearchListResponse response = request
-                        .setKey(API_KEY)
-                        .setQ(keywords)
-                        .setType(Collections.singletonList("video"))
-                        .setOrder("date")
-                        .setFields("items(id/videoId)")
-                        .setMaxResults(maxResults)
-                        .execute();
-                List<SearchResult> items = response.getItems();
-                // TODO remove .join()
-                CompletableFuture<List<Video>> videoFutures = getVideos(items.stream().map(item -> item.getId().getVideoId()).collect(Collectors.toList()));
-                return new VideoList(videoFutures.join());
-            } catch (IOException e) {
-                throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
-            }
+            YouTube.Search.List request = getYoutubeSearchList();
+            SearchListResponse response = getSearchListResponse(keywords, maxResults, request);
+            List<SearchResult> items = response.getItems();
+
+            return items.stream()
+                    .map(item -> item.getId().getVideoId())
+                    .collect(Collectors.toList());
+        }).thenCompose(videoIds -> {
+            // Once we have the video IDs, asynchronously fetch the videos
+            return getVideos(videoIds).thenApply(VideoList::new);
         });
+    }
+
+    private SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
+        SearchListResponse response;
+        try {
+            response = request
+                    .setKey(API_KEY)
+                    .setQ(keywords)
+                    .setType(Collections.singletonList("video"))
+                    .setOrder("date")
+                    .setFields("items(id/videoId)")
+                    .setMaxResults(maxResults)
+                    .execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
+
+    private YouTube.Search.List getYoutubeSearchList() {
+        YouTube.Search.List request;
+        try {
+            request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
+        } catch (IOException e) {
+            throw new RuntimeException("Error occurred while executing YouTube search: " + e.getMessage(), e);
+        }
+        return request;
     }
 
     /**
@@ -92,23 +109,9 @@ public class YoutubeService {
      */
     public CompletableFuture<Video> getVideo(String videoId) {
         return CompletableFuture.supplyAsync(() -> {
-            YouTube.Videos.List request;
-            try {
-                request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            YouTube.Videos.List request = getYoutubeVideosList();
 
-            VideoListResponse response;
-            try {
-                response = request
-                        .setKey(API_KEY)
-                        .setId(Collections.singletonList(videoId))
-                        .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
-                        .execute();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            VideoListResponse response = getVideoListResponse(Collections.singletonList(videoId), request);
 
             // make sure we only have 1 video
             assert response.getItems().size() == 1;
@@ -123,6 +126,17 @@ public class YoutubeService {
         });
     }
 
+    private YouTube.Videos.List getYoutubeVideosList() {
+        YouTube.Videos.List request;
+        try {
+            request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return request;
+    }
+
+
     /**
      * @author Laurent Voisard
      * get a list of videos
@@ -131,23 +145,9 @@ public class YoutubeService {
      */
     public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
         return CompletableFuture.supplyAsync(() -> {
-            YouTube.Videos.List request;
-            try {
-                request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            YouTube.Videos.List request = getYoutubeVideosList();
 
-            VideoListResponse response;
-            try {
-                response = request
-                        .setKey(API_KEY)
-                        .setId(videoIds)
-                        .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
-                        .execute();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            VideoListResponse response = getVideoListResponse(videoIds, request);
 
             return response.getItems().stream().map(video -> new Video(
                     video.getId(),
@@ -160,20 +160,18 @@ public class YoutubeService {
         });
     }
 
-    public static List<Video> parseVideos(List<SearchResult> searchResults) throws IOException {
-        List<Video> videos = new ArrayList<>();
-        for (SearchResult result : searchResults) {
-            Video video = new Video(
-            result.getId().getVideoId(),
-            result.getSnippet().getTitle(),
-            result.getSnippet().getDescription(),
-            result.getSnippet().getChannelId(),
-            result.getSnippet().getChannelTitle(),
-            result.getSnippet().getThumbnails().getDefault().getUrl());
-            videos.add(video);
+    private VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
+        VideoListResponse response;
+        try {
+            response = request
+                    .setKey(API_KEY)
+                    .setId(videoIds)
+                    .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
+                    .execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return videos;
+        return response;
     }
 
 //    Channel-Page Task A

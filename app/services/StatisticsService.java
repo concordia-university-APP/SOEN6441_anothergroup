@@ -30,30 +30,29 @@ public class StatisticsService {
 
     /**
      * @param query the search terms for the video
-     * @param sessionId The user session ID
-     * @return frequency of all unique words from top 50 videos based on search query
+     * @return frequency of all unique words from description of top 50 videos based on search query
      * @author Tanveer Reza
      */
     public CompletableFuture<Map<String, Long>> getWordFrequency(String query, String sessionId) {
         return searchService.getVideosBySearchTerm(query, sessionId).thenApply(videos -> {
-            List<String> titles = videos.getVideoList().stream()
-                    .map(Video::getTitle) // Extract each title
+            List<String> description = videos.getVideoList().stream()
+                    .map(Video::getDescription) // Extract each description
                     .collect(Collectors.toList());
 
-            List<String> listOfWordsFromTitles = extractAndNormalizeWords(titles);
+            List<String> listOfWordsFromTitles = extractAndNormalizeWords(description);
 
             return countAndSortWordFrequencies(listOfWordsFromTitles);
         });
     }
 
     /**
-     * @param titles list of video titles
+     * @param description list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      * @author Tanveer Reza
      */
-    public List<String> extractAndNormalizeWords(List<String> titles) {
-        return titles.stream()
-                .flatMap(title -> Arrays.stream(title.split("\\W+"))) // Split titles into words
+    public List<String> extractAndNormalizeWords(List<String> description) {
+        return description.stream()
+                .flatMap(title -> Arrays.stream(title.split("\\W+"))) // Split descriptions into words
                 .filter(word -> !word.isEmpty()) // Filter out empty words
                 .map(String::toLowerCase)
                 .collect(Collectors.toList()); // Collect to list
