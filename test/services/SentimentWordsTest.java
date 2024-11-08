@@ -8,12 +8,10 @@ import java.util.List;
 
 /**
  * Unit tests for analyzing the sentiment words using the SentimentAnalyzer class.
- *
  * <p>
  * This class verifies the functionality of sentiment analysis by testing various cases
  * with different sentiment compositions in the video descriptions.
  * </p>
- *
  * <p>
  * The following tests are included:
  * <ul>
