@@ -6,7 +6,6 @@ import models.VideoList;
 import models.YoutubeChannel;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import models.Video;
 
@@ -135,7 +134,6 @@ public class YoutubeServiceTest {
      */
     @Test
     public void testGetChannelById_Success() throws Exception {
-        YouTube.Channels.List mockChannelsList = mock(YouTube.Channels.List.class);
         ChannelListResponse mockResponse = new ChannelListResponse();
 
         // Mock channel result with sample data
@@ -461,8 +459,6 @@ public class YoutubeServiceTest {
 
     @Test
     public void testGetVideoMultipleFor1Id() throws IOException {
-        Video v = new Video("1", "title","desc","id","channel","dawkad");
-
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
         VideoListResponse responseMock = mock(VideoListResponse.class);
