@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test class verifies the behavior of the SentimentAnalyzer's sentiment analysis method
  * with different sets of video data. The analysis is expected to classify the sentiment
  * as happy, sad, or neutral based on the content of the provided video descriptions.
- * The following tests are included:
  *   <li>testAnalyzeSentiment_Happy: Tests when the overall sentiment is positive.</li>
  *   <li>testAnalyzeSentiment_Sad: Tests when the overall sentiment is negative.</li>
  *   <li>testAnalyzeSentiment_Neutral: Tests when the overall sentiment is neutral.</li>

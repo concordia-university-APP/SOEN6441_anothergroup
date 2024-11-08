@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Provides methods for analyzing the overall sentiment of a list of videos based on their descriptions.
  * The sentiment is categorized as happy, sad, or neutral by evaluating the presence of predefined words.
- * If the list of videos is empty or no relevant words are found in the descriptions, the default result is neutral (":-|").
+ * If the list of videos is empty or no relevant words are found in the descriptions, the default result is neutral(":-|").
  * @author Rumeysa Turkmen
  */
 public class SentimentAnalyzer {
