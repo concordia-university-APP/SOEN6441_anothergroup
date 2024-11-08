@@ -13,13 +13,13 @@
 
     @videos match {
     case Some(videoList) if !videoList.isEmpty => {
-    <ul>
+    <ol>
         @for(v <- videoList) {
         <li>
             @video(v)
         </li>
         }
-    </ul>
+    </ol>
     }
     case _ => {
     <p>No videos found for this channel.</p>

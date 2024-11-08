@@ -30,7 +30,9 @@
             <p> Flecsh-Kincaid Grade Level Avg. = @("%.1f".format(item.getFleschGradeLevelAverage)), Flecsh-Kincaid Reading Score Avg. =  @("%.1f".format(item.getFleschEaseScoreAverage)) </p>
             <ol>
                 @for(i <- 0 to Math.max(0, Math.min(maxDisplay - 1, item.getResults.getVideoList.size() - 1))) {
-                @video(item.getResults.getVideoList.get(i))
+                    <li>
+                        @video(item.getResults.getVideoList.get(i))
+                    </li>
                 }
             </ol>
             }
