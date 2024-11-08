@@ -8,19 +8,16 @@ import java.util.List;
 
 /**
  * Unit tests for analyzing the sentiment words using the SentimentAnalyzer class.
- * <p>
+
  * This class verifies the functionality of sentiment analysis by testing various cases
  * with different sentiment compositions in the video descriptions.
- * </p>
- * <p>
- * The following tests are included
- *   <li>testHappySentiment: Verifies analysis when the content is predominantly happy.</li>
- *   <li>testSadSentiment: Verifies analysis when the content is predominantly sad.</li>
- *   <li>testNeutralSentiment: Verifies analysis when the content is mixed, leading to neutral sentiment.</li>
- *   <li>testMixedSentiment: Verifies analysis with a balance of positive and negative sentiments.</li>
- *   <li>testEdgeCaseNoSentiment: [Placeholder for testing cases with no sentiment, if applicable].</li>
 
- *
+ * The following tests are included
+ *   testHappySentiment: Verifies analysis when the content is predominantly happy.
+ *   testSadSentiment: Verifies analysis when the content is predominantly sad.
+ *   testNeutralSentiment: Verifies analysis when the content is mixed, leading to neutral sentiment.
+ *   testMixedSentiment: Verifies analysis with a balance of positive and negative sentiments.
+ *   testEdgeCaseNoSentiment: [Placeholder for testing cases with no sentiment, if applicable].
  * @author Rumeysa Turkmen
  */
 public class SentimentWordsTest {
