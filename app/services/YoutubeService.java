@@ -66,6 +66,8 @@ public class YoutubeService {
             SearchListResponse response = getSearchListResponse(keywords, maxResults, request);
             List<SearchResult> items = response.getItems();
 
+
+
             return items.stream()
                     .map(item -> item.getId().getVideoId())
                     .collect(Collectors.toList());
@@ -115,7 +117,9 @@ public class YoutubeService {
             VideoListResponse response = getVideoListResponse(Collections.singletonList(videoId), request);
 
             // make sure we only have 1 video
-            assert response.getItems().size() == 1;
+            if(response.getItems().size() != 1)
+                return null;
+
             com.google.api.services.youtube.model.Video video = response.getItems().get(0);
             return new Video(
                     video.getId(),
@@ -127,7 +131,7 @@ public class YoutubeService {
         });
     }
 
-    private YouTube.Videos.List getYoutubeVideosList() {
+    YouTube.Videos.List getYoutubeVideosList() {
         YouTube.Videos.List request;
         try {
             request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
@@ -145,7 +149,13 @@ public class YoutubeService {
      * @return list of videos from ids
      */
     public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
+
+        // return empty list if no video ids are provided;
+        if (videoIds.isEmpty())
+            return CompletableFuture.supplyAsync(List::of);
+
         return CompletableFuture.supplyAsync(() -> {
+
             YouTube.Videos.List request = getYoutubeVideosList();
 
             VideoListResponse response = getVideoListResponse(videoIds, request);
@@ -161,7 +171,7 @@ public class YoutubeService {
         });
     }
 
-    private VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
+    VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
         VideoListResponse response;
         try {
             response = request

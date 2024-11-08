@@ -9,55 +9,54 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import models.Video;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class YoutubeServiceTest {
-    @Mock
     private YouTube youtubeMock;
 
-    @InjectMocks
     private YoutubeService youtubeService;
 
-    @Mock
-    private YouTube.Search.List mockRequest;
-    private SearchListResponse mockResponse;
-    @Mock
-    private YouTube.Search mockSearch;
+    YouTube.Search mockSearch;
+    YouTube.Search.List mockRequest;
+    SearchListResponse mockResponse;
 
     @Before
     public void setUp() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, GeneralSecurityException, IOException {
         youtubeMock = mock(YouTube.class);
-
-        MockitoAnnotations.initMocks(this);
+        youtubeService = new YoutubeService();
         Method setServiceMethod = youtubeService.getClass().getDeclaredMethod("setYoutubeService", YouTube.class);
         setServiceMethod.setAccessible(true);
         setServiceMethod.invoke(youtubeService, youtubeMock);
-        youtubeService = Mockito.spy(new YoutubeService());
+
+
+        mockSearch = mock(YouTube.Search.class);
         mockRequest = mock(YouTube.Search.List.class);
         mockResponse = mock(SearchListResponse.class);
 
+        when(youtubeMock.search()).thenReturn(mockSearch);
+        when(mockSearch.list(anyList())).thenReturn(mockRequest);
+
+        when(mockRequest.setKey(anyString())).thenReturn(mockRequest);
+        when(mockRequest.setQ(anyString())).thenReturn(mockRequest);
+        when(mockRequest.setFields(anyString())).thenReturn(mockRequest);
+        when(mockRequest.setChannelId(anyString())).thenReturn(mockRequest);
+        when(mockRequest.setMaxResults(anyLong())).thenReturn(mockRequest);
+        when(mockRequest.setOrder(anyString())).thenReturn(mockRequest);
+        when(mockRequest.setType(anyList())).thenReturn(mockRequest);
+        when(mockRequest.execute()).thenReturn(mockResponse);
         //Initialize with mock YouTube
     }
 
@@ -142,7 +141,7 @@ public class YoutubeServiceTest {
         CompletableFuture<YoutubeChannel> channelFuture = (CompletableFuture<YoutubeChannel>) youtubeService.getChannelById("sampleChannelId");
         YoutubeChannel channel = channelFuture.join();
 
-        Assert.assertNotNull("Expected non-null channel result",channel);
+        assertNotNull("Expected non-null channel result",channel);
         assertEquals("sampleChannelId", channel.getId());
         assertEquals("Sample Channel", channel.getTitle());
         assertEquals("Sample Channel Description", channel.getDescription());
@@ -173,7 +172,7 @@ public class YoutubeServiceTest {
         when(mockSearchList.setType(anyList())).thenReturn(mockSearchList);
         when(mockSearchList.execute()).thenThrow(new IOException("Test Exception"));
 
-        Assert.assertThrows(CompletionException.class, () -> youtubeService.getChannelById("sampleChannelId").toCompletableFuture().join());
+        Assert.assertThrows(CompletionException.class, () -> youtubeService.getChannelVideos("sampleChannelId").toCompletableFuture().join());
     }
 
     @Test
@@ -203,19 +202,51 @@ public class YoutubeServiceTest {
         String keywords = "sample";
         Long maxResults = 5L;
 
-        YoutubeService mockYoutubeService = mock(YoutubeService.class);
 
-        when(mockYoutubeService.searchResults(eq(keywords), eq(maxResults)))
-                .thenReturn(CompletableFuture.completedFuture(new VideoList(Arrays.asList(
-                        new Video("videoId1", "Sample Video", "Sample Description", "channelId", "Sample Channel", "http://thumbnail.url")
-                ))));
+        com.google.api.services.youtube.model.SearchResult searchResponse = new com.google.api.services.youtube.model.SearchResult();
+        searchResponse.setId(new ResourceId());
+        searchResponse.getId().setVideoId("videoId1");
 
-        CompletableFuture<VideoList> resultFuture = mockYoutubeService.searchResults(keywords, maxResults);
+        when(mockSearch.list(anyList())).thenReturn(mockRequest);
+        when(mockRequest.execute()).thenReturn(mockResponse);
+        when(mockResponse.getItems()).thenReturn(List.of(searchResponse));
 
-        assertNotNull(resultFuture, "Expected non-null resultFuture");
+        Video[] videos = new Video[]{
+                new Video("videoId1", "Sample Video", "Sample Description", "id1", "channel1", "dawkad1"),
+                new Video("videoId2", "title2", "desc2", "id2", "channel2", "dawkad2"),
+                new Video("videoId3", "title3", "desc3", "id3", "channel3", "dawkad3")
+        };
+        YouTube.Videos videosMock = mock(YouTube.Videos.class);
+        YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
+        VideoListResponse responseMock = mock(VideoListResponse.class);
 
-        VideoList videoList = resultFuture.get();
-        assertNotNull(videoList, "Expected non-null VideoList");
+        com.google.api.services.youtube.model.Video[] vidResponse = new com.google.api.services.youtube.model.Video[3];
+        for(int i = 0; i < 3; i++) {
+            vidResponse[i] = new com.google.api.services.youtube.model.Video();
+            vidResponse[i].setId(videos[i].getId());
+            vidResponse[i].setSnippet(new VideoSnippet());
+            vidResponse[i].getSnippet().setTitle(videos[i].getTitle());
+            vidResponse[i].getSnippet().setDescription(videos[i].getDescription());
+            vidResponse[i].getSnippet().setChannelId(videos[i].getChannelId());
+            vidResponse[i].getSnippet().setChannelTitle(videos[i].getChannelName());
+            vidResponse[i].getSnippet().setThumbnails(new ThumbnailDetails());
+            vidResponse[i].getSnippet().getThumbnails().setDefault(new Thumbnail());
+            vidResponse[i].getSnippet().getThumbnails().setDefault(new Thumbnail());
+            vidResponse[i].getSnippet().getThumbnails().getDefault().setUrl(videos[i].getThumbnailUrl());
+        }
+
+        when(youtubeMock.videos()).thenReturn(videosMock);
+        when(videosMock.list(anyList())).thenReturn(videoListMock);
+
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setFields(anyString())).thenReturn(videoListMock);
+        when(videoListMock.execute()).thenReturn(responseMock);
+        when(responseMock.getItems()).thenReturn(List.of(vidResponse));
+
+
+        VideoList videoList = youtubeService.searchResults(keywords, maxResults).join();
+        assertNotNull("Expected non-null VideoList", videoList);
 
         // Assertions
         assertEquals("Expected video ID to match", "videoId1", videoList.getVideoList().get(0).getId());
@@ -230,19 +261,15 @@ public class YoutubeServiceTest {
     @Test
     public void testSearchResults_NoResults() throws Exception {
         String keywords = "noResults";
-        Long maxResults = 5L;
+        Long maxResults = 50L;
 
-        YoutubeService mockYoutubeService = mock(YoutubeService.class);
+        mockResponse.setItems(List.of());
+        when(mockSearch.list(anyList())).thenReturn(mockRequest);
+        when(mockRequest.execute()).thenReturn(mockResponse);
 
-        when(mockYoutubeService.searchResults(eq(keywords), eq(maxResults)))
-                .thenReturn(CompletableFuture.completedFuture(new VideoList(Arrays.asList()))); // Return empty list
 
-        CompletableFuture<VideoList> resultFuture = mockYoutubeService.searchResults(keywords, maxResults);
-
-        assertNotNull(resultFuture, "Expected non-null resultFuture");
-
-        VideoList videoList = resultFuture.get();
-        assertNotNull(videoList, "Expected non-null VideoList");
+        VideoList videoList = youtubeService.searchResults(keywords, maxResults).join();
+        assertNotNull("Expected non-null VideoList",videoList);
 
         assertTrue(videoList.getVideoList().isEmpty());
     }
@@ -259,9 +286,7 @@ public class YoutubeServiceTest {
 
         when(youtubeService.getYoutubeSearchList()).thenThrow(new RuntimeException("Test Exception"));
 
-        CompletableFuture<VideoList> resultFuture = youtubeService.searchResults(keywords, maxResults);
-
-        assertThrows(ExecutionException.class, resultFuture::get, "Expected ExecutionException due to RuntimeException");
+        Assert.assertThrows("Expected ExecutionException due to RuntimeException", RuntimeException.class, () -> youtubeService.searchResults(keywords, maxResults).join());
     }
 
     /**
@@ -338,7 +363,7 @@ public class YoutubeServiceTest {
         verify(mockYoutube).search();
         verify(mockSearch).list(Collections.singletonList("id, snippet"));
 
-        assertNotNull(result, "Expected non-null result from getYoutubeSearchList");
+        assertNotNull("Expected non-null result from getYoutubeSearchList", result);
     }
 
     /**
@@ -346,12 +371,11 @@ public class YoutubeServiceTest {
      * Tests the getYoutubeSearchList method when an exception occurs during the search setup.
      * Verifies that a RuntimeException is thrown when an IOException is encountered.
      */
-    @Test(expected = RuntimeException.class)
+    @Test()
     public void testGetYoutubeSearchList_Exception() throws IOException {
-        when(youtubeService.getYoutubeService()).thenReturn(youtubeMock);
-        when(youtubeMock.search()).thenThrow(new IOException("Test exception"));
+        when(mockSearch.list(anyList())).thenThrow(new IOException("Test exception"));
 
-        youtubeService.getYoutubeSearchList();
+        Assert.assertThrows(RuntimeException.class, () -> youtubeService.getYoutubeSearchList());
     }
 
 
@@ -394,6 +418,54 @@ public class YoutubeServiceTest {
         assertEquals(v.getThumbnailUrl(), result.getThumbnailUrl() );
         assertEquals(v.getFleschReadingEaseScore().getReadingEaseScore(), result.getFleschReadingEaseScore().getReadingEaseScore(),0.0 );
         assertEquals(v.getFleschReadingEaseScore().getGradeLevel(), result.getFleschReadingEaseScore().getGradeLevel(), 0.0);
+    }
+
+    @Test
+    public void testGetVideoMultipleFor1Id() throws IOException {
+        Video v = new Video("1", "title","desc","id","channel","dawkad");
+
+        YouTube.Videos videosMock = mock(YouTube.Videos.class);
+        YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
+        VideoListResponse responseMock = mock(VideoListResponse.class);
+
+        com.google.api.services.youtube.model.Video[] vidResponse = new com.google.api.services.youtube.model.Video[] {
+                new com.google.api.services.youtube.model.Video(),
+                new com.google.api.services.youtube.model.Video(),
+        };
+
+        when(youtubeMock.videos()).thenReturn(videosMock);
+        when(videosMock.list(anyList())).thenReturn(videoListMock);
+
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setFields(anyString())).thenReturn(videoListMock);
+        when(videoListMock.execute()).thenReturn(responseMock);
+        when(responseMock.getItems()).thenReturn(List.of(vidResponse));
+
+        assertNull(youtubeService.getVideo("id").join());
+    }
+
+    @Test
+    public void testGetVideoNoResults() throws IOException {
+        Video v = new Video("1", "title","desc","id","channel","dawkad");
+
+        YouTube.Videos videosMock = mock(YouTube.Videos.class);
+        YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
+        VideoListResponse responseMock = mock(VideoListResponse.class);
+
+        com.google.api.services.youtube.model.Video[] vidResponse = new com.google.api.services.youtube.model.Video[] {
+        };
+
+        when(youtubeMock.videos()).thenReturn(videosMock);
+        when(videosMock.list(anyList())).thenReturn(videoListMock);
+
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setFields(anyString())).thenReturn(videoListMock);
+        when(videoListMock.execute()).thenReturn(responseMock);
+        when(responseMock.getItems()).thenReturn(List.of(vidResponse));
+
+        assertNull(youtubeService.getVideo("id").join());
     }
 
     @Test
@@ -444,4 +516,41 @@ public class YoutubeServiceTest {
             assertEquals(videos[i].getFleschReadingEaseScore().getGradeLevel(), result.get(i).getFleschReadingEaseScore().getGradeLevel(), 0.0);
         }
     }
+
+    @Test
+    public void testGetYoutubeVideosListException() throws IOException {
+
+        when(youtubeMock.videos()).thenReturn(mock(YouTube.Videos.class));
+        when(youtubeMock.videos().list(anyList())).thenThrow(new IOException("Test exception"));
+
+        assertThrows(RuntimeException.class, () -> youtubeService.getYoutubeVideosList());
+    }
+
+    @Test
+    public void testGetVideoListResponseException() throws IOException {
+
+        when(mockRequest.execute()).thenThrow(new IOException("Test exception"));
+        YouTube.Videos.List request = mock(YouTube.Videos.List.class);
+        when(request.setKey(anyString())).thenReturn(request);
+        when(request.setFields(anyString())).thenReturn(request);
+        when(request.setId(anyList())).thenReturn(request);
+        when(request.execute()).thenThrow(new IOException("Test exception"));
+
+        assertThrows(RuntimeException.class, () -> youtubeService.getVideoListResponse(List.of(""), request));
+    }
+
+//    @Test
+//    public void testGetVideoException() throws IOException {
+//
+//        when(mockRequest.execute()).thenThrow(new IOException("Test exception"));
+//
+//        assertThrows(RuntimeException.class, () -> youtubeService.getVideo(""));
+//    }
+//    @Test
+//    public void testGetVideosException() throws IOException {
+//
+//        when(mockRequest.execute()).thenThrow(new IOException("Test exception"));
+//
+//        assertThrows(RuntimeException.class, () -> youtubeService.getVideos(List.of("", "")));
+//    }
 }
