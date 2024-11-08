@@ -19,7 +19,7 @@ public class FleschReadingEaseScore {
     /**
      * @author Laurent Voisard
      * Constructor for the Flesh reading score
-     * @param description
+     * @param description the description of the video
      */
     public FleschReadingEaseScore(String description) {
 

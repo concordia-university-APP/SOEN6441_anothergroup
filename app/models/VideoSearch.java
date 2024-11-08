@@ -14,6 +14,7 @@ public class VideoSearch {
      * Basic Constructor
      * @param searchTerms keywords of the search
      * @param results list of videos of the search
+     * @param sentiment overall sentiment of the search videos
      */
     public VideoSearch(String searchTerms, VideoList results, String sentiment) {
         this.searchTerms = searchTerms;
@@ -31,6 +32,11 @@ public class VideoSearch {
      * @return list of videos
      */
     public VideoList getResults() { return results;}
+
+    /**
+     * @author Rumeysa Turkmen
+     * @return sentiment of the search
+     */
     public String getSentiment() { return sentiment;}
 
 

@@ -2,6 +2,7 @@ package services;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
@@ -27,7 +28,7 @@ public class YoutubeService {
     private final Config config = ConfigFactory.load();
     private final String API_KEY = config.getString("youtube.apiKey");
     private final String APPLICATION_NAME = config.getString("youtube.applicationName");
-    private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private YouTube youtube;
 
     public YoutubeService() throws GeneralSecurityException, IOException {
@@ -51,7 +52,7 @@ public class YoutubeService {
      * @param youtube youtube service
      * @author Laurent Voisard
      */
-    private void setYoutubeService(YouTube youtube) {
+    void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
 
@@ -84,7 +85,7 @@ public class YoutubeService {
      * @return search list response from youtube api
      * @author Tanveer Reza, Laurent Voisard, Yehia
      */
-    private SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
+    SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
         SearchListResponse response;
         try {
             response = request
@@ -106,7 +107,7 @@ public class YoutubeService {
      * @return youtube search list
      * @author Laurent Voisard, Tanveer Reza
      */
-    private YouTube.Search.List getYoutubeSearchList() {
+    YouTube.Search.List getYoutubeSearchList() {
         YouTube.Search.List request;
         try {
             request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
@@ -129,7 +130,9 @@ public class YoutubeService {
             VideoListResponse response = getVideoListResponse(Collections.singletonList(videoId), request);
 
             // make sure we only have 1 video
-            assert response.getItems().size() == 1;
+            if(response.getItems().size() != 1)
+                return null;
+
             com.google.api.services.youtube.model.Video video = response.getItems().get(0);
             return new Video(
                     video.getId(),
@@ -146,7 +149,7 @@ public class YoutubeService {
      * @return youtube videos list
      * @author Tanveer Reza
      */
-    private YouTube.Videos.List getYoutubeVideosList() {
+    YouTube.Videos.List getYoutubeVideosList() {
         YouTube.Videos.List request;
         try {
             request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
@@ -164,18 +167,24 @@ public class YoutubeService {
      * @author Laurent Voisard
      */
     public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
+
+        // return empty list if no video ids are provided;
+        if (videoIds.isEmpty())
+            return CompletableFuture.supplyAsync(List::of);
+
         return CompletableFuture.supplyAsync(() -> {
+
             YouTube.Videos.List request = getYoutubeVideosList();
 
             VideoListResponse response = getVideoListResponse(videoIds, request);
 
             return response.getItems().stream().map(video -> new Video(
-                            video.getId(),
-                            video.getSnippet().getTitle(),
-                            video.getSnippet().getDescription(),
-                            video.getSnippet().getChannelId(),
-                            video.getSnippet().getChannelTitle(),
-                            video.getSnippet().getThumbnails().getDefault().getUrl()))
+                    video.getId(),
+                    video.getSnippet().getTitle(),
+                    video.getSnippet().getDescription(),
+                    video.getSnippet().getChannelId(),
+                    video.getSnippet().getChannelTitle(),
+                    video.getSnippet().getThumbnails().getDefault().getUrl()))
                     .collect(Collectors.toList());
         });
     }
@@ -187,7 +196,7 @@ public class YoutubeService {
      * @return video list response
      * @author Laurent Voisard
      */
-    private VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
+    VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
         VideoListResponse response;
         try {
             response = request
@@ -208,36 +217,35 @@ public class YoutubeService {
      * @throws IOException if an error occurs while fetching the videos
      * @author Yehia
      */
-    public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
-                request.setKey(API_KEY);
-                request.setChannelId(channelId);
-                request.setMaxResults(10L);
-                request.setOrder("date");
-                request.setType(Collections.singletonList("video"));
+public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
+    return CompletableFuture.supplyAsync(() -> {
+        try {
+            YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
+            request.setKey(API_KEY);
+            request.setChannelId(channelId);
+            request.setMaxResults(10L);
+            request.setOrder("date");
+            request.setType(Collections.singletonList("video"));
 
-                SearchListResponse response = request.execute();
-                List<SearchResult> searchResults = response.getItems();
+            SearchListResponse response = request.execute();
+            List<SearchResult> searchResults = response.getItems();
 
-                // Convert SearchResult to Video objects
-                return searchResults.stream()
-                        .map(sr -> new Video(
-                                sr.getId().getVideoId(),
-                                sr.getSnippet().getTitle(),
-                                sr.getSnippet().getDescription(),
-                                sr.getSnippet().getChannelId(),
-                                sr.getSnippet().getChannelTitle(),
-                                sr.getSnippet().getThumbnails().getDefault().getUrl()
-                        ))
-                        .collect(Collectors.toList());
-            } catch (IOException e) {
-                throw new CompletionException(e);
-            }
-        });
-    }
-
+            // Convert SearchResult to Video objects
+            return searchResults.stream()
+                    .map(sr -> new Video(
+                            sr.getId().getVideoId(),
+                            sr.getSnippet().getTitle(),
+                            sr.getSnippet().getDescription(),
+                            sr.getSnippet().getChannelId(),
+                            sr.getSnippet().getChannelTitle(),
+                            sr.getSnippet().getThumbnails().getDefault().getUrl()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        }
+    });
+}
     /**
      * Get channel by id
      * @param channelId channel id
