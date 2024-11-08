@@ -22,7 +22,13 @@ import java.util.concurrent.CompletionStage;
 import java.util.List;
 
 /**
- *
+ * The controller for handling YouTube-related operations such as searching for videos, retrieving video details,
+ * and displaying channel profiles and statistics.
+ * <p>
+ * This controller provides endpoints for searching YouTube videos, retrieving a video by ID, showing channel profiles,
+ * and displaying statistics about search queries. It uses the {@link SearchService}, {@link StatisticsService}, and
+ * {@link YoutubeService} to interact with YouTube data.
+ * </p>
  */
 public class YoutubeController extends Controller {
     private final StatisticsService statisticsService;
@@ -40,9 +46,9 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Laurent, Yehia
-     * Search for videos with keywords
+     *  Search for videos with keywords
      * creates a new session if one doesn't exist
+     * @author Laurent, Yehia
      * @param query string query to send to youtube api
      * @param request Http request of the browser
      * @return returns the search page populated with the last 10 or less requests made
@@ -64,8 +70,8 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Laurent, Yehia
      * Creates a user session or retrieves an existing one
+     * @author Laurent, Yehia
      * @param request browser http request
      * @return redirects to search page only the form is visible unless a user session exists
      */
@@ -82,8 +88,8 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Laurent Voisard
      * Get a video with the specified id from youtube api
+     * @author Laurent Voisard
      * @param id video Id
      * @return video model
      */
@@ -124,8 +130,8 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * @author Tanveer Reza
      * Get the word frequency statistics for the given query
+     * @author Tanveer Reza
      * @param query The search query
      * @param request Incoming http request from the web page
      * @return The word frequency statistics
