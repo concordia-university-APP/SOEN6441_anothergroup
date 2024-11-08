@@ -11,7 +11,8 @@ project/plugins/project/
 .cache
 .lib/
 .idea
-.bsp
+.bsp/*
+.settings/*
 
 .classpath
 .metadata
