@@ -12,16 +12,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
+ * Service for calculating word frequency statistics from video descriptions
  * @author Tanveer Reza
- * A service class for handling word-stats of a video
  */
 @Singleton
 public class StatisticsService {
     private final SearchService searchService;
 
     /**
+     * Constructor for the StatisticsService class.
      * @author Tanveer Reza
-     * @param searchService the search service to use for fetching videos
+     * @param searchService
      */
     @Inject
     public StatisticsService(SearchService searchService) {
@@ -29,6 +30,7 @@ public class StatisticsService {
     }
 
     /**
+     * Get the frequency of all unique words from the descriptions of the top 50 videos based on a search query.
      * @param query the search terms for the video
      * @return frequency of all unique words from description of top 50 videos based on search query
      * @author Tanveer Reza
@@ -46,6 +48,7 @@ public class StatisticsService {
     }
 
     /**
+     * Extracts all words from a list of video titles, normalizes them, and converts them to lowercase for case handling.
      * @param description list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
      * @author Tanveer Reza
@@ -81,6 +84,7 @@ public class StatisticsService {
     }
 
     /**
+     * Count the occurrences of each word in the provided list.
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
      * @author Tanveer Reza

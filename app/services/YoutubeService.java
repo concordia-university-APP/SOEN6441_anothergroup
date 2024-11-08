@@ -20,6 +20,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
+ * Service for interacting with the YouTube API
  * @author Yehia, Laurent, Tanveer Reza
  */
 public class YoutubeService {
@@ -31,33 +32,35 @@ public class YoutubeService {
 
     public YoutubeService() throws GeneralSecurityException, IOException {
 
-            setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build());
+        setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+                .setApplicationName(APPLICATION_NAME)
+                .build());
     }
 
     /**
-     * @author Laurent Voisard
+     * Get youtube service
      * @return youtube service
+     * @author Laurent Voisard
      */
     public YouTube getYoutubeService() {
         return youtube;
     }
 
     /**
-     * @author Laurent Voisard
      * private setter, only used in tests to mock behavior
      * @param youtube youtube service
+     * @author Laurent Voisard
      */
     private void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
 
     /**
-     * @author Tanveer Reza, Laurent Voisard, Yehia
-     * @param keywords search query
+     * Search for videos based on a search query
+     * @param keywords   search query
      * @param maxResults number of results to return
      * @return a list of videos based on the search query
+     * @author Tanveer Reza, Laurent Voisard, Yehia
      */
     public CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
         return CompletableFuture.supplyAsync(() -> {
@@ -74,6 +77,13 @@ public class YoutubeService {
         });
     }
 
+    /**
+     * Get search list response
+     * @param keywords   search query
+     * @param maxResults number of results to return
+     * @return a list of videos based on the search query
+     * @author Tanveer Reza, Laurent Voisard, Yehia
+     */
     private SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
         SearchListResponse response;
         try {
@@ -91,6 +101,11 @@ public class YoutubeService {
         return response;
     }
 
+    /**
+     * Get youtube search list
+     * @return youtube search list
+     * @author Laurent Voisard, Tanveer Reza
+     */
     private YouTube.Search.List getYoutubeSearchList() {
         YouTube.Search.List request;
         try {
@@ -102,10 +117,10 @@ public class YoutubeService {
     }
 
     /**
-     * @author Laurent Voisard
      * Get video by id
      * @param videoId video id
      * @return video model
+     * @author Laurent Voisard
      */
     public CompletableFuture<Video> getVideo(String videoId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -126,6 +141,11 @@ public class YoutubeService {
         });
     }
 
+    /**
+     * Get youtube videos list
+     * @return youtube videos list
+     * @author Tanveer Reza
+     */
     private YouTube.Videos.List getYoutubeVideosList() {
         YouTube.Videos.List request;
         try {
@@ -138,10 +158,10 @@ public class YoutubeService {
 
 
     /**
-     * @author Laurent Voisard
      * get a list of videos
      * @param videoIds a list of video ids
      * @return list of videos from ids
+     * @author Laurent Voisard
      */
     public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
         return CompletableFuture.supplyAsync(() -> {
@@ -150,16 +170,23 @@ public class YoutubeService {
             VideoListResponse response = getVideoListResponse(videoIds, request);
 
             return response.getItems().stream().map(video -> new Video(
-                    video.getId(),
-                    video.getSnippet().getTitle(),
-                    video.getSnippet().getDescription(),
-                    video.getSnippet().getChannelId(),
-                    video.getSnippet().getChannelTitle(),
-                    video.getSnippet().getThumbnails().getDefault().getUrl()))
+                            video.getId(),
+                            video.getSnippet().getTitle(),
+                            video.getSnippet().getDescription(),
+                            video.getSnippet().getChannelId(),
+                            video.getSnippet().getChannelTitle(),
+                            video.getSnippet().getThumbnails().getDefault().getUrl()))
                     .collect(Collectors.toList());
         });
     }
 
+    /**
+     * Get video list response
+     * @param videoIds list of video ids
+     * @param request  youtube videos list
+     * @return video list response
+     * @author Laurent Voisard
+     */
     private VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
         VideoListResponse response;
         try {
@@ -174,36 +201,49 @@ public class YoutubeService {
         return response;
     }
 
-//    Channel-Page Task A
-public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
-    return CompletableFuture.supplyAsync(() -> {
-        try {
-            YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
-            request.setKey(API_KEY);
-            request.setChannelId(channelId);
-            request.setMaxResults(10L);
-            request.setOrder("date");
-            request.setType(Collections.singletonList("video"));
+    /**
+     * Get channel videos
+     * @param channelId channel id
+     * @return list of videos from channel id
+     * @throws IOException if an error occurs while fetching the videos
+     * @author Yehia
+     */
+    public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
+                request.setKey(API_KEY);
+                request.setChannelId(channelId);
+                request.setMaxResults(10L);
+                request.setOrder("date");
+                request.setType(Collections.singletonList("video"));
 
-            SearchListResponse response = request.execute();
-            List<SearchResult> searchResults = response.getItems();
+                SearchListResponse response = request.execute();
+                List<SearchResult> searchResults = response.getItems();
 
-            // Convert SearchResult to Video objects
-            return searchResults.stream()
-                    .map(sr -> new Video(
-                            sr.getId().getVideoId(),
-                            sr.getSnippet().getTitle(),
-                            sr.getSnippet().getDescription(),
-                            sr.getSnippet().getChannelId(),
-                            sr.getSnippet().getChannelTitle(),
-                            sr.getSnippet().getThumbnails().getDefault().getUrl()
-                    ))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new CompletionException(e);
-        }
-    });
-}
+                // Convert SearchResult to Video objects
+                return searchResults.stream()
+                        .map(sr -> new Video(
+                                sr.getId().getVideoId(),
+                                sr.getSnippet().getTitle(),
+                                sr.getSnippet().getDescription(),
+                                sr.getSnippet().getChannelId(),
+                                sr.getSnippet().getChannelTitle(),
+                                sr.getSnippet().getThumbnails().getDefault().getUrl()
+                        ))
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    /**
+     * Get channel by id
+     * @param channelId channel id
+     * @return youtube channel model
+     * @author Yehia
+     */
     public CompletionStage<YoutubeChannel> getChannelById(String channelId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -228,5 +268,4 @@ public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IO
             }
         });
     }
-
 }
