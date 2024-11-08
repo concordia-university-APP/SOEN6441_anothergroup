@@ -1,0 +1,34 @@
+@import java.util
+@(channel: Option[models.YoutubeChannel], videos: Option[util.List[models.Video]])
+
+@main("Channel Profile") {
+<div class="container">
+    @channel match {
+    case Some(ch) => {
+    <h1>@ch.getTitle</h1>
+    <p>@ch.getDescription</p>
+    <img src="@ch.getThumbnailUrl" alt="Channel Thumbnail" />
+
+    <h2>Last 10 Videos:</h2>
+
+    @videos match {
+    case Some(videoList) if !videoList.isEmpty => {
+    <ol>
+        @for(v <- videoList) {
+        <li>
+            @video(v)
+        </li>
+        }
+    </ol>
+    }
+    case _ => {
+    <p>No videos found for this channel.</p>
+    }
+    }
+    }
+    case None => {
+    <p>Channel not found.</p>
+    }
+    }
+</div>
+}

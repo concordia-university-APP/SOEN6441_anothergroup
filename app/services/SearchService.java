@@ -10,6 +10,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 
+/**
+ * @author Laurent Voisard
+ * This service adds a level of indirection to the youtube service so we can cache the search results
+ */
 @Singleton
 public class SearchService {
     private int userSessionCounter = 0;
@@ -18,6 +22,11 @@ public class SearchService {
     private final HashMap<String, List<VideoSearch>> sessionVideoSearchList = new HashMap<>();
     private final YoutubeService youtubeService;
 
+    /**
+     * author Laurent Voisard
+     * Constructor for the SearchService class.
+     * @param youtubeService the YouTube service to use for fetching videos
+     */
     @Inject
     public SearchService(YoutubeService youtubeService) {
         this.youtubeService = youtubeService;
@@ -38,11 +47,13 @@ public class SearchService {
      * @return list of the last 10 or less searches made
      */
     public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId) {
+
         Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
 
         if (existingSearch.isPresent()) {
+            System.out.println("Search already made");
             getSessionSearchList(sessionId).remove(existingSearch.get());
             getSessionSearchList(sessionId).add(0, existingSearch.get());
             return CompletableFuture.completedFuture(getSessionSearchList(sessionId));
@@ -98,7 +109,29 @@ public class SearchService {
         sessionVideoSearchList.put(sessionId, new ArrayList<>());
     }
 
+    /**
+     * Retrieves a video by its ID.
+     * @author Laurent Voisard
+     * @param id the ID of the video to retrieve
+     * @return a CompletableFuture containing the video with the specified ID
+     */
     public CompletableFuture<Video> getVideoById(String id) {
         return youtubeService.getVideo(id);
+    }
+
+    /**
+     * Retrieves a list of videos based on the search term. If the search term has already been made in the current session,
+     * it returns the cached results. Otherwise, it makes a request to the YouTube API to get the results.
+     * @author Tanveer Reza
+     * @param keywords the search terms for the video
+     * @param sessionId the user session id
+     * @return a CompletableFuture containing the list of videos based on the search term
+     */
+    public CompletableFuture<VideoList> getVideosBySearchTerm(String keywords, String sessionId) {
+        Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
+                .filter(x -> x.getSearchTerms().equals(keywords))
+                .findFirst();
+        return existingSearch.map(videoSearch -> CompletableFuture.completedFuture(videoSearch.getResults()))
+                .orElseGet(() -> youtubeService.searchResults(keywords, MAX_VIDEO_COUNT).thenApply(videoList -> videoList));
     }
 }
