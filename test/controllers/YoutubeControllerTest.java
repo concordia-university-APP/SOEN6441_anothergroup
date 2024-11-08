@@ -186,6 +186,14 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(OK, result.status());
     }
 
+    /**
+     * Tests that the showChannelProfile method in YoutubeController successfully returns
+     * the expected result when a channel and its videos are found.
+     *
+     * @throws GeneralSecurityException if a security error occurs during the test.
+     * @throws IOException if an I/O error occurs during the test.
+     * @author yehia metwally
+     */
     @Test
     public void testShowChannelProfile_Success() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
@@ -198,10 +206,18 @@ public class YoutubeControllerTest extends WithApplication {
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals("Expected status to be OK", Http.Status.OK, result.status());
-        assertNotNull("Content type should not be null",result.contentType());
-        assertTrue("Response should contain channel name",Helpers.contentAsString(result).contains("Test Channel"));
+        assertNotNull("Content type should not be null", result.contentType());
+        assertTrue("Response should contain channel name", Helpers.contentAsString(result).contains("Test Channel"));
     }
 
+    /**
+     * Tests that the showChannelProfile method in YoutubeController returns a BAD REQUEST status
+     * when the specified channel is not found.
+     *
+     * @throws GeneralSecurityException if a security error occurs during the test.
+     * @throws IOException if an I/O error occurs during the test.
+     * @author yehia metwally
+     */
     @Test
     public void testShowChannelProfile_ChannelNotFound() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
@@ -210,10 +226,18 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals("Expected status to be BAD REQUEST",Http.Status.BAD_REQUEST, result.status());
-        assertTrue("Response should indicate channel not found",Helpers.contentAsString(result).contains("Channel not found"));
+        assertEquals("Expected status to be BAD REQUEST", Http.Status.BAD_REQUEST, result.status());
+        assertTrue("Response should indicate channel not found", Helpers.contentAsString(result).contains("Channel not found"));
     }
 
+    /**
+     * Tests that the showChannelProfile method in YoutubeController returns a BAD REQUEST status
+     * when no videos are found for a specified channel.
+     *
+     * @throws GeneralSecurityException if a security error occurs during the test.
+     * @throws IOException if an I/O error occurs during the test.
+     * @author yehia metwally
+     */
     @Test
     public void testShowChannelProfile_NoVideosFound() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
@@ -226,9 +250,17 @@ public class YoutubeControllerTest extends WithApplication {
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
-        assertTrue( "Response should indicate no videos found",Helpers.contentAsString(result).contains("No videos found for this channel"));
+        assertTrue("Response should indicate no videos found", Helpers.contentAsString(result).contains("No videos found for this channel"));
     }
 
+    /**
+     * Tests that the showChannelProfile method in YoutubeController returns an INTERNAL SERVER ERROR
+     * status when an exception occurs while retrieving the channel profile.
+     *
+     * @throws GeneralSecurityException if a security error occurs during the test.
+     * @throws IOException if an I/O error occurs during the test.
+     * @author yehia metwally
+     */
     @Test
     public void testShowChannelProfile_Exception() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
@@ -240,10 +272,18 @@ public class YoutubeControllerTest extends WithApplication {
         CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
         Result result = resultStage.toCompletableFuture().join();
 
-        assertEquals("Expected status to be Internal Server Error",Http.Status.INTERNAL_SERVER_ERROR, result.status());
+        assertEquals("Expected status to be Internal Server Error", Http.Status.INTERNAL_SERVER_ERROR, result.status());
         assertTrue("Response should indicate an error", Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"));
     }
 
+    /**
+     * Tests that the showChannelProfile method in YoutubeController returns a BAD REQUEST status
+     * when the channel is found but no video list is returned (null).
+     *
+     * @throws GeneralSecurityException if a security error occurs during the test.
+     * @throws IOException if an I/O error occurs during the test.
+     *@author yehia metwally
+     */
     @Test
     public void testShowChannelProfile_NotFoundNull() throws GeneralSecurityException, IOException {
         when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
@@ -256,6 +296,6 @@ public class YoutubeControllerTest extends WithApplication {
         Result result = resultStage.toCompletableFuture().join();
 
         assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
-
     }
+
 }

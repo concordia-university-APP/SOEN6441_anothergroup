@@ -74,14 +74,15 @@ public class YoutubeServiceTest {
         //Initialize with mock YouTube
     }
 
-
     /**
-     * Test the getChannelVideos method with a basic case
-     * @author Yehia Metwally
+     * Tests the getChannelVideos method in YoutubeService to verify it returns the expected
+     * list of videos for a given channel ID when the API call is successful.
+     *
+     * @throws Exception if any exception occurs during the mock setup or method execution
+     * @author yehia,laurant
      */
     @Test
     public void testGetChannelVideos_Success() throws Exception {
-
         SearchListResponse mockResponse = new SearchListResponse();
 
         // Mock search result with sample data
@@ -103,7 +104,6 @@ public class YoutubeServiceTest {
         mockResult.setSnippet(snippet);
 
         mockResponse.setItems(Collections.singletonList(mockResult));
-
 
         YouTube.Search searchMock = mock(YouTube.Search.class);
         when(youtubeMock.search()).thenReturn(searchMock);
@@ -128,9 +128,11 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * Test the getChannelVideos method with an empty query result list
-     * The method should return an empty list in this case
-     * @author Yehia Metwally
+     * Tests the getChannelById method in YoutubeService to verify it returns the expected
+     * channel information when a valid channel ID is provided, and the API call is successful.
+     *
+     * @throws Exception if any exception occurs during the mock setup or method execution
+     * @author yehia,laurant
      */
     @Test
     public void testGetChannelById_Success() throws Exception {
@@ -231,9 +233,9 @@ public class YoutubeServiceTest {
         Assert.assertNull("Expected null channel result", channel);
     }
     /**
-     * @author Yehia Metwally
      * Tests the searchResults method for a successful search with valid keywords and max results.
      * It verifies that the method returns a non-null VideoList with correct video details.
+     * @author Yehia Metwally
      */
     @Test
     public void testSearchResults_Success() throws Exception {
@@ -292,9 +294,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the searchResults method for a case where no search results are returned.
      * It verifies that the method returns an empty VideoList.
+     * @author Yehia Metwally
      */
     @Test
     public void testSearchResults_NoResults() throws Exception {
@@ -313,9 +315,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the searchResults method when an exception occurs during the request.
      * It verifies that an ExecutionException is thrown due to a RuntimeException.
+     *@author Yehia Metwally
      */
     @Test
     public void testSearchResults_Exception() {
@@ -328,9 +330,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the getSearchListResponse method for a successful response.
      * Verifies that the request setup is successful and that execute() is called.
+     * @author Yehia Metwally
      */
     @Test
     public void testGetSearchListResponse_Success() throws IOException {
@@ -357,9 +359,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the getSearchListResponse method when an IOException occurs during the request setup.
      * Verifies that a RuntimeException is thrown in response to the IOException.
+     * @author Yehia Metwally
      */
     @Test(expected = RuntimeException.class)
     public void testGetSearchListResponse_IOException() throws IOException {
@@ -379,9 +381,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the getYoutubeSearchList method for successful setup of the search list.
      * Verifies that search() and list() are called correctly and a non-null List object is returned.
+     * @author Yehia Metwally
      */
     @Test
     public void testGetYoutubeSearchList_Success() throws IOException, GeneralSecurityException {
@@ -405,9 +407,9 @@ public class YoutubeServiceTest {
     }
 
     /**
-     * @author Yehia Metwally
      * Tests the getYoutubeSearchList method when an exception occurs during the search setup.
      * Verifies that a RuntimeException is thrown when an IOException is encountered.
+     * @author Yehia Metwally
      */
     @Test()
     public void testGetYoutubeSearchList_Exception() throws IOException {
