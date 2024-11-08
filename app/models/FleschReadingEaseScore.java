@@ -5,12 +5,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Laurent Voisard
+ *
+ * Class to compute Flesch reading score
+ */
 public class FleschReadingEaseScore {
 
     private final String vowels = "aeiouy";
     private final double readingEaseScore;
     private final double gradeLevel;
 
+    /**
+     * @author Laurent Voisard
+     * Constructor for the Flesh reading score
+     * @param description
+     */
     public FleschReadingEaseScore(String description) {
 
         if (description.isEmpty()) {
@@ -31,18 +41,38 @@ public class FleschReadingEaseScore {
         this.gradeLevel = Math.max(grade, 0);
     }
 
+    /**
+     * @author Laurent Voisard
+     * Getter for reading ease score
+     * @return reading ease score
+     */
     public double getReadingEaseScore() {
         return readingEaseScore;
     }
 
+    /**
+     * @author Laurent Voisard
+     * Getter for grade level
+     * @return grade level
+     */
     public double getGradeLevel() {
         return gradeLevel;
     }
 
+    /**
+     * @author Laurent Voisard
+     * Check if letter is a vowel
+     * @return if the letter is a vowel
+     */
     private boolean isVowel(char letter) {
         return vowels.contains(Character.toString(letter));
     }
 
+    /**
+     * @author Laurent Voisard
+     * @param sentence one sentence of the description
+     * @return number of syllables in the sentence
+     */
     private int countSentenceSyllables(String sentence) {
         return Arrays.stream(sentence.split(" "))
                 .map(this::countWordSyllables)
@@ -50,6 +80,11 @@ public class FleschReadingEaseScore {
                 .sum();
     }
 
+    /**
+     * @author Laurent Voisard
+     * @param word one word of the description
+     * @return number of syllables in the word
+     */
     private int countWordSyllables(String word) {
 
         word = word.toLowerCase();
@@ -78,6 +113,11 @@ public class FleschReadingEaseScore {
         return Math.max(syllables, 1);
     }
 
+    /**
+     * @author Laurent Voisard
+     * @param description description of a video
+     * @return separated sentences from the description
+     */
     private List<String> getSentences(String description)
     {
         return Arrays.stream(description.split("[.!?]"))
@@ -85,6 +125,11 @@ public class FleschReadingEaseScore {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @author Laurent Voisard
+     * @param description get the description words
+     * @return list of words contained in the description
+     */
     private List<String> getDescriptionWords(String description)
     {
         return Arrays.asList(description.replaceAll("[.!?]", "").split("\\s+"));

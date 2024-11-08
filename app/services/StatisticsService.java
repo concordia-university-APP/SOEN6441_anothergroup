@@ -13,52 +13,58 @@ import java.util.stream.Collectors;
 
 /**
  * @author Tanveer Reza
- * Version : 1
  * A service class for handling word-stats of a video
  */
 @Singleton
 public class StatisticsService {
     private final SearchService searchService;
 
+    /**
+     * @author Tanveer Reza
+     * @param searchService the search service to use for fetching videos
+     */
     @Inject
     public StatisticsService(SearchService searchService) {
         this.searchService = searchService;
     }
+
     /**
      * @param query the search terms for the video
-     * @return frequency of all unique words from top 50 videos based on search query
+     * @return frequency of all unique words from description of top 50 videos based on search query
      * @author Tanveer Reza
      */
     public CompletableFuture<Map<String, Long>> getWordFrequency(String query, String sessionId) {
-        return searchService.searchKeywords(query, sessionId).thenApply(videos -> {
-            List<String> titles = videos.stream()
-                    .flatMap(videoSearch -> videoSearch.getResults().getVideoList().stream())
-                    .map(Video::getTitle) // Extract each title
+        return searchService.getVideosBySearchTerm(query, sessionId).thenApply(videos -> {
+            List<String> description = videos.getVideoList().stream()
+                    .map(Video::getDescription) // Extract each description
                     .collect(Collectors.toList());
 
-            List<String> listOfWordsFromTitles = extractAndNormalizeWords(titles);
+            List<String> listOfWordsFromTitles = extractAndNormalizeWords(description);
 
             return countAndSortWordFrequencies(listOfWordsFromTitles);
         });
     }
 
     /**
-     * @param titles list of video titles
+     * @param description list of video titles
      * @return all words from a list of titles, normalize them and convert to lowercase for case handling
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      */
-    public List<String> extractAndNormalizeWords(List<String> titles) {
-        return titles.stream()
-                .flatMap(title -> Arrays.stream(title.split("\\W+"))) // Split titles into words
+    public List<String> extractAndNormalizeWords(List<String> description) {
+        return description.stream()
+                .flatMap(title -> Arrays.stream(title.split("\\W+"))) // Split descriptions into words
                 .filter(word -> !word.isEmpty()) // Filter out empty words
                 .map(String::toLowerCase)
                 .collect(Collectors.toList()); // Collect to list
     }
 
     /**
-     * @param words list of words gathered from titles
-     * @return all unique words with their frequency, sorted by frequency and then alphabets
-     * @author : Tanveer Reza
+     * Counts the occurrences of each word in the provided list, sorts them by frequency in descending order,
+     * and then by the word in alphabetical order. The sorted entries are then collected into a LinkedHashMap
+     * to maintain the order.
+     * @author Tanveer Reza
+     * @param words the list of words to count and sort
+     * @return a map of words and their frequencies, sorted by frequency and then alphabetically
      */
     public Map<String, Long> countAndSortWordFrequencies(List<String> words) {
         return getWordOccurences(words).entrySet().stream()
@@ -77,7 +83,7 @@ public class StatisticsService {
     /**
      * @param words list of words gathered from titles
      * @return frequency of each word from a list of Words
-     * @author : Tanveer Reza
+     * @author Tanveer Reza
      */
     public Map<String, Long> getWordOccurences(List<String> words) {
         return words.stream()

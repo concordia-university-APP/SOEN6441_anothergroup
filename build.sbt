@@ -38,8 +38,7 @@ jacocoExcludes := Seq(
   "controllers.javascript.*",
   "views.html.*",
   "router.*",
-  "controllers.routes",
-  "controllers.routes.*",
+  "controllers.routes*",
   "controllers.ReverseAssets",
   "controllers.ReverseYoutubeController",
 )
