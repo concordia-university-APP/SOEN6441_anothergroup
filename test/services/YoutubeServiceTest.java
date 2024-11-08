@@ -2,14 +2,15 @@ package services;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import models.VideoList;
 import models.YoutubeChannel;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import models.Video;
+import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -69,7 +70,7 @@ public class YoutubeServiceTest {
         YouTube.Search searchMock = mock(YouTube.Search.class);
         when(youtubeMock.search()).thenReturn(searchMock);
         YouTube.Search.List mockSearchList = mock(YouTube.Search.List.class);
-        // Mock `youtube.search().list`
+
         when(searchMock.list(Collections.singletonList("id,snippet"))).thenReturn(mockSearchList);
         when(mockSearchList.setKey(anyString())).thenReturn(mockSearchList);
         when(mockSearchList.setChannelId(anyString())).thenReturn(mockSearchList);
@@ -126,6 +127,57 @@ public class YoutubeServiceTest {
         assertEquals("Sample Channel", channel.getTitle());
         assertEquals("Sample Channel Description", channel.getDescription());
         assertEquals("http://example.com/channel_image.jpg", channel.getThumbnailUrl());
+    }
+
+    @Test
+    public void testGetChannelById_handlesIOException() throws Exception {
+        YouTube.Channels.List mockChannelsList = mock(YouTube.Channels.List.class);
+        when(youtubeMock.channels()).thenReturn(mock(YouTube.Channels.class));
+        when(youtubeMock.channels().list(anyList())).thenReturn(mockChannelsList);
+        when(mockChannelsList.setId(anyList())).thenReturn(mockChannelsList);
+        when(mockChannelsList.setKey(anyString())).thenReturn(mockChannelsList);
+        when(mockChannelsList.execute()).thenThrow(new IOException("Test Exception"));
+
+        exceptionRule.expect(CompletionException.class);
+        exceptionRule.expectMessage("java.io.IOException: Test Exception");
+
+        youtubeService.getChannelById("sampleChannelId").toCompletableFuture().join();
+    }
+
+    @Test
+    public void testGetChannelVideos_handlesIOException() throws Exception{
+        YouTube.Search.List mockSearchList = mock(YouTube.Search.List.class);
+        when(youtubeMock.search()).thenReturn(mock(YouTube.Search.class));
+        when(youtubeMock.search().list(anyList())).thenReturn(mockSearchList);
+        when(mockSearchList.setKey(anyString())).thenReturn(mockSearchList);
+        when(mockSearchList.setChannelId(anyString())).thenReturn(mockSearchList);
+        when(mockSearchList.setMaxResults(anyLong())).thenReturn(mockSearchList);
+        when(mockSearchList.setOrder(anyString())).thenReturn(mockSearchList);
+        when(mockSearchList.setType(anyList())).thenReturn(mockSearchList);
+        when(mockSearchList.execute()).thenThrow(new IOException("Test Exception"));
+
+        exceptionRule.expect(CompletionException.class);
+        exceptionRule.expectMessage("java.io.IOException: Test Exception");
+
+        youtubeService.getChannelVideos("sampleChannelId").toCompletableFuture().join();
+    }
+
+    @Test
+    public void testGetChannelById_ReturnsNullWhenChannelEmpty() throws Exception {
+        ChannelListResponse mockResponse = new ChannelListResponse();
+        mockResponse.setItems(Collections.emptyList());
+
+        YouTube.Channels.List mockChannelsList = mock(YouTube.Channels.List.class);
+        when(youtubeMock.channels()).thenReturn(mock(YouTube.Channels.class));
+        when(youtubeMock.channels().list(anyList())).thenReturn(mockChannelsList);
+        when(mockChannelsList.setId(anyList())).thenReturn(mockChannelsList);
+        when(mockChannelsList.setKey(anyString())).thenReturn(mockChannelsList);
+        when(mockChannelsList.execute()).thenReturn(mockResponse);
+
+        CompletableFuture<YoutubeChannel> channelFuture = (CompletableFuture<YoutubeChannel>) youtubeService.getChannelById("sampleChannelId");
+        YoutubeChannel channel = channelFuture.join();
+
+        Assert.assertNull("Expected null channel result",channel);
     }
 
     @Test

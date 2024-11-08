@@ -33,7 +33,7 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard
+     * @author Laurent Voisard & Rumeysa Turkmen
      * Indirection level to youtube service search, we store the search results in the correct user session search result list
      * We also handle if a search term has already been made, if so put it back to the top of the list without making a request
      * to the api. Otherwise request from the youtube api
@@ -42,11 +42,13 @@ public class SearchService {
      * @return list of the last 10 or less searches made
      */
     public CompletableFuture<List<VideoSearch>> searchKeywords(String keywords, String sessionId) {
+
         Optional<VideoSearch> existingSearch = getSessionSearchList(sessionId).stream()
                 .filter(x -> x.getSearchTerms().equals(keywords))
                 .findFirst();
 
         if (existingSearch.isPresent()) {
+            System.out.println("Search already made");
             getSessionSearchList(sessionId).remove(existingSearch.get());
             getSessionSearchList(sessionId).add(0, existingSearch.get());
             return CompletableFuture.completedFuture(getSessionSearchList(sessionId));
@@ -54,7 +56,10 @@ public class SearchService {
 
         return youtubeService.searchResults(keywords, MAX_VIDEO_COUNT).thenApply(results -> {
 
-            VideoSearch search = new VideoSearch(keywords, results);
+
+       // Analyze sentiment
+       String overallSentiment = SentimentAnalyzer.analyzeSentiment(results.getVideoList());
+       VideoSearch search = new VideoSearch(keywords, results, overallSentiment);
             getSessionSearchList(sessionId).add(0, search);
 
             if (getSessionSearchList(sessionId).size() > MAX_SEARCHES_PER_SESSION) {
