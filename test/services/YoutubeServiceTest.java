@@ -418,7 +418,6 @@ public class YoutubeServiceTest {
         Assert.assertThrows(RuntimeException.class, () -> youtubeService.getYoutubeSearchList());
     }
 
-
     @Test
     public void testGetVideo() throws IOException {
         Video v = new Video("1", "title","desc","id","channel","dawkad");
