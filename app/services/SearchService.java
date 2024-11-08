@@ -11,10 +11,8 @@ import java.util.concurrent.CompletableFuture;
 
 
 /**
- *  Represents an instance of a search model containing search terms,
- * a list of video results, and an overall sentiment analysis.
+ * Service for searching videos on YouTube and storing the search results for a user session.
  * @author Laurent Voisard
- * This service adds a level of indirection to the youtube service so we can cache the search results
  */
 @Singleton
 public class SearchService {
@@ -25,8 +23,7 @@ public class SearchService {
     private final YoutubeService youtubeService;
 
     /**
-     *  Constructs a VideoSearch object with the specified search terms,
-     *  results, and sentiment analysis.
+     * Constructor for the SearchService class.
      * author Laurent Voisard
      * @param youtubeService the YouTube service to use for fetching videos
      */
@@ -42,7 +39,8 @@ public class SearchService {
      * This method also performs sentiment analysis on the list of videos returned by the YouTube
      *  search. The sentiment is analyzed to determine the overall mood (happy, sad, or neutral)
      * based on the descriptions of the videos in the result. The result, including the sentiment
-     *  analysis, is encapsulated in a {@link VideoSearch} object and added to the session's search list.
+     *  analysis, is encapsulated in a {@link VideoSearch} object and added to the session's search list
+     * to the api. Otherwise request from the youtube api
      * @author Laurent Voisard & Rumeysa Turkmen
      * @param keywords keywords of the search
      * @param sessionId user session id
@@ -78,6 +76,7 @@ public class SearchService {
     }
 
     /**
+     * Get the search list for a user session, if it doesn't exist create a new one
      * @author Laurent Voisard
      * @param sessionId user session id
      * @return the video search list for this user
@@ -90,8 +89,8 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard
      * Create a new session search list
+     * @author Laurent Voisard
      * @return created ID
      */
     public String createSessionSearchList() {
@@ -101,9 +100,9 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard
      * Internal method to create a new session if a browser already had one
-     * @param sessionId
+     * @author Laurent Voisard
+     * @param sessionId user session id
      */
     private void createSessionSearchList(String sessionId) {
 

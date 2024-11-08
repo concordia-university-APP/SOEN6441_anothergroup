@@ -7,6 +7,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Unit tests for the YoutubeChannel class.
+ * @author yehia metwally
+ */
 public class YoutubeChannelTest {
     private YoutubeChannel youtubeChannel;
     private final String TEST_ID = "sampleId";
@@ -15,6 +19,11 @@ public class YoutubeChannelTest {
     private final String TEST_THUMBNAIL_URL = "http://example.com/thumbnail.jpg";
     private VideoList testVideoList;
 
+    /**
+     * Sets up the test environment before each test. Initializes the youtubeChannel
+     * instance with predefined values.
+     * @author yehia metwally,laurant
+     */
     @Before
     public void setUp() {
         // Assume testVideoList is initialized if VideoList is a complex object
@@ -25,31 +34,56 @@ public class YoutubeChannelTest {
         youtubeChannel = new YoutubeChannel(TEST_ID, TEST_TITLE, TEST_DESCRIPTION, TEST_THUMBNAIL_URL, testVideoList);
     }
 
+    /**
+     * Tests that getId() returns the correct ID value initialized in the setup.
+     * @author laurant
+     */
     @Test
     public void testGetId() {
-        assertEquals( "Expected ID to match the initialized value", TEST_ID, youtubeChannel.getId());
+        assertEquals("Expected ID to match the initialized value", TEST_ID, youtubeChannel.getId());
     }
 
+    /**
+     * Tests that getTitle() returns the correct title initialized in the setup.
+     * @author laurant
+     */
     @Test
     public void testGetTitle() {
-        assertEquals( "Expected title to match the initialized value", TEST_TITLE, youtubeChannel.getTitle());
+        assertEquals("Expected title to match the initialized value", TEST_TITLE, youtubeChannel.getTitle());
     }
 
+    /**
+     * Tests that getDescription() returns the correct description initialized in the setup.
+     * @author laurant
+     */
     @Test
     public void testGetDescription() {
         assertEquals("Expected description to match the initialized value", TEST_DESCRIPTION, youtubeChannel.getDescription());
     }
 
+    /**
+     * Tests that getThumbnailUrl() returns the correct thumbnail URL initialized in the setup.
+     * @author laurant
+     */
     @Test
     public void testGetThumbnailUrl() {
         assertEquals("Expected thumbnail URL to match the initialized value", TEST_THUMBNAIL_URL, youtubeChannel.getThumbnailUrl());
     }
 
+    /**
+     * Tests that getRecentVideos() returns the VideoList initialized in the setup.
+     * @author laurant
+     */
     @Test
     public void testGetRecentVideos() {
         assertEquals("Expected recent videos to match the initialized VideoList", testVideoList, youtubeChannel.getRecentVideos());
     }
 
+    /**
+     * Tests that the YoutubeChannel constructor correctly initializes all fields
+     * with the provided values.
+     * @author yehia metwally, laurant
+     */
     @Test
     public void testConstructor() {
         // Test that all fields are correctly initialized

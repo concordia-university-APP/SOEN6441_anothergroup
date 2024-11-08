@@ -4,7 +4,6 @@ package models;
  *  Represents an instance of a search model containing search terms,
  *  a list of video results, and an overall sentiment analysis.
  * @author Laurent Voisard & Rumeysa Turkmen
- * Instance of a search model
  */
 public class VideoSearch {
     private final String searchTerms;
@@ -27,15 +26,13 @@ public class VideoSearch {
     }
 
     /**
-     * Retrieves the search terms associated with this video search.
-     *
+     * Retrieves the search terms associated with this video search
      * @author Laurent Voisard
      * @return The search terms used.
      */
     public String getSearchTerms() { return searchTerms;}
     /**
-     * Retrieves the list of video results from the search.
-     *
+     * Retrieves the list of video results from the search
      * @author Laurent Voisard
      * @return The list of videos in the search result.
      */
@@ -43,7 +40,6 @@ public class VideoSearch {
 
     /**
      * Retrieves the overall sentiment analysis of the video search.
-     *
      * @author Rumeysa Turkmen
      * @return The sentiment as a string (e.g., happy, sad, neutral).
      */
@@ -52,7 +48,6 @@ public class VideoSearch {
 
     /**
      * Calculates the average Flesch Reading Ease score of all videos in the search result.
-     *
      * @author Laurent Voisard
      * @return The average reading ease score, or 0.0 if no videos are present.
      */
@@ -66,7 +61,6 @@ public class VideoSearch {
 
     /**
      * Calculates the average Flesch grade level of all videos in the search result.
-     *
      * @author Laurent Voisard
      * @return The average grade level, or 0.0 if no videos are present.
      */

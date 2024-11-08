@@ -6,15 +6,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * @author Laurent
  * Test class for Video model
+ * @author Laurent
  */
 public class VideoTest {
 
     /**
-     * @author Laurent Voisard
-     *
      * Assert that getters work properly
+     * @author Laurent Voisard
      */
     @Test
     public void testVideoGetters() {
