@@ -1,10 +1,11 @@
 package services;
 
 import models.Video;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Collections;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the SentimentAnalyzer class.
@@ -53,4 +54,16 @@ public class SentimentAnalyzerTest {
         String result = SentimentAnalyzer.analyzeSentiment(videos);
         assertEquals(":-|", result, "The sentiment should be neutral (:-|)");
     }
+    @Test
+    public void testAnalyzeSentiment_Empty() {
+        // Create an empty list of videos
+        List<Video> videos = Collections.emptyList();
+
+        // Call the analyzeSentiment method
+        String result = SentimentAnalyzer.analyzeSentiment(videos);
+
+        // Assert that the result is neutral (:-|) when there are no videos
+        assertEquals(":-|", result, "The sentiment should be neutral when there are no videos.");
+    }
+
 }

@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 
 
 /**
+ *  Represents an instance of a search model containing search terms,
+ * a list of video results, and an overall sentiment analysis.
  * @author Laurent Voisard
  * This service adds a level of indirection to the youtube service so we can cache the search results
  */
@@ -23,8 +25,9 @@ public class SearchService {
     private final YoutubeService youtubeService;
 
     /**
+     *  Constructs a VideoSearch object with the specified search terms,
+     *  results, and sentiment analysis.
      * author Laurent Voisard
-     * Constructor for the SearchService class.
      * @param youtubeService the YouTube service to use for fetching videos
      */
     @Inject
