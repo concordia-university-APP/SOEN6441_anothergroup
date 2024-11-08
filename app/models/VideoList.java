@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Laurent Voisard
@@ -26,4 +27,5 @@ public class VideoList {
     public List<Video> getVideoList() {
         return videoList;
     }
+
 }
