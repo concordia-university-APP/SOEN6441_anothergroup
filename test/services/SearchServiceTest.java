@@ -122,7 +122,7 @@ public class SearchServiceTest {
     public void testGetVideosBySearchTerm_existingSearch() {
         Video video1 = new Video("1","1","1","1","1","1");
         VideoList videoList = new VideoList(Arrays.asList(video1));
-        VideoSearch videoSearch = new VideoSearch("test", videoList);
+        VideoSearch videoSearch = new VideoSearch("test", videoList, "");
         searchService.getSessionSearchList("1").add(videoSearch);
 
         CompletableFuture<VideoList> result = searchService.getVideosBySearchTerm("test", "1");

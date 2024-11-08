@@ -33,7 +33,6 @@ public class StatisticsServiceTest {
         Video video3 = new Video("3", "Introduction to Java programming", "Introduction to Java programming", "103", "Intro Channel", "http://example.com/thumb3.jpg");
 
         sampleVideoList = new VideoList(Arrays.asList(video1, video2, video3));
-        VideoSearch videoSearch = new VideoSearch("Java", sampleVideoList, "");
 
         when(searchService.getVideosBySearchTerm(eq("Java"), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(sampleVideoList));
@@ -167,7 +166,6 @@ public class StatisticsServiceTest {
         Video video2 = new Video("2", "Java Java", "Java Java", "102", "Channel B", "http://example.com/thumb2.jpg");
 
         VideoList videoList = new VideoList(Arrays.asList(video1, video2));
-        VideoSearch videoSearch = new VideoSearch("Java", videoList, "");
 
         when(searchService.getVideosBySearchTerm(eq("Java"), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(videoList));
