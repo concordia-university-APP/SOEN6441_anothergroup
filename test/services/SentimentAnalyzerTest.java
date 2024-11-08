@@ -137,6 +137,6 @@ public class SentimentAnalyzerTest {
         String result = SentimentAnalyzer.analyzeSentiment(videos);
 
         // Since there are more sad videos than happy or neutral ones, the result should be sad (:-()
-        assertEquals("The sentiment should be sad (:-() when there are more sad videos than happy or neutral ones.",":-(", result);
+        assertEquals("The sentiment should be sad (:-() when there are more sad videos than happy or neutral ones.",":-(", result); 
     }
 }
