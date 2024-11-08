@@ -17,14 +17,12 @@ public class SentimentAnalyzer {
 
         // Process each video to determine its sentiment
         List<String> videoSentiments = videos.stream().map(video -> {
-            String description = video.getDescription().toLowerCase();
-            String[] words = description.split("\\W+");
-
-            long happyCount = Arrays.stream(words)
-                    .filter(SentimentWords.HAPPY_WORDS::contains)
+            String description = video.getDescription();
+            long happyCount = SentimentWords.HAPPY_WORDS.stream()
+                    .filter(description.toLowerCase()::contains)
                     .count();
-            long sadCount = Arrays.stream(words)
-                    .filter(SentimentWords.SAD_WORDS::contains)
+            long sadCount = SentimentWords.SAD_WORDS.stream()
+                    .filter(description.toLowerCase()::contains)
                     .count();
 
             double totalSentimentWords = happyCount + sadCount;
@@ -44,7 +42,7 @@ public class SentimentAnalyzer {
             }
         }).collect(Collectors.toList());
 
-        // Count how many videos fall into each sentiment category
+        // Count how many videos have each sentiment
         long happyVideos = videoSentiments.stream().filter(":-)"::equals).count();
         long sadVideos = videoSentiments.stream().filter(":-("::equals).count();
         long neutralVideos = videoSentiments.stream().filter(":-|"::equals).count();
@@ -55,7 +53,7 @@ public class SentimentAnalyzer {
         } else if (sadVideos > happyVideos && sadVideos > neutralVideos) {
             return ":-(";
         } else {
-            return ":-|"; // Return neutral if no clear majority
+            return ":-|";
         }
     }
 }
