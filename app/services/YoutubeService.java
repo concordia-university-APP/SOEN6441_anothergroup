@@ -54,7 +54,7 @@ public class YoutubeService {
     }
 
     /**
-     * @author Tanveer Reza, Laurent Voisard, Yehia
+     * @author Tanveer Reza, Laurent Voisard, Yehia metwally
      * @param keywords search query
      * @param maxResults number of results to return
      * @return a list of videos based on the search query
@@ -174,36 +174,55 @@ public class YoutubeService {
         return response;
     }
 
-//    Channel-Page Task A
-public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
-    return CompletableFuture.supplyAsync(() -> {
-        try {
-            YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
-            request.setKey(API_KEY);
-            request.setChannelId(channelId);
-            request.setMaxResults(10L);
-            request.setOrder("date");
-            request.setType(Collections.singletonList("video"));
+    /**
+     * Retrieves a list of videos from a specific YouTube channel.
+     * This method queries the YouTube Data API for recent videos in a given channel,
+     * limited to 10 results ordered by the date they were uploaded.
+     *
+     * @param channelId The ID of the YouTube channel for which videos are retrieved.
+     * @return A CompletionStage containing a list of Video objects representing the retrieved videos.
+     * @throws IOException If an error occurs while communicating with the YouTube API.
+     * @author yehia metwally
+     */
+    public CompletionStage<List<Video>> getChannelVideos(String channelId) throws IOException {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                YouTube.Search.List request = getYoutubeService().search().list(Collections.singletonList("id,snippet"));
+                request.setKey(API_KEY);
+                request.setChannelId(channelId);
+                request.setMaxResults(10L);
+                request.setOrder("date");
+                request.setType(Collections.singletonList("video"));
 
-            SearchListResponse response = request.execute();
-            List<SearchResult> searchResults = response.getItems();
+                SearchListResponse response = request.execute();
+                List<SearchResult> searchResults = response.getItems();
 
-            // Convert SearchResult to Video objects
-            return searchResults.stream()
-                    .map(sr -> new Video(
-                            sr.getId().getVideoId(),
-                            sr.getSnippet().getTitle(),
-                            sr.getSnippet().getDescription(),
-                            sr.getSnippet().getChannelId(),
-                            sr.getSnippet().getChannelTitle(),
-                            sr.getSnippet().getThumbnails().getDefault().getUrl()
-                    ))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new CompletionException(e);
-        }
-    });
-}
+                // Convert SearchResult to Video objects
+                return searchResults.stream()
+                        .map(sr -> new Video(
+                                sr.getId().getVideoId(),
+                                sr.getSnippet().getTitle(),
+                                sr.getSnippet().getDescription(),
+                                sr.getSnippet().getChannelId(),
+                                sr.getSnippet().getChannelTitle(),
+                                sr.getSnippet().getThumbnails().getDefault().getUrl()
+                        ))
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    /**
+     * Retrieves details of a YouTube channel by its ID.
+     * This method fetches the channel information from the YouTube Data API, including
+     * the channel's title, description, and thumbnail URL.
+     *
+     * @param channelId The ID of the YouTube channel to retrieve.
+     * @return A CompletionStage containing a YoutubeChannel object with the channel details, or null if the channel is not found.
+     * @author yehia metwally
+     */
     public CompletionStage<YoutubeChannel> getChannelById(String channelId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
