@@ -33,7 +33,7 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard & Rumeysa Turkmen
+     * @author Laurent Voisard, Rumeysa Turkmen
      * Indirection level to youtube service search, we store the search results in the correct user session search result list
      * We also handle if a search term has already been made, if so put it back to the top of the list without making a request
      * to the api. Otherwise request from the youtube api

@@ -30,6 +30,7 @@ public class StatisticsService {
 
     /**
      * @param query the search terms for the video
+     * @param sessionId current user session id
      * @return frequency of all unique words from description of top 50 videos based on search query
      * @author Tanveer Reza
      */

@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Tanveer Reza
  * Unit tests for StatisticsService class
+ * @author Tanveer Reza
  */
 public class StatisticsServiceTest {
 

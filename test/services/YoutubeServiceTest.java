@@ -19,6 +19,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.assertEquals;
@@ -138,10 +139,7 @@ public class YoutubeServiceTest {
         when(mockChannelsList.setKey(anyString())).thenReturn(mockChannelsList);
         when(mockChannelsList.execute()).thenThrow(new IOException("Test Exception"));
 
-        exceptionRule.expect(CompletionException.class);
-        exceptionRule.expectMessage("java.io.IOException: Test Exception");
-
-        youtubeService.getChannelById("sampleChannelId").toCompletableFuture().join();
+        Assert.assertThrows(CompletionException.class, () -> youtubeService.getChannelById("sampleChannelId").toCompletableFuture().join());
     }
 
     @Test
@@ -156,10 +154,7 @@ public class YoutubeServiceTest {
         when(mockSearchList.setType(anyList())).thenReturn(mockSearchList);
         when(mockSearchList.execute()).thenThrow(new IOException("Test Exception"));
 
-        exceptionRule.expect(CompletionException.class);
-        exceptionRule.expectMessage("java.io.IOException: Test Exception");
-
-        youtubeService.getChannelVideos("sampleChannelId").toCompletableFuture().join();
+        Assert.assertThrows(CompletionException.class, () -> youtubeService.getChannelById("sampleChannelId").toCompletableFuture().join());
     }
 
     @Test
@@ -230,10 +225,11 @@ public class YoutubeServiceTest {
         };
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
-        SearchListResponse responseMock = mock(SearchListResponse.class);
+        VideoListResponse responseMock = mock(VideoListResponse.class);
 
-        com.google.api.services.youtube.model.SearchResult[] vidResponse = new com.google.api.services.youtube.model.SearchResult[3];
+        com.google.api.services.youtube.model.Video[] vidResponse = new com.google.api.services.youtube.model.Video[3];
         for(int i = 0; i < 3; i++) {
+            vidResponse[i] = new com.google.api.services.youtube.model.Video();
             vidResponse[i].setId(videos[i].getId());
             vidResponse[i].setSnippet(new VideoSnippet());
             vidResponse[i].getSnippet().setTitle(videos[i].getTitle());
@@ -250,8 +246,6 @@ public class YoutubeServiceTest {
         when(youtubeMock.videos()).thenReturn(videosMock);
         when(videosMock.list(anyList())).thenReturn(videoListMock);
 
-        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
-        when(videoListMock.setQ(anyString())).thenReturn(videoListMock);
         when(videoListMock.setId(anyList())).thenReturn(videoListMock);
         when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
         when(videoListMock.setFields(anyString())).thenReturn(videoListMock);

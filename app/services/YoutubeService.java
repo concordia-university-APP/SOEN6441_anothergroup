@@ -2,6 +2,7 @@ package services;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
@@ -26,7 +27,7 @@ public class YoutubeService {
     private final Config config = ConfigFactory.load();
     private final String API_KEY = config.getString("youtube.apiKey");
     private final String APPLICATION_NAME = config.getString("youtube.applicationName");
-    private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private YouTube youtube;
 
     public YoutubeService() throws GeneralSecurityException, IOException {

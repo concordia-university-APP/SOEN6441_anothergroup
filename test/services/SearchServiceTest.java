@@ -17,9 +17,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Laurent Voisard
- *
  * Test class for SearchService
+ * @author Laurent Voisard
  */
 public class SearchServiceTest {
 
@@ -27,9 +26,8 @@ public class SearchServiceTest {
     private YoutubeService youtubeService;
 
     /**
-     * @author Laurent Voisard
-     *
      * Setup function to prepare tests
+     * @author Laurent Voisard
      */
     @Before
     public void setUpBeforeClass() {
@@ -60,9 +58,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that querying a new search returns a result
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermNoExistingEqualSearchTerm() {
@@ -71,9 +68,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that querying an existing search returns the same result first
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermWithExistingEqualSearchTerm() {
@@ -86,9 +82,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that when more than 10 searches are made, the first one gets erased
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermMaximumCapacity() {
@@ -101,9 +96,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * tests getting a video by id
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideoById() {
@@ -114,9 +108,8 @@ public class SearchServiceTest {
     }
 
     /**
+     * Tests the `getVideosBySearchTerm` method when an existing search term is used. It verifies that the cached results are returned instead of making a new request.
      * @author Tanveer Reza
-     * Tests the `getVideosBySearchTerm` method when an existing search term is used.
-     * It verifies that the cached results are returned instead of making a new request.
      */
     @Test
     public void testGetVideosBySearchTerm_existingSearch() {
@@ -130,9 +123,8 @@ public class SearchServiceTest {
     }
 
     /**
+     * Tests the `getVideosBySearchTerm` method when a new search term is used. It verifies that the correct number of videos are returned and that the titles match the expected values.
      * @author Tanveer Reza
-     * Tests the `getVideosBySearchTerm` method when a new search term is used.
-     * It verifies that the correct number of videos are returned and that the titles match the expected values.
      */
     @Test
     public void testGetVideosBySearchTerm_newSearch() {

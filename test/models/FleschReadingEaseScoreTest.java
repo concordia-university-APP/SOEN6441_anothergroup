@@ -7,16 +7,15 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Laurent Voisard
  * Unit test class for flesch reading score feature
  * all tests have about a 1% precision fault
+ * @author Laurent Voisard
  */
 public class FleschReadingEaseScoreTest {
 
     /**
-     * @author Laurent Voisard
-     *
      * Test that the scores are accurate, multi sentences
+     * @author Laurent Voisard
      */
     @Test
     public void testComputeFleschReadingEaseScore1() {
@@ -31,9 +30,8 @@ public class FleschReadingEaseScoreTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * Test that the scores are accurate, on sentence
+     * @author Laurent Voisard
      */
     @Test
     public void testComputeFleschReadingEaseScore2() {
@@ -48,9 +46,8 @@ public class FleschReadingEaseScoreTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * Test that the scores are 0 when the description is empty
+     * @author Laurent Voisard
      */
     @Test
     public void testComputeFleschReadingEaseEmpty() {
@@ -65,9 +62,8 @@ public class FleschReadingEaseScoreTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * Test that the scores are 100 when a description is e
+     * @author Laurent Voisard
      */
     @Test
     public void testComputeFleschReadingEaseOnlyE() {
