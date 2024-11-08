@@ -30,7 +30,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-)", result, "The sentiment should be happy (:-))");
+        assertEquals("The sentiment should be happy (:-))",":-)", result);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-(", result, "The sentiment should be sad (:-() ");
+        assertEquals("The sentiment should be sad (:-() ",":-(", result);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-|", result, "The sentiment should be neutral (:-|)");
+        assertEquals("The sentiment should be neutral (:-|)",":-|", result);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class SentimentAnalyzerTest {
         String result = SentimentAnalyzer.analyzeSentiment(videos);
 
         // Assert that the result is neutral (:-|) when there are no videos
-        assertEquals(":-|", result, "The sentiment should be neutral when there are no videos.");
+        assertEquals("The sentiment should be neutral when there are no videos.",":-|", result);
     }
 
     @Test
@@ -78,7 +78,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-|", result, "The sentiment should be neutral (:-|) when there are no happy or sad words.");
+        assertEquals("The sentiment should be neutral (:-|) when there are no happy or sad words.",":-|", result);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2, video3);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-|", result, "The sentiment should be neutral (:-|) when there is a mix of happy and sad words.");
+        assertEquals("The sentiment should be neutral (:-|) when there is a mix of happy and sad words.",":-|", result);
     }
     @Test
     public void testAnalyzeSentiment_SadMajority() {
@@ -99,14 +99,14 @@ public class SentimentAnalyzerTest {
         Video video1 = new Video("id7", "Title 1", "It was a terrible and sad experience", "channelId7", "channelName7", "thumbnailUrl7");
         Video video2 = new Video("id8", "Title 2", "The weather was dark and depressing", "channelId8", "channelName8", "thumbnailUrl8");
         Video video3 = new Video("id9", "Title 3", "I had a sad and gloomy day", "channelId9", "channelName9", "thumbnailUrl9");
-        Video video4 = new Video("id10", "Title 4", "A fine day but nothing special", "channelId10", "channelName10", "thumbnailUrl10");  // Neutral video
-        Video video5 = new Video("id11", "Title 5", "It was a fun and exciting event", "channelId11", "channelName11", "thumbnailUrl11"); // Happy video
+        Video video4 = new Video("id10", "Title 4", "A fine day but nothing special bad sad", "channelId10", "channelName10", "thumbnailUrl10");  // Neutral video
+        Video video5 = new Video("id11", "Title 5", "It was a and event horrible", "channelId11", "channelName11", "thumbnailUrl11"); // Happy video
 
         List<Video> videos = Arrays.asList(video1, video2, video3, video4, video5);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
 
         // Since there are more sad videos than happy or neutral ones, the result should be sad (:-()
-        assertEquals(":-(", result, "The sentiment should be sad (:-() when there are more sad videos than happy or neutral ones.");
+        assertEquals("The sentiment should be sad (:-() when there are more sad videos than happy or neutral ones.",":-(", result);
     }
 }
