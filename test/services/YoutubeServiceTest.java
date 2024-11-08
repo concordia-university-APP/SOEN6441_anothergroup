@@ -127,4 +127,95 @@ public class YoutubeServiceTest {
         assertEquals("Sample Channel Description", channel.getDescription());
         assertEquals("http://example.com/channel_image.jpg", channel.getThumbnailUrl());
     }
+
+    @Test
+    public void testGetVideo() throws IOException {
+        Video v = new Video("1", "title","desc","id","channel","dawkad");
+
+        YouTube.Videos videosMock = mock(YouTube.Videos.class);
+        YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
+        VideoListResponse responseMock = mock(VideoListResponse.class);
+
+        com.google.api.services.youtube.model.Video vidResponse = new com.google.api.services.youtube.model.Video();
+        vidResponse.setId(v.getId());
+        vidResponse.setSnippet(new VideoSnippet());
+        vidResponse.getSnippet().setTitle(v.getTitle());
+        vidResponse.getSnippet().setDescription(v.getDescription());
+        vidResponse.getSnippet().setChannelId(v.getChannelId());
+        vidResponse.getSnippet().setChannelTitle(v.getChannelName());
+        vidResponse.getSnippet().setThumbnails(new ThumbnailDetails());
+        vidResponse.getSnippet().getThumbnails().setDefault(new Thumbnail());
+        vidResponse.getSnippet().getThumbnails().setDefault(new Thumbnail());
+        vidResponse.getSnippet().getThumbnails().getDefault().setUrl(v.getThumbnailUrl());
+        responseMock.setItems(List.of(vidResponse));
+
+        when(youtubeMock.videos()).thenReturn(videosMock);
+        when(videosMock.list(anyList())).thenReturn(videoListMock);
+
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setFields(anyString())).thenReturn(videoListMock);
+        when(videoListMock.execute()).thenReturn(responseMock);
+        when(responseMock.getItems()).thenReturn(List.of(vidResponse));
+
+        Video result = youtubeService.getVideo("id").join();
+        assertEquals(v.getId(), result.getId() );
+        assertEquals(v.getTitle(), result.getTitle() );
+        assertEquals(v.getDescription(), result.getDescription() );
+        assertEquals(v.getChannelName(), result.getChannelName() );
+        assertEquals(v.getChannelId(), result.getChannelId() );
+        assertEquals(v.getThumbnailUrl(), result.getThumbnailUrl() );
+        assertEquals(v.getFleschReadingEaseScore().getReadingEaseScore(), result.getFleschReadingEaseScore().getReadingEaseScore(),0.0 );
+        assertEquals(v.getFleschReadingEaseScore().getGradeLevel(), result.getFleschReadingEaseScore().getGradeLevel(), 0.0);
+    }
+
+    @Test
+    public void testGetVideos() throws IOException {
+        Video[] videos = new Video[]{
+                new Video("1", "title1", "desc1", "id1", "channel1", "dawkad1"),
+                new Video("2", "title2", "desc2", "id2", "channel2", "dawkad2"),
+                new Video("3", "title3", "desc3", "id3", "channel3", "dawkad3")
+        };
+        YouTube.Videos videosMock = mock(YouTube.Videos.class);
+        YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
+        SearchListResponse responseMock = mock(SearchListResponse.class);
+
+        com.google.api.services.youtube.model.SearchResult[] vidResponse = new com.google.api.services.youtube.model.SearchResult[3];
+        for(int i = 0; i < 3; i++) {
+            vidResponse[i].setId(videos[i].getId());
+            vidResponse[i].setSnippet(new VideoSnippet());
+            vidResponse[i].getSnippet().setTitle(videos[i].getTitle());
+            vidResponse[i].getSnippet().setDescription(videos[i].getDescription());
+            vidResponse[i].getSnippet().setChannelId(videos[i].getChannelId());
+            vidResponse[i].getSnippet().setChannelTitle(videos[i].getChannelName());
+            vidResponse[i].getSnippet().setThumbnails(new ThumbnailDetails());
+            vidResponse[i].getSnippet().getThumbnails().setDefault(new Thumbnail());
+            vidResponse[i].getSnippet().getThumbnails().setDefault(new Thumbnail());
+            vidResponse[i].getSnippet().getThumbnails().getDefault().setUrl(videos[i].getThumbnailUrl());
+        }
+        responseMock.setItems(List.of(vidResponse));
+
+        when(youtubeMock.videos()).thenReturn(videosMock);
+        when(videosMock.list(anyList())).thenReturn(videoListMock);
+
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setQ(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setId(anyList())).thenReturn(videoListMock);
+        when(videoListMock.setKey(anyString())).thenReturn(videoListMock);
+        when(videoListMock.setFields(anyString())).thenReturn(videoListMock);
+        when(videoListMock.execute()).thenReturn(responseMock);
+        when(responseMock.getItems()).thenReturn(List.of(vidResponse));
+
+        List<Video> result = youtubeService.getVideos(List.of("1","2","3")).join();
+        for(int i = 0; i < 3; i++) {
+            assertEquals(videos[i].getId(), result.get(i).getId() );
+            assertEquals(videos[i].getTitle(), result.get(i).getTitle() );
+            assertEquals(videos[i].getDescription(), result.get(i).getDescription() );
+            assertEquals(videos[i].getChannelName(), result.get(i).getChannelName() );
+            assertEquals(videos[i].getChannelId(), result.get(i).getChannelId() );
+            assertEquals(videos[i].getThumbnailUrl(), result.get(i).getThumbnailUrl() );
+            assertEquals(videos[i].getFleschReadingEaseScore().getReadingEaseScore(), result.get(i).getFleschReadingEaseScore().getReadingEaseScore(),0.0 );
+            assertEquals(videos[i].getFleschReadingEaseScore().getGradeLevel(), result.get(i).getFleschReadingEaseScore().getGradeLevel(), 0.0);
+        }
+    }
 }
