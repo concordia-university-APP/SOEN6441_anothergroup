@@ -416,6 +416,11 @@ public class YoutubeServiceTest {
         Assert.assertThrows(RuntimeException.class, () -> youtubeService.getYoutubeSearchList());
     }
 
+    /**
+     * Validate that we can get a video
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetVideo() throws IOException {
         Video v = new Video("1", "title","desc","id","channel","dawkad");
@@ -457,6 +462,11 @@ public class YoutubeServiceTest {
         assertEquals(v.getFleschReadingEaseScore().getGradeLevel(), result.getFleschReadingEaseScore().getGradeLevel(), 0.0);
     }
 
+    /**
+     * Validate that we cannot get more that 1 vid with get video
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetVideoMultipleFor1Id() throws IOException {
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
@@ -480,6 +490,11 @@ public class YoutubeServiceTest {
         assertNull(youtubeService.getVideo("id").join());
     }
 
+    /**
+     * Validate that we handle when we can't find a video by id
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetVideoNoResults() throws IOException {
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
@@ -501,6 +516,11 @@ public class YoutubeServiceTest {
         assertNull(youtubeService.getVideo("id").join());
     }
 
+    /**
+     * Test functionality of get videos
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetVideos() throws IOException {
         Video[] videos = new Video[]{
@@ -550,6 +570,11 @@ public class YoutubeServiceTest {
         }
     }
 
+    /**
+     * Validate error handling in function
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetYoutubeVideosListException() throws IOException {
 
@@ -559,6 +584,11 @@ public class YoutubeServiceTest {
         assertThrows(RuntimeException.class, () -> youtubeService.getYoutubeVideosList());
     }
 
+    /**
+     * Validate error handling case in function
+     * @throws IOException
+     * @author Laurent Voisard
+     */
     @Test
     public void testGetVideoListResponseException() throws IOException {
 
@@ -571,19 +601,4 @@ public class YoutubeServiceTest {
 
         assertThrows(RuntimeException.class, () -> youtubeService.getVideoListResponse(List.of(""), request));
     }
-
-//    @Test
-//    public void testGetVideoException() throws IOException {
-//
-//        when(mockRequest.execute()).thenThrow(new IOException("Test exception"));
-//
-//        assertThrows(RuntimeException.class, () -> youtubeService.getVideo(""));
-//    }
-//    @Test
-//    public void testGetVideosException() throws IOException {
-//
-//        when(mockRequest.execute()).thenThrow(new IOException("Test exception"));
-//
-//        assertThrows(RuntimeException.class, () -> youtubeService.getVideos(List.of("", "")));
-//    }
 }
