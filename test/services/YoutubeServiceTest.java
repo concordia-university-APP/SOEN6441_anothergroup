@@ -235,6 +235,7 @@ public class YoutubeServiceTest {
     /**
      * Tests the searchResults method for a successful search with valid keywords and max results.
      * It verifies that the method returns a non-null VideoList with correct video details.
+     * @throws Exception error handling
      * @author Yehia Metwally
      */
     @Test
@@ -296,6 +297,7 @@ public class YoutubeServiceTest {
     /**
      * Tests the searchResults method for a case where no search results are returned.
      * It verifies that the method returns an empty VideoList.
+     * @throws Exception error handling
      * @author Yehia Metwally
      */
     @Test
@@ -332,6 +334,7 @@ public class YoutubeServiceTest {
     /**
      * Tests the getSearchListResponse method for a successful response.
      * Verifies that the request setup is successful and that execute() is called.
+     * @throws IOException error handling
      * @author Yehia Metwally
      */
     @Test
@@ -361,6 +364,7 @@ public class YoutubeServiceTest {
     /**
      * Tests the getSearchListResponse method when an IOException occurs during the request setup.
      * Verifies that a RuntimeException is thrown in response to the IOException.
+     * @throws IOException error handling
      * @author Yehia Metwally
      */
     @Test(expected = RuntimeException.class)
@@ -383,6 +387,8 @@ public class YoutubeServiceTest {
     /**
      * Tests the getYoutubeSearchList method for successful setup of the search list.
      * Verifies that search() and list() are called correctly and a non-null List object is returned.
+     * @throws IOException error handling
+     * @throws GeneralSecurityException error handling
      * @author Yehia Metwally
      */
     @Test
@@ -409,6 +415,7 @@ public class YoutubeServiceTest {
     /**
      * Tests the getYoutubeSearchList method when an exception occurs during the search setup.
      * Verifies that a RuntimeException is thrown when an IOException is encountered.
+     * @throws IOException error handling
      * @author Yehia Metwally
      */
     @Test()
@@ -420,7 +427,7 @@ public class YoutubeServiceTest {
 
     /**
      * Validate that we can get a video
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test
@@ -466,7 +473,7 @@ public class YoutubeServiceTest {
 
     /**
      * Validate that we cannot get more that 1 vid with get video
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test
@@ -494,7 +501,7 @@ public class YoutubeServiceTest {
 
     /**
      * Validate that we handle when we can't find a video by id
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test
@@ -520,7 +527,7 @@ public class YoutubeServiceTest {
 
     /**
      * Test functionality of get videos
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test
@@ -574,7 +581,7 @@ public class YoutubeServiceTest {
 
     /**
      * Validate error handling in function
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test
@@ -588,7 +595,7 @@ public class YoutubeServiceTest {
 
     /**
      * Validate error handling case in function
-     * @throws IOException
+     * @throws IOException error handling
      * @author Laurent Voisard
      */
     @Test

@@ -3,7 +3,7 @@ package models;
 /**
  *  Represents an instance of a search model containing search terms,
  *  a list of video results, and an overall sentiment analysis.
- * @author Laurent Voisard & Rumeysa Turkmen
+ * @author Laurent Voisard, Rumeysa Turkmen
  */
 public class VideoSearch {
     private final String searchTerms;
@@ -14,7 +14,7 @@ public class VideoSearch {
      * Constructs a VideoSearch object with the specified search terms,
      * results, and sentiment analysis.
      *
-     * @author Laurent Voisard & Rumeysa Turkmen
+     * @author Laurent Voisard, Rumeysa Turkmen
      * @param searchTerms The keywords used for the search.
      * @param results The list of videos returned from the search.
      * @param sentiment The overall sentiment of the video results.

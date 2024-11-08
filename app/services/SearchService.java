@@ -41,7 +41,7 @@ public class SearchService {
      * based on the descriptions of the videos in the result. The result, including the sentiment
      *  analysis, is encapsulated in a {@link VideoSearch} object and added to the session's search list
      * to the api. Otherwise request from the youtube api
-     * @author Laurent Voisard & Rumeysa Turkmen
+     * @author Laurent Voisard, Rumeysa Turkmen
      * @param keywords keywords of the search
      * @param sessionId user session id
      * @return list of the last 10 or less searches made
