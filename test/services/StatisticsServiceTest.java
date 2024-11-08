@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Tanveer Reza
  * Unit tests for StatisticsService class
+ * @author Tanveer Reza
  */
 public class StatisticsServiceTest {
 
@@ -23,6 +23,11 @@ public class StatisticsServiceTest {
     private VideoList sampleVideoList;
     private Map<String, Long> expectedWordFrequency;
 
+    /**
+     * Set up the mock search service and sample video list
+     *
+     * @author Tanveer Reza
+     */
     @Before
     public void setUp() {
         searchService = mock(SearchService.class);
@@ -48,6 +53,11 @@ public class StatisticsServiceTest {
         expectedWordFrequency.put("to", 1L);
     }
 
+    /**
+     * Test the getWordFrequency method with a basic case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordFrequency_basicCase() {
         CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency("Java", "1");
@@ -56,6 +66,12 @@ public class StatisticsServiceTest {
         assertEquals(expectedWordFrequency, wordFrequency);
     }
 
+    /**
+     * Test the getWordFrequency method with an empty query result list
+     * The method should return an empty map in this case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordFrequency_emptyQueryResults() {
         when(searchService.getVideosBySearchTerm(eq("NonexistentQuery"), anyString()))
@@ -67,6 +83,12 @@ public class StatisticsServiceTest {
         assertTrue(wordFrequency.isEmpty());
     }
 
+    /**
+     * Test the getWordFrequency method with an empty query
+     * The method should return an empty map in this case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testExtractAndNormalizeWords_basicCase() {
         List<String> titles = Arrays.asList("Java Programming", "Python Tutorial");
@@ -77,6 +99,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, words);
     }
 
+    /**
+     * Test the extractAndNormalizeWords method with empty titles
+     * The method should return an empty list in this case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testExtractAndNormalizeWords_handlesEmptyTitles() {
         List<String> titles = Arrays.asList("", "   ");
@@ -85,6 +113,12 @@ public class StatisticsServiceTest {
         assertTrue(words.isEmpty());
     }
 
+    /**
+     * Test the extractAndNormalizeWords method with special characters
+     * The method should remove special characters and convert words to lowercase
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testExtractAndNormalizeWords_specialCharacters() {
         List<String> titles = Arrays.asList("Java & Python!", "Programming: Tips & Tricks");
@@ -95,6 +129,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, words);
     }
 
+    /**
+     * Test the countAndSortWordFrequencies method with a basic case
+     * The method should return a map of word frequencies sorted by frequency in descending order
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testCountAndSortWordFrequencies_basicCase() {
         List<String> words = Arrays.asList("java", "programming", "java", "tutorial");
@@ -108,6 +148,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, sortedFrequencies);
     }
 
+    /**
+     * Test the countAndSortWordFrequencies method with a tiebreaker
+     * The method should sort words alphabetically if they have the same frequency count
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testCountAndSortWordFrequencies_tieBreakerAlphabetical() {
         List<String> words = Arrays.asList("java", "python", "java", "python");
@@ -120,6 +166,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, sortedFrequencies);
     }
 
+    /**
+     * Test the countAndSortWordFrequencies method with an empty list
+     * The method should return an empty map in this case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testCountAndSortWordFrequencies_emptyList() {
         Map<String, Long> sortedFrequencies = statisticsService.countAndSortWordFrequencies(Collections.emptyList());
@@ -127,6 +179,12 @@ public class StatisticsServiceTest {
         assertTrue(sortedFrequencies.isEmpty());
     }
 
+    /**
+     * Test the countAndSortWordFrequencies method with case sensitivity
+     * The method should treat words with different cases as different words and count them separately
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordOccurrences_basicCase() {
         List<String> words = Arrays.asList("java", "programming", "java", "tutorial");
@@ -140,6 +198,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, wordOccurrences);
     }
 
+    /**
+     * Test the getWordOccurrences method with an empty list
+     * The method should return an empty map in this case
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordOccurrences_emptyList() {
         Map<String, Long> wordOccurrences = statisticsService.getWordOccurences(Collections.emptyList());
@@ -147,6 +211,12 @@ public class StatisticsServiceTest {
         assertTrue(wordOccurrences.isEmpty());
     }
 
+    /**
+     * Test the getWordOccurrences method with case sensitivity
+     * The method should treat words with different cases as different words and count them separately
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordOccurrences_caseSensitivity() {
         List<String> words = Arrays.asList("Java", "java", "JAVA");
@@ -160,6 +230,12 @@ public class StatisticsServiceTest {
         assertEquals(expected, wordOccurrences);
     }
 
+    /**
+     * Test the getWordFrequency method with a key collision
+     * The method should handle key collisions by summing the frequencies of the colliding keys together
+     *
+     * @author Tanveer Reza
+     */
     @Test
     public void testGetWordFrequency_keyCollision() {
         Video video1 = new Video("1", "Java programming", "Java programming", "101", "Channel A", "http://example.com/thumb1.jpg");
