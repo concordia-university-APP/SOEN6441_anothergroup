@@ -21,6 +21,11 @@ import static org.junit.Assert.*;
  */
 public class SentimentAnalyzerTest {
 
+
+    /**
+     * Test positive sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_Happy() {
         // Mock data with more than 70% happy words
@@ -33,6 +38,10 @@ public class SentimentAnalyzerTest {
         assertEquals("The sentiment should be happy (:-))",":-)", result);
     }
 
+    /**
+     * Test negative sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_Sad() {
         // Mock data with more than 70% sad words
@@ -45,6 +54,10 @@ public class SentimentAnalyzerTest {
         assertEquals("The sentiment should be sad (:-() ",":-(", result);
     }
 
+    /**
+     * Test neutral sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_Neutral() {
         // Mock data with mixed or neutral words
@@ -57,6 +70,10 @@ public class SentimentAnalyzerTest {
         assertEquals("The sentiment should be neutral (:-|)",":-|", result);
     }
 
+    /**
+     * Test empty videos
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_Empty() {
         // Create an empty list of videos
@@ -69,6 +86,10 @@ public class SentimentAnalyzerTest {
         assertEquals("The sentiment should be neutral when there are no videos.",":-|", result);
     }
 
+    /**
+     * No happy words
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_NoHappySadWords() {
         // Mock data with no happy or sad words
@@ -81,6 +102,10 @@ public class SentimentAnalyzerTest {
         assertEquals("The sentiment should be neutral (:-|) when there are no happy or sad words.",":-|", result);
     }
 
+    /**
+     * No happy and sad words
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_MixedSentiments() {
         // Mock data with mixed happy and sad words
@@ -93,6 +118,11 @@ public class SentimentAnalyzerTest {
         String result = SentimentAnalyzer.analyzeSentiment(videos);
         assertEquals("The sentiment should be neutral (:-|) when there is a mix of happy and sad words.",":-|", result);
     }
+
+    /**
+     * Sad majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testAnalyzeSentiment_SadMajority() {
         // Mock data where sad sentiments outnumber happy and neutral ones

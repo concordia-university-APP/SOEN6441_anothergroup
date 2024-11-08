@@ -22,13 +22,13 @@ import java.util.concurrent.CompletionStage;
 import java.util.List;
 
 /**
- * The controller for handling YouTube-related operations such as searching for videos, retrieving video details,
- * and displaying channel profiles and statistics.
  * <p>
  * This controller provides endpoints for searching YouTube videos, retrieving a video by ID, showing channel profiles,
  * and displaying statistics about search queries. It uses the {@link SearchService}, {@link StatisticsService}, and
  * {@link YoutubeService} to interact with YouTube data.
  * </p>
+ *
+ * @author Yehia, Laurent, Tanveer
  */
 public class YoutubeController extends Controller {
     private final StatisticsService statisticsService;
@@ -98,6 +98,14 @@ public class YoutubeController extends Controller {
                 .thenApplyAsync(video -> ok(views.html.video.render(video)), ec.current());
     }
 
+    /**
+     * Redirect to the profile page
+     * @param channelId id of the channel in youtube api
+     * @return channel page
+     * @throws GeneralSecurityException errors
+     * @throws IOException errors
+     * @author Yehia
+     */
     public CompletionStage<Result> showChannelProfile(String channelId) throws GeneralSecurityException, IOException {
         CompletionStage<YoutubeChannel> channelFuture = youtubeService.getChannelById(channelId);
         CompletionStage<List<Video>> videosFuture = youtubeService.getChannelVideos(channelId);
