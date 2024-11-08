@@ -90,4 +90,15 @@ public class SentimentWordsTest {
         // Expecting neutral sentiment as no sentiment words are present
         assertEquals(":-|", result);
     }
+
+    /**
+     * Required for 100% test coverage
+     * @author Rumeysa Turkmen
+     */
+    @Test
+    public void testInitializeSentimentWords() {
+        SentimentWords words = new SentimentWords();
+
+        assertNotNull(words);
+    }
 }

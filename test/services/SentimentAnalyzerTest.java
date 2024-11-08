@@ -28,7 +28,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-)", result, "The sentiment should be happy (:-))");
+        assertEquals("The sentiment should be happy (:-))",":-)", result);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-(", result, "The sentiment should be sad (:-() ");
+        assertEquals("The sentiment should be sad (:-() ",":-(", result);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class SentimentAnalyzerTest {
         List<Video> videos = Arrays.asList(video1, video2);
 
         String result = SentimentAnalyzer.analyzeSentiment(videos);
-        assertEquals(":-|", result, "The sentiment should be neutral (:-|)");
+        assertEquals("The sentiment should be neutral (:-|)", ":-|", result);
     }
     @Test
     public void testAnalyzeSentiment_Empty() {
@@ -63,7 +63,17 @@ public class SentimentAnalyzerTest {
         String result = SentimentAnalyzer.analyzeSentiment(videos);
 
         // Assert that the result is neutral (:-|) when there are no videos
-        assertEquals(":-|", result, "The sentiment should be neutral when there are no videos.");
+        assertEquals("The sentiment should be neutral when there are no videos.",":-|", result);
     }
 
+    /**
+     * Required for 100% test coverage
+     * @author Rumeysa Turkmen
+     */
+    @Test
+    public void testInitializeAnalyzer() {
+        SentimentAnalyzer analyzer = new SentimentAnalyzer();
+
+        assertNotNull(analyzer);
+    }
 }
