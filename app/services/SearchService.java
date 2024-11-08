@@ -10,6 +10,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 
+/**
+ * @author Laurent Voisard
+ * This service adds a level of indirection to the youtube service so we can cache the search results
+ */
 @Singleton
 public class SearchService {
     private int userSessionCounter = 0;

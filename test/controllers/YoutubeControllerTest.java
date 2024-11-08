@@ -25,11 +25,16 @@ import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.*;
 
+/**
+ * @author Laurent Voisard, Yehia, Tanveer Reza
+ * Test class for the Youtube Controller
+ */
 public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;
     private static StatisticsService statisticsService;
@@ -44,10 +49,10 @@ public class YoutubeControllerTest extends WithApplication {
      */
     @BeforeClass
     public static void setUp() {
-        mockYoutubeService = Mockito.mock(YoutubeService.class);
-        statisticsService = Mockito.mock(StatisticsService.class);
-        searchService = Mockito.mock(SearchService.class);
-        HttpExecutionContext ec = Mockito.mock(HttpExecutionContext.class);
+        mockYoutubeService = mock(YoutubeService.class);
+        statisticsService = mock(StatisticsService.class);
+        searchService = mock(SearchService.class);
+        HttpExecutionContext ec = mock(HttpExecutionContext.class);
         youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
@@ -56,6 +61,10 @@ public class YoutubeControllerTest extends WithApplication {
         when(ec.current()).thenReturn(Runnable::run);
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user has no session and opens the app
+     */
     @Test
     public void testIndexRedirectWhenNoUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -68,6 +77,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(SEE_OTHER, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user has a session and opens the app
+     */
     @Test
     public void testIndexWithUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -82,6 +95,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(OK, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user searches without a session
+     */
     @Test
     public void testSearchWithoutUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -94,6 +111,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(SEE_OTHER, result.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test when a user searches without a session
+     */
     @Test
     public void testSearchWithUserSession() {
         Http.RequestBuilder request = Helpers.fakeRequest()
@@ -107,6 +128,10 @@ public class YoutubeControllerTest extends WithApplication {
         assertEquals(OK, res.status());
     }
 
+    /**
+     * @author Laurent Voisard
+     * Test the video route
+     */
     @Test
     public void testVideo() {
         Video v = new Video("test","test","test","test","test","test");
@@ -217,5 +242,20 @@ public class YoutubeControllerTest extends WithApplication {
 
         assertEquals("Expected status to be Internal Server Error",Http.Status.INTERNAL_SERVER_ERROR, result.status());
         assertTrue("Response should indicate an error", Helpers.contentAsString(result).contains("Error occurred while retrieving channel profile"));
+    }
+
+    @Test
+    public void testShowChannelProfile_NotFoundNull() throws GeneralSecurityException, IOException {
+        when(mockYoutubeService.getChannelById(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(testChannel));
+
+        when(mockYoutubeService.getChannelVideos(TEST_CHANNEL_ID))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        CompletionStage<Result> resultStage = youtubeController.showChannelProfile(TEST_CHANNEL_ID);
+        Result result = resultStage.toCompletableFuture().join();
+
+        assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
+
     }
 }
