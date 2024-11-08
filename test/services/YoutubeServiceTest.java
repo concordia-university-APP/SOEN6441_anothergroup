@@ -482,8 +482,6 @@ public class YoutubeServiceTest {
 
     @Test
     public void testGetVideoNoResults() throws IOException {
-        Video v = new Video("1", "title","desc","id","channel","dawkad");
-
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
         VideoListResponse responseMock = mock(VideoListResponse.class);
