@@ -49,7 +49,7 @@ public class YoutubeService {
      * private setter, only used in tests to mock behavior
      * @param youtube youtube service
      */
-    private void setYoutubeService(YouTube youtube) {
+    void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
 
@@ -74,7 +74,7 @@ public class YoutubeService {
         });
     }
 
-    private SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
+    SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
         SearchListResponse response;
         try {
             response = request
@@ -91,7 +91,7 @@ public class YoutubeService {
         return response;
     }
 
-    private YouTube.Search.List getYoutubeSearchList() {
+    YouTube.Search.List getYoutubeSearchList() {
         YouTube.Search.List request;
         try {
             request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
