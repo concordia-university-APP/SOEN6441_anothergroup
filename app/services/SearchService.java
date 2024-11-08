@@ -40,7 +40,6 @@ public class SearchService {
      *  search. The sentiment is analyzed to determine the overall mood (happy, sad, or neutral)
      * based on the descriptions of the videos in the result. The result, including the sentiment
      *  analysis, is encapsulated in a {@link VideoSearch} object and added to the session's search list.
-     *
      * @author Laurent Voisard & Rumeysa Turkmen
      * @param keywords keywords of the search
      * @param sessionId user session id
