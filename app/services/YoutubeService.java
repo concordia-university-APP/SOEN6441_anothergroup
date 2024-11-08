@@ -81,7 +81,7 @@ public class YoutubeService {
      * Get search list response
      * @param keywords   search query
      * @param maxResults number of results to return
-     * @return a list of videos based on the search query
+     * @return search list response from youtube api
      * @author Tanveer Reza, Laurent Voisard, Yehia
      */
     private SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {

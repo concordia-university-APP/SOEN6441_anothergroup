@@ -97,7 +97,7 @@ public class SearchService {
     /**
      * Internal method to create a new session if a browser already had one
      * @author Laurent Voisard
-     * @param sessionId
+     * @param sessionId user session id
      */
     private void createSessionSearchList(String sessionId) {
 

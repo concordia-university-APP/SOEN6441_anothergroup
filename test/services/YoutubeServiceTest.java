@@ -39,11 +39,11 @@ public class YoutubeServiceTest {
 
     /**
      * Setup function to prepare tests
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws GeneralSecurityException
-     * @throws IOException
+     * @throws NoSuchMethodException if the method does not exist
+     * @throws InvocationTargetException if the method cannot be invoked
+     * @throws IllegalAccessException if the method cannot be accessed
+     * @throws GeneralSecurityException if there is a security exception
+     * @throws IOException if there is an IO exception
      * @author Laurent Voisard, Tanveer Reza, Yehia
      */
     @Before
@@ -156,7 +156,7 @@ public class YoutubeServiceTest {
 
     /**
      * Test the getChannelById method handles IOException and throws a CompletionException
-     * @throws Exception
+     * @throws Exception IOException
      * @author Tanveer Reza
      */
     @Test
@@ -173,7 +173,7 @@ public class YoutubeServiceTest {
 
     /**
      * Test the getChannelVideos method handles IOException and throws a CompletionException
-     * @throws Exception
+     * @throws Exception IOException
      * @author Tanveer Reza
      */
     @Test
@@ -195,7 +195,7 @@ public class YoutubeServiceTest {
 
     /**
      * Test the getChannelById method returns null when the channel is empty
-     * @throws Exception
+     * @throws Exception IOException
      * @author Tanveer Reza
      */
     @Test

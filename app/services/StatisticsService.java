@@ -22,7 +22,7 @@ public class StatisticsService {
     /**
      * Constructor for the StatisticsService class.
      * @author Tanveer Reza
-     * @param searchService
+     * @param searchService the search service to use for fetching videos
      */
     @Inject
     public StatisticsService(SearchService searchService) {

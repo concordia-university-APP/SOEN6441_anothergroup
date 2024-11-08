@@ -115,7 +115,7 @@ public class SearchServiceTest {
     @Test
     public void testGetVideosBySearchTerm_existingSearch() {
         Video video1 = new Video("1","1","1","1","1","1");
-        VideoList videoList = new VideoList(Arrays.asList(video1));
+        VideoList videoList = new VideoList(List.of(video1));
         VideoSearch videoSearch = new VideoSearch("test", videoList, "");
         searchService.getSessionSearchList("1").add(videoSearch);
 
