@@ -22,6 +22,10 @@ import java.util.List;
  */
 public class SentimentWordsTest {
 
+    /**
+     * Test positive sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testHappySentiment() {
         // Prepare a list of videos with happy descriptions
@@ -36,6 +40,10 @@ public class SentimentWordsTest {
         assertEquals(":-)", result);
     }
 
+    /**
+     * Test negative sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testSadSentiment() {
         // Prepare a list of videos with sad descriptions
@@ -50,6 +58,10 @@ public class SentimentWordsTest {
         assertEquals(":-(", result);
     }
 
+    /**
+     * Test neutral sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testNeutralSentiment() {
         // Prepare a list of videos with mixed sentiments
@@ -64,6 +76,10 @@ public class SentimentWordsTest {
         assertEquals(":-|", result);
     }
 
+    /**
+     * Test mixed positive and negative sentiment majority
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testMixedSentiment() {
         // Prepare a list of videos with mixed happy and sad descriptions
@@ -78,6 +94,10 @@ public class SentimentWordsTest {
         assertEquals(":-|", result);
     }
 
+    /**
+     * Test no videos
+     * @author Rumeysa Turkmen
+     */
     @Test
     public void testEdgeCaseNoSentimentWords() {
         // Prepare a list of videos with no sentiment words
