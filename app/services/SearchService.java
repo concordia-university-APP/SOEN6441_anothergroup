@@ -11,8 +11,8 @@ import java.util.concurrent.CompletableFuture;
 
 
 /**
+ * Service for searching videos on YouTube and storing the search results for a user session.
  * @author Laurent Voisard
- * This service adds a level of indirection to the youtube service so we can cache the search results
  */
 @Singleton
 public class SearchService {
@@ -23,8 +23,8 @@ public class SearchService {
     private final YoutubeService youtubeService;
 
     /**
-     * author Laurent Voisard
      * Constructor for the SearchService class.
+     * author Laurent Voisard
      * @param youtubeService the YouTube service to use for fetching videos
      */
     @Inject
@@ -33,10 +33,10 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard & Rumeysa Turkmen
      * Indirection level to youtube service search, we store the search results in the correct user session search result list
      * We also handle if a search term has already been made, if so put it back to the top of the list without making a request
      * to the api. Otherwise request from the youtube api
+     * @author Laurent Voisard & Rumeysa Turkmen
      * @param keywords keywords of the search
      * @param sessionId user session id
      * @return list of the last 10 or less searches made
@@ -71,6 +71,7 @@ public class SearchService {
     }
 
     /**
+     * Get the search list for a user session, if it doesn't exist create a new one
      * @author Laurent Voisard
      * @param sessionId user session id
      * @return the video search list for this user
@@ -83,8 +84,8 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard
      * Create a new session search list
+     * @author Laurent Voisard
      * @return created ID
      */
     public String createSessionSearchList() {
@@ -94,9 +95,9 @@ public class SearchService {
     }
 
     /**
-     * @author Laurent Voisard
      * Internal method to create a new session if a browser already had one
-     * @param sessionId
+     * @author Laurent Voisard
+     * @param sessionId user session id
      */
     private void createSessionSearchList(String sessionId) {
 

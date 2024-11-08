@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -17,9 +16,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Laurent Voisard
- *
  * Test class for SearchService
+ * @author Laurent Voisard
  */
 public class SearchServiceTest {
 
@@ -27,9 +25,8 @@ public class SearchServiceTest {
     private YoutubeService youtubeService;
 
     /**
-     * @author Laurent Voisard
-     *
      * Setup function to prepare tests
+     * @author Laurent Voisard
      */
     @Before
     public void setUpBeforeClass() {
@@ -60,9 +57,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that querying a new search returns a result
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermNoExistingEqualSearchTerm() {
@@ -71,9 +67,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that querying an existing search returns the same result first
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermWithExistingEqualSearchTerm() {
@@ -86,9 +81,8 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Laurent Voisard
-     *
      * validate that when more than 10 searches are made, the first one gets erased
+     * @author Laurent Voisard
      */
     @Test
     public void testGetVideosForSearchTermMaximumCapacity() {
@@ -101,9 +95,8 @@ public class SearchServiceTest {
     }
 
     /**
+     * tests getting a video by id from the youtube service
      * @author Laurent Voisard
-     *
-     * tests getting a video by id
      */
     @Test
     public void testGetVideoById() {
@@ -114,14 +107,14 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Tanveer Reza
      * Tests the `getVideosBySearchTerm` method when an existing search term is used.
      * It verifies that the cached results are returned instead of making a new request.
+     * @author Tanveer Reza
      */
     @Test
     public void testGetVideosBySearchTerm_existingSearch() {
         Video video1 = new Video("1","1","1","1","1","1");
-        VideoList videoList = new VideoList(Arrays.asList(video1));
+        VideoList videoList = new VideoList(List.of(video1));
         VideoSearch videoSearch = new VideoSearch("test", videoList, "");
         searchService.getSessionSearchList("1").add(videoSearch);
 
@@ -130,9 +123,9 @@ public class SearchServiceTest {
     }
 
     /**
-     * @author Tanveer Reza
      * Tests the `getVideosBySearchTerm` method when a new search term is used.
      * It verifies that the correct number of videos are returned and that the titles match the expected values.
+     * @author Tanveer Reza
      */
     @Test
     public void testGetVideosBySearchTerm_newSearch() {

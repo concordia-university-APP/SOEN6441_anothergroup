@@ -32,8 +32,8 @@ import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.*;
 
 /**
- * @author Laurent Voisard, Yehia, Tanveer Reza
  * Test class for the Youtube Controller
+ * @author Laurent Voisard, Yehia, Tanveer Reza
  */
 public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;

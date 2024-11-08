@@ -2,7 +2,7 @@ package services;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import com.typesafe.config.Config;
@@ -20,44 +20,47 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
+ * Service for interacting with the YouTube API
  * @author Yehia, Laurent, Tanveer Reza
  */
 public class YoutubeService {
     private final Config config = ConfigFactory.load();
     private final String API_KEY = config.getString("youtube.apiKey");
     private final String APPLICATION_NAME = config.getString("youtube.applicationName");
-    private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private YouTube youtube;
 
     public YoutubeService() throws GeneralSecurityException, IOException {
 
-            setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build());
+        setYoutubeService(new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+                .setApplicationName(APPLICATION_NAME)
+                .build());
     }
 
     /**
-     * @author Laurent Voisard
+     * Get youtube service
      * @return youtube service
+     * @author Laurent Voisard
      */
     public YouTube getYoutubeService() {
         return youtube;
     }
 
     /**
-     * @author Laurent Voisard
      * private setter, only used in tests to mock behavior
      * @param youtube youtube service
+     * @author Laurent Voisard
      */
     void setYoutubeService(YouTube youtube) {
         this.youtube = youtube;
     }
 
     /**
-     * @author Tanveer Reza, Laurent Voisard, Yehia metwally
-     * @param keywords search query
+     * Search for videos based on a search query
+     * @param keywords   search query
      * @param maxResults number of results to return
      * @return a list of videos based on the search query
+     * @author Tanveer Reza, Laurent Voisard, Yehia
      */
     public CompletableFuture<VideoList> searchResults(String keywords, Long maxResults) {
         return CompletableFuture.supplyAsync(() -> {
@@ -74,6 +77,13 @@ public class YoutubeService {
         });
     }
 
+    /**
+     * Get search list response
+     * @param keywords   search query
+     * @param maxResults number of results to return
+     * @return search list response from youtube api
+     * @author Tanveer Reza, Laurent Voisard, Yehia
+     */
     SearchListResponse getSearchListResponse(String keywords, Long maxResults, YouTube.Search.List request) {
         SearchListResponse response;
         try {
@@ -91,6 +101,11 @@ public class YoutubeService {
         return response;
     }
 
+    /**
+     * Get youtube search list
+     * @return youtube search list
+     * @author Laurent Voisard, Tanveer Reza
+     */
     YouTube.Search.List getYoutubeSearchList() {
         YouTube.Search.List request;
         try {
@@ -102,10 +117,10 @@ public class YoutubeService {
     }
 
     /**
-     * @author Laurent Voisard
      * Get video by id
      * @param videoId video id
      * @return video model
+     * @author Laurent Voisard
      */
     public CompletableFuture<Video> getVideo(String videoId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -114,7 +129,9 @@ public class YoutubeService {
             VideoListResponse response = getVideoListResponse(Collections.singletonList(videoId), request);
 
             // make sure we only have 1 video
-            assert response.getItems().size() == 1;
+            if(response.getItems().size() != 1)
+                return null;
+
             com.google.api.services.youtube.model.Video video = response.getItems().get(0);
             return new Video(
                     video.getId(),
@@ -126,7 +143,12 @@ public class YoutubeService {
         });
     }
 
-    private YouTube.Videos.List getYoutubeVideosList() {
+    /**
+     * Get youtube videos list
+     * @return youtube videos list
+     * @author Tanveer Reza
+     */
+    YouTube.Videos.List getYoutubeVideosList() {
         YouTube.Videos.List request;
         try {
             request = getYoutubeService().videos().list(Collections.singletonList("snippet"));
@@ -138,13 +160,19 @@ public class YoutubeService {
 
 
     /**
-     * @author Laurent Voisard
      * get a list of videos
      * @param videoIds a list of video ids
      * @return list of videos from ids
+     * @author Laurent Voisard
      */
     public CompletableFuture<List<Video>> getVideos(List<String> videoIds) {
+
+        // return empty list if no video ids are provided;
+        if (videoIds.isEmpty())
+            return CompletableFuture.supplyAsync(List::of);
+
         return CompletableFuture.supplyAsync(() -> {
+
             YouTube.Videos.List request = getYoutubeVideosList();
 
             VideoListResponse response = getVideoListResponse(videoIds, request);
@@ -160,7 +188,14 @@ public class YoutubeService {
         });
     }
 
-    private VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
+    /**
+     * Get video list response
+     * @param videoIds list of video ids
+     * @param request  youtube videos list
+     * @return video list response
+     * @author Laurent Voisard
+     */
+    VideoListResponse getVideoListResponse(List<String> videoIds, YouTube.Videos.List request) {
         VideoListResponse response;
         try {
             response = request
@@ -197,23 +232,22 @@ public class YoutubeService {
                 SearchListResponse response = request.execute();
                 List<SearchResult> searchResults = response.getItems();
 
-                // Convert SearchResult to Video objects
-                return searchResults.stream()
-                        .map(sr -> new Video(
-                                sr.getId().getVideoId(),
-                                sr.getSnippet().getTitle(),
-                                sr.getSnippet().getDescription(),
-                                sr.getSnippet().getChannelId(),
-                                sr.getSnippet().getChannelTitle(),
-                                sr.getSnippet().getThumbnails().getDefault().getUrl()
-                        ))
-                        .collect(Collectors.toList());
-            } catch (IOException e) {
-                throw new CompletionException(e);
-            }
-        });
-    }
-
+            // Convert SearchResult to Video objects
+            return searchResults.stream()
+                    .map(sr -> new Video(
+                            sr.getId().getVideoId(),
+                            sr.getSnippet().getTitle(),
+                            sr.getSnippet().getDescription(),
+                            sr.getSnippet().getChannelId(),
+                            sr.getSnippet().getChannelTitle(),
+                            sr.getSnippet().getThumbnails().getDefault().getUrl()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        }
+    });
+}
     /**
      * Retrieves details of a YouTube channel by its ID.
      * This method fetches the channel information from the YouTube Data API, including
@@ -247,5 +281,4 @@ public class YoutubeService {
             }
         });
     }
-
 }

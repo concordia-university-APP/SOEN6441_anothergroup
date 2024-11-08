@@ -8,8 +8,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Laurent
  * Test class to verify the behavior of VideoList model
+ * @author Laurent
  */
 public class VideoListTest {
     @Test
