@@ -1,55 +1,61 @@
 package services;
 
 import models.Video;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.*;
+import java.util.Arrays;
 
+/**
+ * @author Rumeysa Turkmen
+ * this class implements the logic for sentiment analysis.
+ */
 public class SentimentAnalyzer {
     public static String analyzeSentiment(List<Video> videos) {
-        int happyCount = 0;
-        int sadCount = 0;
+        if (videos.isEmpty()) {
+            return ":-|"; // Return neutral if no videos are provided
+        }
 
-        for (Video video : videos) {
-            String description = video.getDescription();
-            String[] words = description.toLowerCase().split("\\W+");
+        // Process each video to determine its sentiment
+        List<String> videoSentiments = videos.stream().map(video -> {
+            String description = video.getDescription().toLowerCase();
+            String[] words = description.split("\\W+");
 
-            for (String word : words) {
-                if (SentimentWords.HAPPY_WORDS.contains(word)) {
-                    happyCount++;
-                } else if (SentimentWords.SAD_WORDS.contains(word)) {
-                    sadCount++;
-                }
+            long happyCount = Arrays.stream(words)
+                    .filter(SentimentWords.HAPPY_WORDS::contains)
+                    .count();
+            long sadCount = Arrays.stream(words)
+                    .filter(SentimentWords.SAD_WORDS::contains)
+                    .count();
+
+            double totalSentimentWords = happyCount + sadCount;
+            if (totalSentimentWords == 0) {
+                return ":-|"; // Neutral if no happy/sad words found
             }
 
-            // Debugging: Print counts for each video
-            System.out.println("Video: " + video.getTitle());
-            System.out.println("Happy Count: " + happyCount + ", Sad Count: " + sadCount);
-        }
+            double happyPercentage = (double) happyCount / totalSentimentWords;
+            double sadPercentage = (double) sadCount / totalSentimentWords;
 
-        // Calculate percentages
-        double totalSentimentWords = happyCount + sadCount;
-        double happyPercentage = 0;
-        double sadPercentage = 0;
+            if (happyPercentage > 0.7) {
+                return ":-)";
+            } else if (sadPercentage > 0.7) {
+                return ":-(";
+            } else {
+                return ":-|";
+            }
+        }).collect(Collectors.toList());
 
-        if (totalSentimentWords > 0) {
-            happyPercentage = happyCount / totalSentimentWords;
-            sadPercentage = sadCount / totalSentimentWords;
-        }
+        // Count how many videos fall into each sentiment category
+        long happyVideos = videoSentiments.stream().filter(":-)"::equals).count();
+        long sadVideos = videoSentiments.stream().filter(":-("::equals).count();
+        long neutralVideos = videoSentiments.stream().filter(":-|"::equals).count();
 
-        // Debugging: Print percentages
-        System.out.println("Happy Percentage: " + happyPercentage + ", Sad Percentage: " + sadPercentage);
-
-        // Determine overall sentiment
-        if (happyPercentage > 0.7) {
+        // Determine overall sentiment based on majority
+        if (happyVideos > sadVideos && happyVideos > neutralVideos) {
             return ":-)";
-        } else if (sadPercentage > 0.7) {
+        } else if (sadVideos > happyVideos && sadVideos > neutralVideos) {
             return ":-(";
         } else {
-            return ":-|";
+            return ":-|"; // Return neutral if no clear majority
         }
     }
-
 }

@@ -49,15 +49,8 @@ public class YoutubeController extends Controller {
 
         return searchService.searchKeywords(query, user.get())
                 .thenApplyAsync(searches ->
-//                    List<Video> allVideos = new ArrayList<>();
-//        for (VideoSearch search : searches) {
-//            allVideos.addAll(search.getResults().getVideoList());
-//        }
-//        // Analyze sentiment
-//        String overallSentiment = SentimentAnalyzer.analyzeSentiment(allVideos);
                     ok(views.html.search.render(
                         Option.apply(searches),
-                        "",
                         DISPLAY_COUNT)),
                         ec.current()
                         
@@ -76,7 +69,7 @@ public class YoutubeController extends Controller {
         return user.map(sessionId -> CompletableFuture.supplyAsync(() ->
                 ok(views.html.search.render(
                         Option.apply(searchService.getSessionSearchList(sessionId)),
-                        "",
+
                         DISPLAY_COUNT
                 ))
         )).orElseGet(() -> CompletableFuture.supplyAsync(() ->

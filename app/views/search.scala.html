@@ -1,7 +1,7 @@
 @import java.util.Collection
 @import java.util
 @import java.text.DecimalFormat
-@(results: Option[util.Collection[VideoSearch]],overallSentiment String, maxDisplay: Integer)
+@(results: Option[util.Collection[VideoSearch]], maxDisplay: Integer)
 
 @main("YouTube Search") {
     <div class="container">
@@ -17,10 +17,7 @@
                 </div>
             </form>
 
-                <!-- Display Overall Sentiment -->
-            <div>
-                <h2>Overall Sentiment: @overallSentiment</h2>
-            </div>
+
 
                 <!-- Search Results -->
             <div id="results">
@@ -29,6 +26,10 @@
                     @for(item: VideoSearch <- searchList) {
 
                         <h2>Search Results for terms: @item.getSearchTerms </h2>
+                            <!-- Display Overall Sentiment -->
+                        <div>
+                            <h2>Overall Sentiment: @item.getSentiment </h2>
+                        </div>
                         <div>
                             <a href="@routes.YoutubeController.getStatistics(item.getSearchTerms)" target="_blank">
                                 View Word Frequency Statistics for "@item.getSearchTerms"

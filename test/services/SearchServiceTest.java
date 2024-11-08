@@ -50,7 +50,7 @@ public class SearchServiceTest {
                 new Video("10","1","1","1","1","1"),
         }));
 
-        VideoSearch search = new VideoSearch("test", videoList);
+        VideoSearch search = new VideoSearch("test", videoList, "");
 
 
         when(youtubeService.searchResults(anyString(), anyLong()))

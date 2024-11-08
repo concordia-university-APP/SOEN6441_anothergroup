@@ -27,7 +27,7 @@ public class VideoSearchTest {
                 })
         );
 
-        VideoSearch videoSearch = new VideoSearch(keywords, videoList);
+        VideoSearch videoSearch = new VideoSearch(keywords, videoList, "");
         assertEquals(keywords, videoSearch.getSearchTerms());
         assertEquals(videoList, videoSearch.getResults());
     }
@@ -49,7 +49,7 @@ public class VideoSearchTest {
                 })
         );
 
-        VideoSearch videoSearch = new VideoSearch(keywords, videoList);
+        VideoSearch videoSearch = new VideoSearch(keywords, videoList, "");
         assertEquals(expectedReadingScoreAverage, videoSearch.getFleschEaseScoreAverage(), 1.0);
         assertEquals(expectedGradeAverage, videoSearch.getFleschGradeLevelAverage(), 0.2);
     }
