@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class contains sets of words associated with different sentiments.
+ * Provides predefined sets of words associated with "happy" and "sad" sentiments.
+ * These sets are used for sentiment analysis of video descriptions or other text content.
  * @author Rumeysa Turkmen
+ *
  */
 public class SentimentWords {
     public static final Set<String> HAPPY_WORDS = new HashSet<>(Arrays.asList(

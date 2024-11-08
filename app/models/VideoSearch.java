@@ -1,8 +1,9 @@
 package models;
 
 /**
- * @author Laurent Voisard
- * Instance of a search model
+ *  Represents an instance of a search model containing search terms,
+ *  a list of video results, and an overall sentiment analysis.
+ * @author Laurent Voisard & Rumeysa Turkmen
  */
 public class VideoSearch {
     private final String searchTerms;
@@ -10,11 +11,13 @@ public class VideoSearch {
     private final String sentiment;
 
     /**
-     * @author Laurent Voisard
-     * Basic Constructor
-     * @param searchTerms keywords of the search
-     * @param results list of videos of the search
-     * @param sentiment overall sentiment of the search videos
+     * Constructs a VideoSearch object with the specified search terms,
+     * results, and sentiment analysis.
+     *
+     * @author Laurent Voisard & Rumeysa Turkmen
+     * @param searchTerms The keywords used for the search.
+     * @param results The list of videos returned from the search.
+     * @param sentiment The overall sentiment of the video results.
      */
     public VideoSearch(String searchTerms, VideoList results, String sentiment) {
         this.searchTerms = searchTerms;
@@ -23,27 +26,30 @@ public class VideoSearch {
     }
 
     /**
+     * Retrieves the search terms associated with this video search
      * @author Laurent Voisard
-     * @return keywords
+     * @return The search terms used.
      */
     public String getSearchTerms() { return searchTerms;}
     /**
+     * Retrieves the list of video results from the search
      * @author Laurent Voisard
-     * @return list of videos
+     * @return The list of videos in the search result.
      */
     public VideoList getResults() { return results;}
 
     /**
+     * Retrieves the overall sentiment analysis of the video search.
      * @author Rumeysa Turkmen
-     * @return sentiment of the search
+     * @return The sentiment as a string (e.g., happy, sad, neutral).
      */
     public String getSentiment() { return sentiment;}
 
 
-
     /**
+     * Calculates the average Flesch Reading Ease score of all videos in the search result.
      * @author Laurent Voisard
-     * @return the average reading ease score of all videos in the search
+     * @return The average reading ease score, or 0.0 if no videos are present.
      */
     public double getFleschEaseScoreAverage() {
         return this.results.getVideoList().stream()
@@ -54,8 +60,9 @@ public class VideoSearch {
     }
 
     /**
+     * Calculates the average Flesch grade level of all videos in the search result.
      * @author Laurent Voisard
-     * @return the average grade level of all videos in the search
+     * @return The average grade level, or 0.0 if no videos are present.
      */
     public double getFleschGradeLevelAverage() {
         return this.results.getVideoList().stream()
@@ -66,4 +73,3 @@ public class VideoSearch {
     }
 
 }
-

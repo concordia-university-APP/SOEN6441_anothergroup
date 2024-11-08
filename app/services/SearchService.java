@@ -35,6 +35,11 @@ public class SearchService {
     /**
      * Indirection level to youtube service search, we store the search results in the correct user session search result list
      * We also handle if a search term has already been made, if so put it back to the top of the list without making a request
+     * to the api. Otherwise request from the youtube api.
+     * This method also performs sentiment analysis on the list of videos returned by the YouTube
+     *  search. The sentiment is analyzed to determine the overall mood (happy, sad, or neutral)
+     * based on the descriptions of the videos in the result. The result, including the sentiment
+     *  analysis, is encapsulated in a {@link VideoSearch} object and added to the session's search list
      * to the api. Otherwise request from the youtube api
      * @author Laurent Voisard & Rumeysa Turkmen
      * @param keywords keywords of the search
