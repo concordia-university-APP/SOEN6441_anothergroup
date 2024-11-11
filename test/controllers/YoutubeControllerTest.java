@@ -44,8 +44,8 @@ public class YoutubeControllerTest extends WithApplication {
     private static YoutubeChannel testChannel;
     private static List<Video> testVideos;
     /**
-     * @author Tanveer Reza
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
+     * @author Tanveer Reza
      */
     @BeforeClass
     public static void setUp() {
@@ -62,8 +62,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Laurent Voisard
      * Test when a user has no session and opens the app
+     * @author Laurent Voisard
      */
     @Test
     public void testIndexRedirectWhenNoUserSession() {
@@ -78,8 +78,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Laurent Voisard
      * Test when a user has a session and opens the app
+     * @author Laurent Voisard
      */
     @Test
     public void testIndexWithUserSession() {
@@ -96,8 +96,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Laurent Voisard
      * Test when a user searches without a session
+     * @author Laurent Voisard
      */
     @Test
     public void testSearchWithoutUserSession() {
@@ -112,8 +112,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Laurent Voisard
      * Test when a user searches without a session
+     * @author Laurent Voisard
      */
     @Test
     public void testSearchWithUserSession() {
@@ -129,8 +129,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Laurent Voisard
      * Test the video route
+     * @author Laurent Voisard
      */
     @Test
     public void testVideo() {
@@ -141,8 +141,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Tanveer Reza
      * Test the getStatistics method of YoutubeController with no user session
+     * @author Tanveer Reza
      */
     @Test
     public void testGetStatisticsWithoutUserSession() {
@@ -161,8 +161,8 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * @author Tanveer Reza
      * Test the getStatistics method of YoutubeController with user session
+     * @author Tanveer Reza
      */
     @Test
     public void testGetStatisticsWithUserSession() {
