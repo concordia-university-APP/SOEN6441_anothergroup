@@ -1,5 +1,8 @@
 package models;
 
+import scala.collection.immutable.List;
+import services.TagService;
+
 /**
  * @author Laurent Voisard
  *
@@ -82,4 +85,5 @@ public class Video {
      * @return flesch score
      */
     public FleschReadingEaseScore getFleschReadingEaseScore() { return fleschReadingEaseScore;}
+
 }

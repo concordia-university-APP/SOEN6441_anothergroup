@@ -6,6 +6,7 @@ import models.*;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.TagService;
 import services.YoutubeService;
 import java.io.IOException;
 
@@ -14,12 +15,14 @@ import java.util.*;
 import scala.Option;
 import services.SearchService;
 import services.StatisticsService;
+import views.html.search;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -36,13 +39,15 @@ public class YoutubeController extends Controller {
     private final HttpExecutionContext ec;
     private final int DISPLAY_COUNT = 10;
     private final YoutubeService youtubeService;
+    private final TagService tagService;
 
     @Inject
-    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec, YoutubeService youtubeService) {
+    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec, YoutubeService youtubeService, TagService tagService) {
         this.searchService = searchService;
         this.statisticsService = statisticsService;
         this.ec = ec;
         this.youtubeService = youtubeService;
+        this.tagService = tagService;
     }
 
     /**
@@ -154,6 +159,31 @@ public class YoutubeController extends Controller {
             return statisticsService.getWordFrequency(query, user.get())
                     .thenApplyAsync(wordFrequency -> ok(views.html.statistics.render(wordFrequency, query)), ec.current());
         }
-        // Retrieve the last search query from the session
     }
+
+    /**
+     * Get the videos by tag, processes the video list, and renders the result.
+     * @author Ryane
+     * @param tag is the id used to search videos
+     * @return a CompletionStage is a result of either fetching the video list or an error page
+     */
+
+    public CompletionStage<Result> videosByTag(String tag) {
+        return tagService.getVideoWithTags(tag, 10L, tag)
+                .thenApply(videoList -> {
+                    List<Video> videos = videoList.getVideoList();
+                    if (videos.isEmpty()) {
+                        return notFound("No videos found for tag: " + tag);
+                    }
+                    Video firstVideo = videos.get(0);
+                    List<String> tags = tagService.getTagsFromDescription(firstVideo);
+                    return ok(views.html.videoList.render(videos, tags));
+                })
+                .exceptionally(ex -> {
+                    System.err.println("Error fetching videos for tag: " + tag + " - " + ex.getMessage());
+                    return internalServerError("Error fetching videos for tag: " + tag);
+                });
+    }
+
+
 }
