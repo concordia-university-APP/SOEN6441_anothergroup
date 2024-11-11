@@ -19,30 +19,6 @@
         <!-- Search Results -->
         <div id="results">
             @results match {
-            case Some(searchList) if !searchList.isEmpty => {
-            @for(item: VideoSearch <- searchList) {
-            <h2>Search Results for terms: @item.getSearchTerms </h2>
-            <div>
-                <h2>Overall Sentiment: @item.getSentiment </h2>
-            </div>
-            <div>
-                <a href="@routes.YoutubeController.getStatistics(item.getSearchTerms)" target="_blank">
-                    View Word Frequency Statistics for "@item.getSearchTerms"
-                </a>
-            </div>
-            <p> Flecsh-Kincaid Grade Level Avg. = @("%.1f".format(item.getFleschGradeLevelAverage)), Flecsh-Kincaid Reading Score Avg. =  @("%.1f".format(item.getFleschEaseScoreAverage)) </p>
-            <ol>
-                @for(i <- 0 to Math.max(0, Math.min(maxDisplay - 1, item.getResults.getVideoList.size() - 1))) {
-                    <li>
-                        @video(item.getResults.getVideoList.get(i))
-                    </li>
-                }
-            </ol>
-            }
-            }
-            case _ => {
-            <p>No results found.</p>
-            }
                 case Some(searchList) if !searchList.isEmpty => {
                     @for(item: VideoSearch <- searchList) {
 
@@ -56,7 +32,7 @@
                                 View Word Frequency Statistics for "@item.getSearchTerms"
                             </a>
                         </div>
-                        <p> Flecsh-Kincaid Grade Level Avg. = @("%.1f".format(item.getFleschGradeLevelAverage)), Flecsh-Kincaid Reading Score Avg. =  @("%.1f".format(item.getFleschEaseScoreAverage)) </p>
+                        <p> Flecsh-Kincaid Grade Level Avg. = @("%.1f".format(item.getFleschGradeLevelAverage)), Flecsh-Kincaid Reading Score Avg. = @("%.1f".format(item.getFleschEaseScoreAverage)) </p>
                         <ol>
                         @for(i <- 0 to Math.max(0, Math.min(maxDisplay - 1, item.getResults.getVideoList.size() - 1))) {
                             @video(item.getResults.getVideoList.get(i))
