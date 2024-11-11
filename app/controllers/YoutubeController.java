@@ -15,7 +15,6 @@ import java.util.*;
 import scala.Option;
 import services.SearchService;
 import services.StatisticsService;
-import views.html.search;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
