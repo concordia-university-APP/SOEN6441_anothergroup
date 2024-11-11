@@ -62,6 +62,7 @@ public class FleschReadingEaseScore {
     /**
      * @author Laurent Voisard
      * Check if letter is a vowel
+     * @param letter letter to check
      * @return if the letter is a vowel
      */
     private boolean isVowel(char letter) {

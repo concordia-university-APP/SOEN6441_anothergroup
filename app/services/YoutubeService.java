@@ -81,6 +81,7 @@ public class YoutubeService {
      * Get search list response
      * @param keywords   search query
      * @param maxResults number of results to return
+     * @param request youtube request to build from
      * @return search list response from youtube api
      * @author Tanveer Reza, Laurent Voisard, Yehia
      */
