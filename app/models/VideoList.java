@@ -1,8 +1,9 @@
 package models;
 
+import scala.Option;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Laurent Voisard
@@ -21,11 +22,9 @@ public class VideoList {
     }
 
     /**
-     * @author Laurent Voisard
      * @return list of videos
+     * @author Laurent Voisard
      */
-    public List<Video> getVideoList() {
-        return videoList;
-    }
+    public List<Video> getVideoList() {return videoList;}
 
 }
