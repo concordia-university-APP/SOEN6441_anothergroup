@@ -11,18 +11,16 @@ import services.YoutubeService;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.util.*;
+
 import scala.Option;
 import services.SearchService;
 import services.StatisticsService;
-import views.html.search;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -170,20 +168,18 @@ public class YoutubeController extends Controller {
 
     public CompletionStage<Result> videosByTag(String tag) {
         return tagService.getVideoWithTags(tag, 10L, tag)
-                .thenApply(videoList -> {
-                    List<Video> videos = videoList.getVideoList();
-                    if (videos.isEmpty()) {
-                        return notFound("No videos found for tag: " + tag);
-                    }
-                    Video firstVideo = videos.get(0);
-                    List<String> tags = tagService.getTagsFromDescription(firstVideo);
-                    return ok(views.html.videoList.render(videos, tags));
-                })
-                .exceptionally(ex -> {
-                    System.err.println("Error fetching videos for tag: " + tag + " - " + ex.getMessage());
-                    return internalServerError("Error fetching videos for tag: " + tag);
-                });
+                .thenApplyAsync(searches -> ok(views.html.videoList.render(
+                                searches,
+                                DISPLAY_COUNT)),
+                        ec.current());
     }
 
-
+    public CompletionStage<Result> showVideoWithTags(String videoId) {
+       return searchService.getVideoById(videoId).thenApply(
+                video -> {
+                    List<String> tags = tagService.getTagsFromDescription(video);
+                    return ok(views.html.videoTags.render(video, tags));
+                }
+        );
+    }
 }

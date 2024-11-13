@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import play.Application;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
@@ -27,8 +28,7 @@ import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.*;
@@ -46,12 +46,15 @@ public class YoutubeControllerTest extends WithApplication {
     private static YoutubeChannel testChannel;
     private static List<Video> testVideos;
     private static TagService tagService;
+    private static Video testVideo;
+    private static List<String> testTags;
     /**
      * Setup the YoutubeController, StatisticsService, HttpExecutionContext, and Http.Session
      * @author Tanveer Reza
      */
     @BeforeClass
     public static void setUp() {
+        MockitoAnnotations.openMocks(YoutubeControllerTest.class);
         mockYoutubeService = mock(YoutubeService.class);
         statisticsService = mock(StatisticsService.class);
         searchService = mock(SearchService.class);
@@ -60,8 +63,10 @@ public class YoutubeControllerTest extends WithApplication {
         youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService, tagService);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
-
-
+        testTags = new ArrayList<>();
+        testTags.add("tag1");
+        testTags.add("tag2");
+        testTags.add("tag3");
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
     }
@@ -309,16 +314,21 @@ public class YoutubeControllerTest extends WithApplication {
      * @author Ryane
      */
     @Test
-    public void testVideosByTag_NotFound() {
-        String tag = "nonexistentTag";
+    public void testVideosByTag_NoResults() {
+        // Arrange
+        String tag = "unknownTag";
+        when(tagService.getVideoWithTags(tag, 10L, tag)).thenReturn(CompletableFuture.completedFuture(List.of()));
 
-        when(tagService.getVideoWithTags(tag, 10L, tag))
-                .thenReturn(CompletableFuture.completedFuture(new VideoList(List.of())));
+        // Act
+        CompletionStage<Result> resultStage = youtubeController.videosByTag(tag);
+        Result result = resultStage.toCompletableFuture().join();
 
-        Result result = youtubeController.videosByTag(tag).toCompletableFuture().join();
+        // Assert
+        assertEquals("Expected status to be OK when no results are found", Http.Status.OK, result.status());
+        verify(tagService, times(1)).getVideoWithTags(tag, 10L, tag);
 
-        assertEquals(NOT_FOUND, result.status());
-        assertEquals("No videos found for tag: " + tag, contentAsString(result));
+        String content = Helpers.contentAsString(result);
+        assertTrue("Response should contain message indicating no results", content.contains("No results found."));
     }
 
     /**
@@ -326,16 +336,17 @@ public class YoutubeControllerTest extends WithApplication {
      * Verifies that a 500 Internal Server Error response is returned with the appropriate message.
      * @author Ryane
      */
+
     @Test
-    public void testVideosByTag_Exception() {
-        String tag = "exceptionTag";
+    public void testVideosByTag_Success() {
+        List<Video> videoList = List.of(new Video("1", "Video1", "Description #tag", "channelId1", "Channel Title", "http://thumbnail.url"));
+        when(tagService.getVideoWithTags("tag1", 10L, "tag1")).thenReturn(CompletableFuture.completedFuture(videoList));
 
-        when(tagService.getVideoWithTags(tag, 10L, tag))
-                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API error")));
+        CompletionStage<Result> resultStage = youtubeController.videosByTag("tag1");
+        Result result = resultStage.toCompletableFuture().join();
 
-        Result result = youtubeController.videosByTag(tag).toCompletableFuture().join();
-
-        assertEquals(INTERNAL_SERVER_ERROR, result.status());
-        assertEquals("Error fetching videos for tag: " + tag, contentAsString(result));
+        assertEquals(OK, result.status());
+        assertTrue(Helpers.contentAsString(result).contains("Video1"));
     }
+    
 }

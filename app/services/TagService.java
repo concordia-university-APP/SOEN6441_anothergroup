@@ -2,6 +2,7 @@ package services;
 
 import models.Video;
 import models.VideoList;
+import models.VideoSearch;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -42,14 +43,14 @@ public class TagService {
      * @param tagToCheck The specific tag to check within the video descriptions (optional).
      * @return A CompletableFuture that will contain a VideoList of search results.
      */
-    public CompletableFuture<VideoList> getVideoWithTags(String keywords, Long maxResults, String tagToCheck) {
+    public CompletableFuture<List<Video>> getVideoWithTags(String keywords, Long maxResults, String tagToCheck) {
         return youtubeService.searchResults(keywords, maxResults)
                 .thenApply(videoList -> {
                     // Filter the list to include only videos with the specific tag
                     List<Video> filteredVideos = videoList.getVideoList().stream()
                             .filter(video -> getTagsFromDescription(video).contains(tagToCheck))
                             .collect(Collectors.toList());
-                    return new VideoList(filteredVideos);
+                    return filteredVideos;
                 });
     }
 
