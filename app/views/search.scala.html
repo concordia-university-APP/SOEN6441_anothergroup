@@ -38,7 +38,7 @@
                             @video(item.getResults.getVideoList.get(i))
                             </li>
                             <div>
-                                <a href="@routes.YoutubeController.showVideoWithTags(item.getResults.getVideoList.get(i).getId)" target="_blank">Tag</a>
+                                <a href="@routes.YoutubeController.videosByTag(item.getSearchTerms)">Tag</a>
                             </div>
                         }
                         </ol>
