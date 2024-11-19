@@ -1,0 +1,23 @@
+@(video: Video, tags: java.util.List[String])
+
+@main("Video") {
+    <div class="container">
+        <h1>Video List for Selected Tag</h1>
+
+        <h2>Tags:</h2>
+        <ul>
+        @for(tag <- tags) {
+            <div>
+                <a href="@routes.YoutubeController.videosByTag(tag)">@tag</a>
+            </div>
+        }
+        </ul>
+
+        <h2>Video:</h2>
+            <li>
+                <h3>@video.getTitle()</h3>
+                <p>@video.getDescription()</p>
+                <a href="@video.getThumbnailUrl">Watch Video</a>
+            </li>
+    </div>
+}
