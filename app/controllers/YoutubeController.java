@@ -100,7 +100,7 @@ public class YoutubeController extends Controller {
         ActorRef webSocketActor = actorSystem.actorOf(WebSocketActor.props(searchService, youtubeService, statisticsService,"", null));
 
         return FutureConverters.toJava(
-                Patterns.ask(webSocketActor, new SearchServiceActor.SearchKeywords(query, user.get(), null), Timeout.durationToTimeout(Duration.create(5, TimeUnit.SECONDS)))
+                Patterns.ask(webSocketActor, new SearchServiceActor.SearchKeywords(query, user.get()), Timeout.durationToTimeout(Duration.create(5, TimeUnit.SECONDS)))
         ).thenApply(response -> {
             if (response instanceof List) {
                 List<VideoSearch> searches = (List<VideoSearch>) response;
