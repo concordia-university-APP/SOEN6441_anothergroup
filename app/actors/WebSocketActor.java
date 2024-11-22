@@ -17,6 +17,10 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Actor class to handle WebSocket connections and messages.
+ * @author Tanveer Reza
+ */
 public class WebSocketActor extends AbstractActor {
     private final ActorRef searchServiceActor;
     private final ActorRef youtubeServiceActor;
@@ -24,8 +28,18 @@ public class WebSocketActor extends AbstractActor {
     private final String sessionId;
     private final ActorRef out;
 
+    /**
+     * Constructor to initialize the WebSocketActor.
+     *
+     * @param searchService the service to handle search operations
+     * @param youtubeService the service to handle YouTube operations
+     * @param statisticsService the service to handle statistics operations
+     * @param sessionId the session ID for the WebSocket connection
+     * @param out the ActorRef to send messages to the WebSocket client
+     * @author Tanveer Reza
+     */
     @Inject
-    public WebSocketActor(SearchService searchService, YoutubeService youtubeService, StatisticsService statisticsService,  String sessionId, ActorRef out) {
+    public WebSocketActor(SearchService searchService, YoutubeService youtubeService, StatisticsService statisticsService, String sessionId, ActorRef out) {
         this.sessionId = sessionId;
         this.out = out;
         searchServiceActor = getContext().actorOf(SearchServiceActor.props(searchService), "searchServiceActor");
@@ -33,10 +47,27 @@ public class WebSocketActor extends AbstractActor {
         statisticsServiceActor = getContext().actorOf(StatisticsServiceActor.props(statisticsService), "statisticsServiceActor");
     }
 
-    public static Props props(SearchService searchService, YoutubeService youtubeService, StatisticsService statisticsService,  String sessionId, ActorRef out) {
+    /**
+     * Factory method to create Props for WebSocketActor.
+     *
+     * @param searchService the service to handle search operations
+     * @param youtubeService the service to handle YouTube operations
+     * @param statisticsService the service to handle statistics operations
+     * @param sessionId the session ID for the WebSocket connection
+     * @param out the ActorRef to send messages to the WebSocket client
+     * @return Props for creating WebSocketActor
+     * @author Tanveer Reza
+     */
+    public static Props props(SearchService searchService, YoutubeService youtubeService, StatisticsService statisticsService, String sessionId, ActorRef out) {
         return Props.create(WebSocketActor.class, () -> new WebSocketActor(searchService, youtubeService, statisticsService, sessionId, out));
     }
 
+    /**
+     * Defines the message handling for this actor.
+     *
+     * @return the Receive object defining the message handling
+     * @author Tanveer Reza
+     */
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -141,6 +172,12 @@ public class WebSocketActor extends AbstractActor {
                 .build();
     }
 
+    /**
+     * Defines the supervisor strategy for this actor.
+     *
+     * @return the SupervisorStrategy object defining the strategy
+     * @author Tanveer Reza
+     */
     @Override
     public SupervisorStrategy supervisorStrategy() {
         return new OneForOneStrategy(
@@ -150,77 +187,162 @@ public class WebSocketActor extends AbstractActor {
         );
     }
 
+    /**
+     * Message class for search requests.
+     * @author Tanveer Reza
+     */
     public static class Search {
         public final String query;
         public final String sessionId;
 
+        /**
+         * Constructor for Search message.
+         *
+         * @param query the search query
+         * @param sessionId the session ID
+         * @author Tanveer Reza
+         */
         public Search(String query, String sessionId) {
             this.query = query;
             this.sessionId = sessionId;
         }
     }
 
+    /**
+     * Message class for video requests by ID.
+     * @author Tanveer Reza
+     */
     public static class GetVideo {
         public final String id;
 
+        /**
+         * Constructor for GetVideo message.
+         *
+         * @param id the video ID
+         * @author Tanveer Reza
+         */
         public GetVideo(String id) {
             this.id = id;
         }
     }
 
+    /**
+     * Message class for channel profile requests.
+     * @author Tanveer Reza
+     */
     public static class ShowChannelProfile {
         public final String channelId;
 
+        /**
+         * Constructor for ShowChannelProfile message.
+         *
+         * @param channelId the channel ID
+         * @author Tanveer Reza
+         */
         public ShowChannelProfile(String channelId) {
             this.channelId = channelId;
         }
     }
 
+    /**
+     * Message class for statistics requests.
+     * @author Tanveer Reza
+     */
     public static class GetStatistics {
         public final String query;
         public final String sessionId;
 
+        /**
+         * Constructor for GetStatistics message.
+         *
+         * @param query the search query
+         * @param sessionId the session ID
+         * @author Tanveer Reza
+         */
         public GetStatistics(String query, String sessionId) {
             this.query = query;
             this.sessionId = sessionId;
         }
     }
 
+    /**
+     * Message class for video requests by tag.
+     */
     public static class VideosByTag {
         public final String tag;
 
+        /**
+         * Constructor for VideosByTag message.
+         *
+         * @param tag the video tag
+         * @author Tanveer Reza
+         */
         public VideosByTag(String tag) {
             this.tag = tag;
         }
     }
 
+    /**
+     * Message class for search results.
+     * @author Tanveer Reza
+     */
     public static class SearchResult {
         private final List<VideoSearch> videoSearchList;
 
+        /**
+         * Constructor for SearchResult message.
+         *
+         * @param videoSearchList the list of video search results
+         * @author Tanveer Reza
+         */
         public SearchResult(List<VideoSearch> videoSearchList) {
             this.videoSearchList = videoSearchList;
         }
 
+        /**
+         * Gets the list of video search results.
+         *
+         * @return the list of video search results
+         * @author Tanveer Reza
+         */
         public List<VideoSearch> getVideoSearchList() {
             return videoSearchList;
         }
     }
 
+    /**
+     * Called before the actor is restarted.
+     *
+     * @param reason the reason for the restart
+     * @param message the message that caused the restart
+     * @throws Exception if an error occurs
+     * @author Tanveer Reza
+     */
     @Override
     public void preRestart(Throwable reason, scala.Option<Object> message) throws Exception {
         super.preRestart(reason, message);
         System.out.println("WebSocketActor is restarting due to: " + reason.getMessage());
     }
 
+    /**
+     * Called after the actor is restarted.
+     *
+     * @param reason the reason for the restart
+     * @throws Exception if an error occurs
+     * @author Tanveer Reza
+     */
     @Override
     public void postRestart(Throwable reason) throws Exception {
         super.postRestart(reason);
         System.out.println("WebSocketActor has restarted.");
     }
 
+    /**
+     * Called when the actor is stopped.
+     * @author Tanveer Reza
+     */
     @Override
     public void postStop() {
         System.out.println("WebSocketActor has stopped.");
     }
 }
-

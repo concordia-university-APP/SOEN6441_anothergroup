@@ -64,6 +64,13 @@ public class YoutubeController extends Controller {
         this.materializer = materializer;
     }
 
+    /**
+     * Establishes a WebSocket connection for the user session.
+     * If no user session exists, a new session is created.
+     *
+     * @return WebSocket connection
+     * @author Tanveer Reza
+     */
     public WebSocket webSocket() {
         System.out.println("WebSocket connection initiated.");
 
@@ -109,11 +116,6 @@ public class YoutubeController extends Controller {
                 return internalServerError("Unexpected response");
             }
         });
-//        return searchService.searchKeywords(query, user.get())
-//                .thenApplyAsync(searches -> ok(views.html.search.render(
-//                                Option.apply(searches),
-//                                DISPLAY_COUNT)),
-//                        ec.current());
     }
 
     /**
@@ -191,10 +193,9 @@ public class YoutubeController extends Controller {
 
     /**
      * Get the word frequency statistics for the given query
-     * @author Tanveer Reza
      * @param query The search query
-     * @param request Incoming http request from the web page
-     * @return The word frequency statistics
+     * @return Forward to statistics page
+     * @author Tanveer Reza
      */
     public CompletionStage<Result> getStatistics(String query) {
         return CompletableFuture.supplyAsync(() -> ok(views.html.statistics.render(query)));
