@@ -2,6 +2,9 @@ package models;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -23,7 +26,8 @@ public class VideoTest {
         final String channelId = "4";
         final String channelName = "5";
         final String thumbnailUrl = "6";
-        Video video = new Video(id, title, description, channelId, channelName, thumbnailUrl);
+        final List<String> tags = Arrays.asList("java", "programming");
+        Video video = new Video(id, title, description, channelId, channelName, thumbnailUrl, tags);
 
         assertEquals(id, video.getId());
         assertEquals(title, video.getTitle());

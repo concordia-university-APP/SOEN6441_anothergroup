@@ -36,16 +36,16 @@ public class SearchServiceTest {
         searchService.createSessionSearchList();
 
         VideoList videoList = new VideoList(List.of( new Video[] {
-                new Video("1","1","1","1","1","1"),
-                new Video("2","2","1","1","1","1"),
-                new Video("3","3","1","1","1","1"),
-                new Video("4","4","1","1","1","1"),
-                new Video("5","5","1","1","1","1"),
-                new Video("6","6","1","1","1","1"),
-                new Video("7","7","1","1","1","1"),
-                new Video("8","8","1","1","1","1"),
-                new Video("9","9","1","1","1","1"),
-                new Video("10","10","1","1","1","1"),
+                new Video("1","1","1","1","1","1", List.of("#tag1", "#tag2")),
+                new Video("2","2","1","1","1","1", List.of("#tag3", "#tag4")),
+                new Video("3","3","1","1","1","1", List.of("#tag5")),
+                new Video("4","4","1","1","1","1", List.of("#tag6")),
+                new Video("5","5","1","1","1","1", List.of("#tag7")),
+                new Video("6","6","1","1","1","1", List.of("#tag8")),
+                new Video("7","7","1","1","1","1", List.of("#tag9")),
+                new Video("8","8","1","1","1","1", List.of("#tag10")),
+                new Video("9","9","1","1","1","1", List.of("#tag11")),
+                new Video("10","10","1","1","1","1", List.of("#tag12")),
         }));
 
         VideoSearch search = new VideoSearch("test", videoList, "");
@@ -100,7 +100,7 @@ public class SearchServiceTest {
      */
     @Test
     public void testGetVideoById() {
-        Video vid = new Video("id", "", "","", "","");
+        Video vid = new Video("id", "", "","", "","", List.of("#exampleTag1", "#exampleTag2"));
         when(youtubeService.getVideo("id")).thenReturn(CompletableFuture.completedFuture(vid));
         Video v = searchService.getVideoById("id").join();
         assertEquals(vid, v);
@@ -113,7 +113,7 @@ public class SearchServiceTest {
      */
     @Test
     public void testGetVideosBySearchTerm_existingSearch() {
-        Video video1 = new Video("1","1","1","1","1","1");
+        Video video1 = new Video("1","1","1","1","1","1", List.of("#tag1", "#tag2"));
         VideoList videoList = new VideoList(List.of(video1));
         VideoSearch videoSearch = new VideoSearch("test", videoList, "");
         searchService.getSessionSearchList("1").add(videoSearch);

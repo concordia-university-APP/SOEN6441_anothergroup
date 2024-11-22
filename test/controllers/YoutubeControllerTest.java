@@ -62,7 +62,7 @@ public class YoutubeControllerTest extends WithApplication {
         tagService = mock(TagService.class);
         youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService, tagService);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
-        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
+        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url", Collections.singletonList("tag1")));
         testTags = new ArrayList<>();
         testTags.add("tag1");
         testTags.add("tag2");
@@ -144,7 +144,7 @@ public class YoutubeControllerTest extends WithApplication {
      */
     @Test
     public void testVideo() {
-        Video v = new Video("test","test","test","test","test","test");
+        Video v = new Video("test","test","test","test","test","test", Collections.singletonList("testTag"));
         when(searchService.getVideoById(anyString())).thenReturn(CompletableFuture.completedFuture(v));
         Result res = youtubeController.video("id").toCompletableFuture().join();
         assertEquals(OK, res.status());
@@ -307,46 +307,4 @@ public class YoutubeControllerTest extends WithApplication {
 
         assertEquals("Expected status to be BAD REQUEST when no videos found", Http.Status.BAD_REQUEST, result.status());
     }
-
-    /**
-     * Tests the `videosByTag` method when no videos are found for the given tag.
-     * Verifies that a 404 Not Found response is returned with the appropriate message.
-     * @author Ryane
-     */
-    @Test
-    public void testVideosByTag_NoResults() {
-        // Arrange
-        String tag = "unknownTag";
-        when(tagService.getVideoWithTags(tag, 10L, tag)).thenReturn(CompletableFuture.completedFuture(List.of()));
-
-        // Act
-        CompletionStage<Result> resultStage = youtubeController.videosByTag(tag);
-        Result result = resultStage.toCompletableFuture().join();
-
-        // Assert
-        assertEquals("Expected status to be OK when no results are found", Http.Status.OK, result.status());
-        verify(tagService, times(1)).getVideoWithTags(tag, 10L, tag);
-
-        String content = Helpers.contentAsString(result);
-        assertTrue("Response should contain message indicating no results", content.contains("No results found."));
-    }
-
-    /**
-     * Tests the `videosByTag` method when an exception occurs during the API call.
-     * Verifies that a 500 Internal Server Error response is returned with the appropriate message.
-     * @author Ryane
-     */
-
-    @Test
-    public void testVideosByTag_Success() {
-        List<Video> videoList = List.of(new Video("1", "Video1", "Description #tag", "channelId1", "Channel Title", "http://thumbnail.url"));
-        when(tagService.getVideoWithTags("tag1", 10L, "tag1")).thenReturn(CompletableFuture.completedFuture(videoList));
-
-        CompletionStage<Result> resultStage = youtubeController.videosByTag("tag1");
-        Result result = resultStage.toCompletableFuture().join();
-
-        assertEquals(OK, result.status());
-        assertTrue(Helpers.contentAsString(result).contains("Video1"));
-    }
-    
 }

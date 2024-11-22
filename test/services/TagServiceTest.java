@@ -2,128 +2,90 @@ package services;
 
 import models.Video;
 import models.VideoList;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import services.TagService;
+import services.YoutubeService;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 public class TagServiceTest {
 
+    @Mock
+    private YoutubeService youtubeService;
+
     private TagService tagService;
-    private YoutubeService mockYoutubeService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        mockYoutubeService = mock(YoutubeService.class);
-        tagService = new TagService(mockYoutubeService);
+        MockitoAnnotations.openMocks(this);
+        tagService = new TagService(youtubeService);
     }
 
     @Test
-    public void testGetTagsFromDescriptionWithMultipleHashtags() {
-        Video video = new Video("videoId1", "Title", "This is a test #tag1 and #tag2", "channelId", "Channel Title", "thumbnailUrl");
+    public void testGetVideoWithTags_WithMatchingTags() {
+        // Mock a list of videos where tags include "tag1"
+        Video video1 = new Video("id1", "Title 1", "Description 1", "channel1", "Channel Name 1", "http://thumbnail.url", Arrays.asList("tag1", "tag2"));
+        Video video2 = new Video("id2", "Title 2", "Description 2", "channel2", "Channel Name 2", "http://thumbnail2.url", Arrays.asList("tag3"));
+        VideoList videoList = new VideoList(Arrays.asList(video1, video2));
 
-        List<String> tags = TagService.getTagsFromDescription(video);
+        when(youtubeService.searchResults(any(), anyLong())).thenReturn(CompletableFuture.completedFuture(videoList));
 
-        assertEquals(2, tags.size());
-        assertTrue(tags.contains("#tag1"));
-        assertTrue(tags.contains("#tag2"));
+        CompletableFuture<List<Video>> result = tagService.getVideoWithTags("test", 10L, "tag1");
+        List<Video> filteredVideos = result.join();
+
+        assertEquals(1, filteredVideos.size());
+        assertEquals("id1", filteredVideos.get(0).getId());
     }
 
     @Test
-    public void testGetTagsFromDescriptionWithNoHashtags() {
-        Video video = new Video("videoId2", "Title", "This is a test without hashtags", "channelId", "Channel Title", "thumbnailUrl");
-        List<String> tags = TagService.getTagsFromDescription(video);
+    public void testGetVideoWithTags_NoMatchingTags() {
+        // Mock a list of videos where no tags match "tag1"
+        Video video1 = new Video("id1", "Title 1", "Description 1", "channel1", "Channel Name 1", "http://thumbnail.url", Arrays.asList("tag2"));
+        Video video2 = new Video("id2", "Title 2", "Description 2", "channel2", "Channel Name 2", "http://thumbnail2.url", Arrays.asList("tag3"));
+        VideoList videoList = new VideoList(Arrays.asList(video1, video2));
 
-        assertTrue(tags.isEmpty());
+        when(youtubeService.searchResults(any(), anyLong())).thenReturn(CompletableFuture.completedFuture(videoList));
+
+        CompletableFuture<List<Video>> result = tagService.getVideoWithTags("test", 10L, "tag1");
+        List<Video> filteredVideos = result.join();
+
+        assertEquals(0, filteredVideos.size());
     }
 
     @Test
-    public void testGetTagsFromDescriptionWithOneHashtag() {
-        Video video = new Video("videoId3", "Title", "This description #hashtag1 is cool", "channelId", "Channel Title", "thumbnailUrl");
+    public void testGetVideoWithTags_EmptyVideoList() {
+        // Mock an empty list of videos
+        VideoList videoList = new VideoList(Collections.emptyList());
 
-        List<String> tags = TagService.getTagsFromDescription(video);
+        when(youtubeService.searchResults(any(), anyLong())).thenReturn(CompletableFuture.completedFuture(videoList));
 
-        assertEquals(1, tags.size());
-        assertTrue(tags.contains("#hashtag1"));
+        CompletableFuture<List<Video>> result = tagService.getVideoWithTags("test", 10L, "tag1");
+        List<Video> filteredVideos = result.join();
+
+        assertEquals(0, filteredVideos.size());
     }
 
     @Test
-    public void testGetTagsFromDescriptionWithSymbolsNoHashtags() {
-        Video video = new Video("videoId4", "Title", "This is a #description! test #tag123", "channelId", "Channel Title", "thumbnailUrl");
+    public void testGetVideoWithTags_NullVideoList() {
+        // Mock a null video list
+        when(youtubeService.searchResults(any(), anyLong())).thenReturn(CompletableFuture.completedFuture(null));
 
-        List<String> tags = TagService.getTagsFromDescription(video);
+        CompletableFuture<List<Video>> result = tagService.getVideoWithTags("test", 10L, "tag1");
 
-        assertEquals(2, tags.size());
-        assertTrue(tags.contains("#description"));
-        assertTrue(tags.contains("#tag123"));
-    }
+        List<Video> filteredVideos = result.join();
 
-    @Test
-    public void testGetTagsFromDescriptionWithEmptyDescription() {
-        Video video = new Video("videoId5", "Title", "", "channelId", "Channel Title", "thumbnailUrl");
-
-        List<String> tags = TagService.getTagsFromDescription(video);
-
-        assertTrue(tags.isEmpty());
-    }
-
-
-    @Test
-    public void testGetVideoWithTags_FilteredByTag() {
-        String keywords = "sampleKeywords";
-        String tagToCheck = "#targetTag";
-        Video videoWithTag = new Video("1", "Title1", "Description with #targetTag", "channelId", "Channel1", "thumbnailUrl1");
-        Video videoWithoutTag = new Video("2", "Title2", "Description without tag", "channelId", "Channel2", "thumbnailUrl2");
-
-        VideoList videoList = mock(VideoList.class);
-        when(videoList.getVideoList()).thenReturn(Arrays.asList(videoWithTag, videoWithoutTag));
-        CompletableFuture<VideoList> futureVideos = CompletableFuture.completedFuture(videoList);
-
-        when(mockYoutubeService.searchResults(keywords, 10L)).thenReturn(futureVideos);
-
-        List<Video> result = tagService.getVideoWithTags(keywords, 10L, tagToCheck).toCompletableFuture().join();
-
-        assertEquals(1, result.size());
-        assertEquals(videoWithTag, result.get(0));
-    }
-
-    @Test
-    public void testGetVideoWithTags_NoMatchingTag() {
-        // Arrange
-        String keywords = "sampleKeywords";
-        String tagToCheck = "#nonexistentTag";
-        Video videoWithoutTag = new Video("1", "Title", "Description without tag", "channelId", "Channel", "thumbnailUrl");
-
-        VideoList videoList = mock(VideoList.class);
-        when(videoList.getVideoList()).thenReturn(Arrays.asList(videoWithoutTag));
-        CompletableFuture<VideoList> futureVideos = CompletableFuture.completedFuture(videoList);
-
-        when(mockYoutubeService.searchResults(keywords, 10L)).thenReturn(futureVideos);
-
-        List<Video> result = tagService.getVideoWithTags(keywords, 10L, tagToCheck).toCompletableFuture().join();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetVideoWithTags_EmptyResults() {
-        String keywords = "sampleKeywords";
-        String tagToCheck = "#targetTag";
-
-        VideoList emptyVideoList = mock(VideoList.class);
-        when(emptyVideoList.getVideoList()).thenReturn(Arrays.asList());
-        CompletableFuture<VideoList> futureVideos = CompletableFuture.completedFuture(emptyVideoList);
-
-        when(mockYoutubeService.searchResults(keywords, 10L)).thenReturn(futureVideos);
-
-        List<Video> result = tagService.getVideoWithTags(keywords, 10L, tagToCheck).toCompletableFuture().join();
-
-        assertTrue(result.isEmpty());
+        // Ensure the filtered list is empty
+        assertEquals(0, filteredVideos.size());
     }
 }
