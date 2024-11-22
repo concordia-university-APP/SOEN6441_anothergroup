@@ -15,4 +15,5 @@ GET     /showVideosByTag/:tagID               controllers.YoutubeController.show
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /statistics/:query          controllers.YoutubeController.getStatistics(query: String, request: Request)
+GET     /statistics/:query          controllers.YoutubeController.getStatistics(query: String)
+GET     /ws/search                  controllers.YoutubeController.webSocket()

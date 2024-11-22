@@ -18,7 +18,11 @@ libraryDependencies ++= Seq(
   "com.google.apis" % "google-api-services-youtube" % "v3-rev20240514-2.0.0",
 
   // Jackson for JSON parsing
-  "com.google.http-client" % "google-http-client-jackson2" % "1.44.2"
+  "com.google.http-client" % "google-http-client-jackson2" % "1.44.2",
+
+  "com.typesafe.akka" %% "akka-actor" % "2.6.21",
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.21",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.21"
 )
 
 libraryDependencies ++= Seq(

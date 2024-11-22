@@ -9,6 +9,8 @@ public class VideoSearch {
     private final String searchTerms;
     private final VideoList results;
     private final String sentiment;
+    private final double fleschEaseScoreAverage;
+    private final double fleschGradeLevelAverage;
 
     /**
      * Constructs a VideoSearch object with the specified search terms,
@@ -23,6 +25,8 @@ public class VideoSearch {
         this.searchTerms = searchTerms;
         this.results = results;
         this.sentiment = sentiment;
+        this.fleschEaseScoreAverage = getFleschEaseScoreAverage();
+        this.fleschGradeLevelAverage = getFleschGradeLevelAverage();
     }
 
     /**

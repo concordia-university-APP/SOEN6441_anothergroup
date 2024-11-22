@@ -1,11 +1,22 @@
 package controllers;
 
+import actors.SearchServiceActor;
+import actors.WebSocketActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.pattern.Patterns;
+import akka.stream.Materializer;
+import akka.util.Timeout;
 import play.libs.concurrent.HttpExecutionContext;
 import com.google.inject.Inject;
 import models.*;
+import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
+import scala.compat.java8.FutureConverters;
+import scala.concurrent.duration.Duration;
 import services.TagService;
 import services.YoutubeService;
 import java.io.IOException;
@@ -21,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -38,15 +50,42 @@ public class YoutubeController extends Controller {
     private final int DISPLAY_COUNT = 10;
     private final YoutubeService youtubeService;
     private final TagService tagService;
+    private final ActorSystem actorSystem;
+    private final Materializer materializer;
 
     @Inject
-    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec, YoutubeService youtubeService, TagService tagService) {
-        this.searchService = searchService;
+    public YoutubeController(StatisticsService statisticsService, SearchService searchService, HttpExecutionContext ec, YoutubeService youtubeService, TagService tagService, ActorSystem actorSystem, Materializer materializer) {
         this.statisticsService = statisticsService;
+        this.searchService = searchService;
         this.ec = ec;
         this.youtubeService = youtubeService;
         this.tagService = tagService;
+        this.actorSystem = actorSystem;
+        this.materializer = materializer;
     }
+
+    /**
+     * Establishes a WebSocket connection for the user session.
+     * If no user session exists, a new session is created.
+     *
+     * @return WebSocket connection
+     * @author Tanveer Reza
+     */
+    public WebSocket webSocket() {
+        System.out.println("WebSocket connection initiated.");
+
+        return WebSocket.Text.accept(request -> {
+            Optional<String> user = request.session().get("user");
+
+            // If no user session exists, create a new session and start WebSocket
+            String sessionId;
+            sessionId = user.orElseGet(searchService::createSessionSearchList);
+
+            // Now pass sessionId to the WebSocket actor
+            return ActorFlow.actorRef(out -> WebSocketActor.props(searchService, youtubeService, statisticsService, sessionId, out), actorSystem, materializer);
+        });
+    }
+
 
     /**
      *  Search for videos with keywords
@@ -65,11 +104,18 @@ public class YoutubeController extends Controller {
                     -> redirect("/").addingToSession(request,"user", searchService.createSessionSearchList()));
         }
 
-        return searchService.searchKeywords(query, user.get())
-                .thenApplyAsync(searches -> ok(views.html.search.render(
-                                Option.apply(searches),
-                                DISPLAY_COUNT)),
-                        ec.current());
+        ActorRef webSocketActor = actorSystem.actorOf(WebSocketActor.props(searchService, youtubeService, statisticsService,"", null));
+
+        return FutureConverters.toJava(
+                Patterns.ask(webSocketActor, new SearchServiceActor.SearchKeywords(query, user.get()), Timeout.durationToTimeout(Duration.create(5, TimeUnit.SECONDS)))
+        ).thenApply(response -> {
+            if (response instanceof List) {
+                List<VideoSearch> searches = (List<VideoSearch>) response;
+                return ok(views.html.search.render(Option.apply(searches), DISPLAY_COUNT));
+            } else {
+                return internalServerError("Unexpected response");
+            }
+        });
     }
 
     /**
@@ -97,8 +143,13 @@ public class YoutubeController extends Controller {
      * @return video model
      */
     public CompletionStage<Result> video(String id) {
-        return searchService.getVideoById(id)
-                .thenApplyAsync(video -> ok(views.html.video.render(video)), ec.current());
+        return CompletableFuture.supplyAsync(() -> {
+            ActorRef webSocketActor = actorSystem.actorOf(WebSocketActor.props(searchService, youtubeService, statisticsService,"", null));
+            webSocketActor.tell(new WebSocketActor.GetVideo(id), ActorRef.noSender());
+            return ok("Get video request sent via WebSocket");
+        });
+//        return searchService.getVideoById(id)
+//                .thenApplyAsync(video -> ok(views.html.video.render(video)), ec.current());
     }
 
     /**
@@ -142,21 +193,12 @@ public class YoutubeController extends Controller {
 
     /**
      * Get the word frequency statistics for the given query
-     * @author Tanveer Reza
      * @param query The search query
-     * @param request Incoming http request from the web page
-     * @return The word frequency statistics
+     * @return Forward to statistics page
+     * @author Tanveer Reza
      */
-    public CompletionStage<Result> getStatistics(String query, Http.Request request) {
-        Optional<String> user = request.session().get("user");
-
-        if(user.isEmpty()) {
-            return CompletableFuture.supplyAsync(()
-                    -> redirect(request.uri()).addingToSession(request,"user", searchService.createSessionSearchList()));
-        } else {
-            return statisticsService.getWordFrequency(query, user.get())
-                    .thenApplyAsync(wordFrequency -> ok(views.html.statistics.render(wordFrequency, query)), ec.current());
-        }
+    public CompletionStage<Result> getStatistics(String query) {
+        return CompletableFuture.supplyAsync(() -> ok(views.html.statistics.render(query)));
     }
 
     /**
