@@ -188,5 +188,4 @@ public class YoutubeController extends Controller {
             return ok(views.html.videoTags.render(video, tags));
         }, ec.current());
     }
-
 }
