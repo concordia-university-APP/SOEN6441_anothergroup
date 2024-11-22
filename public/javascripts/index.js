@@ -29,20 +29,30 @@ document.getElementById('searchForm').addEventListener('submit', function (event
     }
 });
 
+
 // Function to dynamically update the search results
 function updateResults(searchResults) {
     const resultsDiv = document.getElementById('results');
+    const DISPLAY_MAX = 10;
     if (searchResults && searchResults.length > 0) {
         let html = '';
         searchResults.forEach(item => {
             html += `<h2>Search Results for terms: ${item.searchTerms}</h2>`;
             html += `<div><h3>Overall Sentiment: ${item.sentiment}</h3></div>`;
             html += `<div><a href="#" class="stats-link" data-term="${item.searchTerms}">View Word Frequency Statistics for "${item.searchTerms}"</a></div>`;
-            html += `<p>Flesch-Kincaid Grade Level Avg. = ${item.fleschGradeLevelAvg}, Flesch-Kincaid Reading Score Avg. = ${item.fleschEaseScoreAvg}</p>`;
+            html += `<p>Flesch-Kincaid Grade Level Avg. = ${item.fleschGradeLevelAverage}, Flesch-Kincaid Reading Score Avg. = ${item.fleschEaseScoreAverage}</p>`;
             html += '<ol>';
-            item.results.videoList.forEach(video => {
-                html += `<li><a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a></li>`;
-            });
+
+            for(let i = 0; i < Math.min(item.results.videoList.length, DISPLAY_MAX); i++) {
+                let video = item.results.videoList[i];
+                html += `<li>`;
+                html += `<b>Title: </b> <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a> </br>`
+                html += `<b>Channel: </b> <a href="http://localhost:9000/channel/${video.channelId}" >${video.channelName}</a> </br>`
+                html += `<b>Description: </b> ${video.description}</br>`
+                html += `<b>Flesch-Kincaid Grade Level : </b> ${video.fleschReadingEaseScore.readingEaseScore} <b>Flesch-Kincaid Reading Score : </b> ${video.fleschReadingEaseScore.gradeLevel}</br>`
+                html += `<a href="http://localhost:9000/videos/${video.id}"> Tags </a></br>`
+                html += `</li>`;
+            };
             html += '</ol>';
         });
         resultsDiv.innerHTML = html;
