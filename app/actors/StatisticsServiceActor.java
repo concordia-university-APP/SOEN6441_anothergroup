@@ -36,7 +36,7 @@ public class StatisticsServiceActor extends AbstractActor {
 
         System.out.println("Handling SearchKeywords message: " + message.searchTerms);
         ActorRef sender = getSender();
-        CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency(message.searchTerms, message.sessionId);;
+        CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency(message.searchTerms, message.sessionId);
         wordFrequencyFuture.thenAccept(wordFrequency -> {
             // Ensure the sender is correctly set here.
             sender.tell(wordFrequency, getSelf());

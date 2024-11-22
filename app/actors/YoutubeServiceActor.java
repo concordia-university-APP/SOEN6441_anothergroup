@@ -37,9 +37,7 @@ public class YoutubeServiceActor extends AbstractActor {
 
     private void handleSearchVideos(SearchVideos message) {
         CompletableFuture<VideoList> searchResults = youtubeService.searchResults(message.keywords, message.maxResults);
-        searchResults.thenAccept(results -> {
-            getSender().tell(results, getSelf());
-        }).exceptionally(ex -> {
+        searchResults.thenAccept(results -> getSender().tell(results, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });
@@ -47,9 +45,7 @@ public class YoutubeServiceActor extends AbstractActor {
 
     private void handleGetVideo(GetVideo message) {
         CompletableFuture<Video> video = youtubeService.getVideo(message.videoId);
-        video.thenAccept(result -> {
-            getSender().tell(result, getSelf());
-        }).exceptionally(ex -> {
+        video.thenAccept(result -> getSender().tell(result, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });
@@ -57,9 +53,7 @@ public class YoutubeServiceActor extends AbstractActor {
 
     private void handleGetChannelVideos(GetChannelVideos message) throws IOException {
         CompletionStage<List<Video>> videos = youtubeService.getChannelVideos(message.channelId);
-        videos.thenAccept(result -> {
-            getSender().tell(result, getSelf());
-        }).exceptionally(ex -> {
+        videos.thenAccept(result -> getSender().tell(result, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });
@@ -67,9 +61,7 @@ public class YoutubeServiceActor extends AbstractActor {
 
     private void handleGetChannelById(GetChannelById message) {
         CompletionStage<YoutubeChannel> channel = youtubeService.getChannelById(message.channelId);
-        channel.thenAccept(result -> {
-            getSender().tell(result, getSelf());
-        }).exceptionally(ex -> {
+        channel.thenAccept(result -> getSender().tell(result, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });

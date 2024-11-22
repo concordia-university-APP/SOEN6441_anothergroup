@@ -50,7 +50,7 @@ public class WebSocketActor extends AbstractActor {
                             String query = jsonNode.get("query").asText();
                             System.out.println("Received Search message: " + query + " for session: " + sessionId);
                             // Forward to SearchServiceActor
-                            SearchServiceActor.SearchKeywords searchKeywords = new SearchServiceActor.SearchKeywords(query, sessionId, out);
+                            SearchServiceActor.SearchKeywords searchKeywords = new SearchServiceActor.SearchKeywords(query, sessionId);
                             getContext().getSelf().forward(searchKeywords, getContext());
                         } catch (Exception e) {
                             e.printStackTrace();

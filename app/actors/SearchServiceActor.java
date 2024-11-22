@@ -51,9 +51,7 @@ public class SearchServiceActor extends AbstractActor {
 
     private void handleGetVideoById(GetVideoById message) {
         CompletableFuture<Video> video = searchService.getVideoById(message.id);
-        video.thenAccept(result -> {
-            getSender().tell(result, getSelf());
-        }).exceptionally(ex -> {
+        video.thenAccept(result -> getSender().tell(result, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });
@@ -61,9 +59,7 @@ public class SearchServiceActor extends AbstractActor {
 
     private void handleGetVideosBySearchTerm(GetVideosBySearchTerm message) {
         CompletableFuture<VideoList> videos = searchService.getVideosBySearchTerm(message.keywords, message.sessionId);
-        videos.thenAccept(result -> {
-            getSender().tell(result, getSelf());
-        }).exceptionally(ex -> {
+        videos.thenAccept(result -> getSender().tell(result, getSelf())).exceptionally(ex -> {
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });
@@ -74,7 +70,7 @@ public class SearchServiceActor extends AbstractActor {
         public final String keywords;
         public final String sessionId;
 
-        public SearchKeywords(String keywords, String sessionId, ActorRef sender) {
+        public SearchKeywords(String keywords, String sessionId) {
             this.keywords = keywords;
             this.sessionId = sessionId;
         }
