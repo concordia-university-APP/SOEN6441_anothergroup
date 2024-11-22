@@ -1,76 +1,80 @@
-@import java.util
-@(wordFrequency: util.Map[String, Long], query: String)
+@(query: String)
 
-@main("Word Frequency Statistics for ") {
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/styles.css")'>
-        <script>
-                let currentPage = 1;
-                const rowsPerPage = 10;
-
-                function displayTable(page) {
-                    const rows = document.querySelectorAll("tbody tr");
-                    const totalRows = rows.length;
-                    const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-                    // Hide all rows
-                    rows.forEach((row) => {
-                        row.style.display = "none"; // Hide all rows initially
-                    });
-
-                    // Calculate the starting and ending row index for the current page
-                    const start = (page - 1) * rowsPerPage;
-                    const end = start + rowsPerPage;
-
-                    // Show only the rows for the current page
-                    for (let i = start; i < end && i < totalRows; i++) {
-                        rows[i].style.display = ""; // Show rows within the range
-                    }
-
-                    // Update pagination buttons
-                    document.getElementById("prevBtn").style.display = page === 1 ? "none" : "inline";
-                    document.getElementById("nextBtn").style.display = page === totalPages ? "none" : "inline";
-                    document.getElementById("pageInfo").textContent = `Page ${page} of ${totalPages}`;
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Statistics for @query</title>
+        <style>
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
                 }
-
-                function changePage(offset) {
-                    currentPage += offset;
-                    displayTable(currentPage);
+                table, th, td {
+                    border: 1px solid black;
                 }
-
-                window.onload = () => {
-                    displayTable(currentPage);
-                };
-        </script>
+                th, td {
+                    padding: 8px;
+                    text-align: left;
+                }
+                .pagination {
+                    margin-top: 10px;
+                    text-align: center;
+                }
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Statistics for @query</title>
+                <style>
+                 table {
+                     width: 100%;
+                     border-collapse: collapse;
+                 }
+                table, th, td {
+                    border: 1px solid black;
+                }
+                th, td {
+                    padding: 8px;
+                    text-align: left;
+                }
+                .pagination {
+                    margin-top: 10px;
+                    text-align: center;
+                }
+                .pagination button {
+                    padding: 5px 10px;
+                    margin: 0 5px;
+                }
+        </style>
     </head>
     <body>
-        <h1>Word Frequency Statistics for "@query"</h1>
-        <p>Below are the word frequency statistics for the search query: "<strong>@query</strong>"</p>
+        <h1>Statistics for: @query</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                    <!-- Data rows will be dynamically inserted here -->
+            </tbody>
+        </table>
 
-        @if(wordFrequency.isEmpty) {
-            <p>No data available for this search query.</p>
-        } else {
-            <table>
-                <thead>
-                    <tr>
-                        <th>Word</th>
-                        <th>Frequency</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @for((word, count) <- wordFrequency) {
-                    <tr>
-                        <td>@word</td>
-                        <td>@count</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-            <div>
-                <button id="prevBtn" onclick="changePage(-1)">Previous</button>
-                <span id="pageInfo"></span>
-                <button id="nextBtn" onclick="changePage(1)">Next</button>
-            </div>
-        }
+        <div class="pagination">
+            <button id="prevBtn" onclick="changePage(-1)" style="display:none;">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextBtn" onclick="changePage(1)" style="display:none;">Next</button>
+        </div>
+
+        <script>
+                const searchTerm = "@query";  // Dynamically set by Play framework
+                console.log("Search term received:", searchTerm);
+        </script>
+
+        <script type="module" src="@routes.Assets.versioned("javascripts/statistics.js")"></script>
     </body>
-}
+</html>
