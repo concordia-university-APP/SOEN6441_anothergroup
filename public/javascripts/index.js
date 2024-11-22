@@ -50,7 +50,7 @@ function updateResults(searchResults) {
                 html += `<b>Channel: </b> <a href="http://localhost:9000/channel/${video.channelId}" >${video.channelName}</a> </br>`
                 html += `<b>Description: </b> ${video.description}</br>`
                 html += `<b>Flesch-Kincaid Grade Level : </b> ${video.fleschReadingEaseScore.readingEaseScore} <b>Flesch-Kincaid Reading Score : </b> ${video.fleschReadingEaseScore.gradeLevel}</br>`
-                html += `<a href="http://localhost:9000/videos/${video.id}"> Tags </a></br>`
+                html += `<a href="http://localhost:9000/showVideosByTag/${video.id}"> Tags </a></br>`
                 html += `</li>`;
             };
             html += '</ol>';
