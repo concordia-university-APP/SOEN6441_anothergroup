@@ -1,25 +1,38 @@
-@(videos: java.util.List[Video], tags: java.util.List[String])
+@import java.util.Collection
+@import java.util
+@import java.text.DecimalFormat
+@(results: util.List[Video], maxDisplay: Integer)
 
-@main("Video List") {
-  <div class="container">
-    <h1>Video List for Selected Tag</h1>
+@main("YouTube Search") {
+    <div class="container">
+        <div class="align-items-center">
+            <h1 class="">YouTube Video Search</h1>
 
-    <h2>Tags:</h2>
-    <ul>
-    @for(tag <- tags) {
-      <li>@tag</li>
-    }
-    </ul>
-
-    <h2>Videos:</h2>
-    <ul>
-    @for(video <- videos) {
-      <li>
-        <h3>@video.getTitle()</h3>
-        <p>@video.getDescription()</p>
-        <a href="@video.getThumbnailUrl">Watch Video</a>
-      </li>
-    }
-    </ul>
-  </div>
+                <!-- Search Form -->
+            <form action='@routes.YoutubeController.search("")' method="GET">
+                <div>
+                    <label for="query">Enter keyword:</label>
+                    <input type="text" name="query" id="query" required placeholder="Search for videos..." />
+                    <button type="submit">Search</button>
+                </div>
+            </form>
+                <!-- Search Results -->
+            <div id="results">
+                if !results.isEmpty => {
+                    @for(item: Video <- results) {
+                        <h2>Search Results for terms: @item.getTitle </h2>
+                        <li>
+                        @video(item)
+                        </li>
+                        <div>
+                            <a href="@routes.YoutubeController.showVideoWithTags(item.getId)" target="_blank">Tag</a>
+                        </div>
+                    }
+                }
+                else => {
+                    <p>No results found.</p>
+                }
+            </div>
+        </div>
+    </div>
 }

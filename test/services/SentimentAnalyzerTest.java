@@ -29,8 +29,8 @@ public class SentimentAnalyzerTest {
     @Test
     public void testAnalyzeSentiment_Happy() {
         // Mock data with more than 70% happy words
-        Video video1 = new Video("id1", "Title 1", "This is an amazing, wonderful, happy day full of joy", "channelId1", "channelName1", "thumbnailUrl1");
-        Video video2 = new Video("id2", "Title 2", "I love this fantastic and fun event :)", "channelId2", "channelName2", "thumbnailUrl2");
+        Video video1 = new Video("id1", "Title 1", "This is an amazing, wonderful, happy day full of joy", "channelId1", "channelName1", "thumbnailUrl1", List.of("happy", "joy"));
+        Video video2 = new Video("id2", "Title 2", "I love this fantastic and fun event :)", "channelId2", "channelName2", "thumbnailUrl2", List.of("fun", "love"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -45,8 +45,8 @@ public class SentimentAnalyzerTest {
     @Test
     public void testAnalyzeSentiment_Sad() {
         // Mock data with more than 70% sad words
-        Video video1 = new Video("id3", "Title 1", "It was a terrible and sad experience full of anger", "channelId3", "channelName3", "thumbnailUrl3");
-        Video video2 = new Video("id4", "Title 2", "The day was gloomy, and I felt broken and distant", "channelId4", "channelName4", "thumbnailUrl4");
+        Video video1 = new Video("id3", "Title 1", "It was a terrible and sad experience full of anger", "channelId3", "channelName3", "thumbnailUrl3", List.of("sad", "anger"));
+        Video video2 = new Video("id4", "Title 2", "The day was gloomy, and I felt broken and distant", "channelId4", "channelName4", "thumbnailUrl4", List.of("gloomy", "broken"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -61,8 +61,8 @@ public class SentimentAnalyzerTest {
     @Test
     public void testAnalyzeSentiment_Neutral() {
         // Mock data with mixed or neutral words
-        Video video1 = new Video("id5", "Title 1", "This day was okay, just a mix of different feelings", "channelId5", "channelName5", "thumbnailUrl5");
-        Video video2 = new Video("id6", "Title 2", "It was neither happy nor sad, just average", "channelId6", "channelName6", "thumbnailUrl6");
+        Video video1 = new Video("id5", "Title 1", "This day was okay, just a mix of different feelings", "channelId5", "channelName5", "thumbnailUrl5", List.of("neutral"));
+        Video video2 = new Video("id6", "Title 2", "It was neither happy nor sad, just average", "channelId6", "channelName6", "thumbnailUrl6", List.of("average"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -92,9 +92,10 @@ public class SentimentAnalyzerTest {
      */
     @Test
     public void testAnalyzeSentiment_NoHappySadWords() {
+        List<String> tags = Collections.emptyList();
         // Mock data with no happy or sad words
-        Video video1 = new Video("id7", "Title 1", "Just a regular video with no emotions expressed", "channelId7", "channelName7", "thumbnailUrl7");
-        Video video2 = new Video("id8", "Title 2", "The content is just informative and neutral", "channelId8", "channelName8", "thumbnailUrl8");
+        Video video1 = new Video("id7", "Title 1", "Just a regular video with no emotions expressed", "channelId7", "channelName7", "thumbnailUrl7", tags);
+        Video video2 = new Video("id8", "Title 2", "The content is just informative and neutral", "channelId8", "channelName8", "thumbnailUrl8", tags);
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -109,9 +110,9 @@ public class SentimentAnalyzerTest {
     @Test
     public void testAnalyzeSentiment_MixedSentiments() {
         // Mock data with mixed happy and sad words
-        Video video1 = new Video("id9", "Title 1", "The experience was amazing but also challenging", "channelId9", "channelName9", "thumbnailUrl9");
-        Video video2 = new Video("id10", "Title 2", "I felt a little sad but also excited", "channelId10", "channelName10", "thumbnailUrl10");
-        Video video3 = new Video("id11", "Title 3", "A normal day with ups and downs", "channelId11", "channelName11", "thumbnailUrl11");
+        Video video1 = new Video("id9", "Title 1", "The experience was amazing but also challenging", "channelId9", "channelName9", "thumbnailUrl9", List.of("amazing", "challenging"));
+        Video video2 = new Video("id10", "Title 2", "I felt a little sad but also excited", "channelId10", "channelName10", "thumbnailUrl10", List.of("sad", "excited"));
+        Video video3 = new Video("id11", "Title 3", "A normal day with ups and downs", "channelId11", "channelName11", "thumbnailUrl11", List.of("normal", "mixed"));
 
         List<Video> videos = Arrays.asList(video1, video2, video3);
 
@@ -126,11 +127,11 @@ public class SentimentAnalyzerTest {
     @Test
     public void testAnalyzeSentiment_SadMajority() {
         // Mock data where sad sentiments outnumber happy and neutral ones
-        Video video1 = new Video("id7", "Title 1", "It was a terrible and sad experience", "channelId7", "channelName7", "thumbnailUrl7");
-        Video video2 = new Video("id8", "Title 2", "The weather was dark and depressing", "channelId8", "channelName8", "thumbnailUrl8");
-        Video video3 = new Video("id9", "Title 3", "I had a sad and gloomy day", "channelId9", "channelName9", "thumbnailUrl9");
-        Video video4 = new Video("id10", "Title 4", "A fine day but nothing special bad sad", "channelId10", "channelName10", "thumbnailUrl10");  // Neutral video
-        Video video5 = new Video("id11", "Title 5", "It was a and event horrible", "channelId11", "channelName11", "thumbnailUrl11"); // Happy video
+        Video video1 = new Video("id7", "Title 1", "It was a terrible and sad experience", "channelId7", "channelName7", "thumbnailUrl7", List.of("terrible", "sad"));
+        Video video2 = new Video("id8", "Title 2", "The weather was dark and depressing", "channelId8", "channelName8", "thumbnailUrl8", List.of("dark", "depressing"));
+        Video video3 = new Video("id9", "Title 3", "I had a sad and gloomy day", "channelId9", "channelName9", "thumbnailUrl9", List.of("sad", "gloomy"));
+        Video video4 = new Video("id10", "Title 4", "A fine day but nothing special bad sad", "channelId10", "channelName10", "thumbnailUrl10", List.of("fine", "sad"));  // Neutral video
+        Video video5 = new Video("id11", "Title 5", "It was a and event horrible", "channelId11", "channelName11", "thumbnailUrl11", List.of("horrible")); // Happy video
 
         List<Video> videos = Arrays.asList(video1, video2, video3, video4, video5);
 

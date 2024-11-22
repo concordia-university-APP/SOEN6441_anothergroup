@@ -140,7 +140,9 @@ public class YoutubeService {
                     video.getSnippet().getDescription(),
                     video.getSnippet().getChannelId(),
                     video.getSnippet().getChannelTitle(),
-                    video.getSnippet().getThumbnails().getDefault().getUrl());
+                    video.getSnippet().getThumbnails().getDefault().getUrl(),
+                    video.getSnippet().getTags()
+            );
         });
     }
 
@@ -184,7 +186,9 @@ public class YoutubeService {
                     video.getSnippet().getDescription(),
                     video.getSnippet().getChannelId(),
                     video.getSnippet().getChannelTitle(),
-                    video.getSnippet().getThumbnails().getDefault().getUrl()))
+                    video.getSnippet().getThumbnails().getDefault().getUrl(),
+                    video.getSnippet().getTags()
+                    ))
                     .collect(Collectors.toList());
         });
     }
@@ -202,7 +206,7 @@ public class YoutubeService {
             response = request
                     .setKey(API_KEY)
                     .setId(videoIds)
-                    .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url)")
+                    .setFields("items(id,snippet/title,snippet/description,snippet/channelId, snippet/channelTitle,snippet/thumbnails/default/url, snippet/tags)")
                     .execute();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -241,7 +245,8 @@ public class YoutubeService {
                             sr.getSnippet().getDescription(),
                             sr.getSnippet().getChannelId(),
                             sr.getSnippet().getChannelTitle(),
-                            sr.getSnippet().getThumbnails().getDefault().getUrl()
+                            sr.getSnippet().getThumbnails().getDefault().getUrl(),
+                            List.of("")
                     ))
                     .collect(Collectors.toList());
         } catch (IOException e) {

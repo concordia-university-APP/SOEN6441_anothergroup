@@ -28,8 +28,8 @@ public class YoutubeChannelTest {
     public void setUp() {
         // Assume testVideoList is initialized if VideoList is a complex object
         testVideoList = new VideoList(List.of(new Video[]{
-                new Video("1", "1", "My pants were falling down so I added a belt.", "1", "1", "1"),
-                new Video("2", "2", "The Lord of the Rings is an epic high fantasy novel by the English author and scholar JRR Tolkien. Set in Middle-earth, the story began as a sequel to Tolkien's 1937 children's book The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling books ever written, with over 150 million copies sold.", "2", "2", "2"),
+                new Video("1", "1", "My pants were falling down so I added a belt.", "1", "1", "1", List.of("fashion", "humor")),
+                new Video("2", "2", "The Lord of the Rings is an epic high fantasy novel by the English author and scholar JRR Tolkien. Set in Middle-earth, the story began as a sequel to Tolkien's 1937 children's book The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling books ever written, with over 150 million copies sold.", "2", "2", "2", List.of("fantasy", "literature")),
         }));
         youtubeChannel = new YoutubeChannel(TEST_ID, TEST_TITLE, TEST_DESCRIPTION, TEST_THUMBNAIL_URL, testVideoList);
     }
