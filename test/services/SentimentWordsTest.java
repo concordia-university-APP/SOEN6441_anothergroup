@@ -29,8 +29,8 @@ public class SentimentWordsTest {
     @Test
     public void testHappySentiment() {
         // Prepare a list of videos with happy descriptions
-        Video video1 = new Video("1", "Video 1", "This is a happy and amazing video!", "123", "Channel 1", "url1");
-        Video video2 = new Video("2", "Video 2", "I love this video, it's fantastic!", "124", "Channel 2", "url2");
+        Video video1 = new Video("1", "Video 1", "This is a happy and amazing video!", "123", "Channel 1", "url1", Arrays.asList("happy", "amazing"));
+        Video video2 = new Video("2", "Video 2", "I love this video, it's fantastic!", "124", "Channel 2", "url2", Arrays.asList("love", "fantastic"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -47,8 +47,8 @@ public class SentimentWordsTest {
     @Test
     public void testSadSentiment() {
         // Prepare a list of videos with sad descriptions
-        Video video1 = new Video("1", "Video 1", "This video makes me sad and terrible.", "123", "Channel 1", "url1");
-        Video video2 = new Video("2", "Video 2", "I hate this video, it's awful!", "124", "Channel 2", "url2");
+        Video video1 = new Video("1", "Video 1", "This video makes me sad and terrible.", "123", "Channel 1", "url1", Arrays.asList("sad", "terrible"));
+        Video video2 = new Video("2", "Video 2", "I hate this video, it's awful!", "124", "Channel 2", "url2", Arrays.asList("hate", "awful"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -65,8 +65,8 @@ public class SentimentWordsTest {
     @Test
     public void testNeutralSentiment() {
         // Prepare a list of videos with mixed sentiments
-        Video video1 = new Video("1", "Video 1", "This is a fun video!", "123", "Channel 1", "url1");
-        Video video2 = new Video("2", "Video 2", "This video is quite boring.", "124", "Channel 2", "url2");
+        Video video1 = new Video("1", "Video 1", "This is a fun video!", "123", "Channel 1", "url1", Arrays.asList("fun"));
+        Video video2 = new Video("2", "Video 2", "This video is quite boring.", "124", "Channel 2", "url2", Arrays.asList("boring"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -83,8 +83,8 @@ public class SentimentWordsTest {
     @Test
     public void testMixedSentiment() {
         // Prepare a list of videos with mixed happy and sad descriptions
-        Video video1 = new Video("1", "Video 1", "This is a wonderful video!", "123", "Channel 1", "url1");
-        Video video2 = new Video("2", "Video 2", "This video is a disaster.", "124", "Channel 2", "url2");
+        Video video1 = new Video("1", "Video 1", "This is a wonderful video!", "123", "Channel 1", "url1", Arrays.asList("wonderful", "happy"));
+        Video video2 = new Video("2", "Video 2", "This video is a disaster.", "124", "Channel 2", "url2", Arrays.asList("disaster", "sad"));
 
         List<Video> videos = Arrays.asList(video1, video2);
 
@@ -101,7 +101,7 @@ public class SentimentWordsTest {
     @Test
     public void testEdgeCaseNoSentimentWords() {
         // Prepare a list of videos with no sentiment words
-        Video video1 = new Video("1", "Video 1", "Just a regular video description.", "123", "Channel 1", "url1");
+        Video video1 = new Video("1", "Video 1", "Just a regular video description.", "123", "Channel 1", "url1", Arrays.asList("regular", "neutral"));
 
         List<Video> videos = Arrays.asList(video1);
 

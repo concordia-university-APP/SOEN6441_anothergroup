@@ -22,6 +22,7 @@ import services.YoutubeService;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+
 import scala.Option;
 import services.SearchService;
 import services.StatisticsService;
@@ -201,28 +202,32 @@ public class YoutubeController extends Controller {
     }
 
     /**
-     * Get the videos by tag, processes the video list, and renders the result.
+     * Handles the request to display a list of videos associated with a specific tag.
      * @author Ryane
-     * @param tag is the id used to search videos
-     * @return a CompletionStage is a result of either fetching the video list or an error page
+     * @param videoID the ID of the video used to fetch related videos based on tags.
+     * @return a {@link CompletionStage} that completes with an HTTP {@link Result} displaying the video list.
      */
-
-    public CompletionStage<Result> videosByTag(String tag) {
-        return tagService.getVideoWithTags(tag, 10L, tag)
-                .thenApply(videoList -> {
-                    List<Video> videos = videoList.getVideoList();
-                    if (videos.isEmpty()) {
-                        return notFound("No videos found for tag: " + tag);
-                    }
-                    Video firstVideo = videos.get(0);
-                    List<String> tags = tagService.getTagsFromDescription(firstVideo);
-                    return ok(views.html.videoList.render(videos, tags));
-                })
-                .exceptionally(ex -> {
-                    System.err.println("Error fetching videos for tag: " + tag + " - " + ex.getMessage());
-                    return internalServerError("Error fetching videos for tag: " + tag);
-                });
+    public CompletionStage<Result> videosByTag(String videoID) {
+        return tagService.getVideoWithTags(videoID, 10L, videoID)
+                .thenApplyAsync(searches -> ok(views.html.videoList.render(
+                                searches,
+                                DISPLAY_COUNT)),
+                        ec.current());
     }
 
-
+    /**
+     * Handles the request to display a video and its associated tags.
+     * @author Ryane
+     * @param videoID the ID of the video to fetch from the search service.
+     * @return a {@link CompletionStage} that completes with an HTTP {@link Result} displaying the video and its tags.
+     */
+    public CompletionStage<Result> showVideoWithTags(String videoID) {
+        return searchService.getVideoById(videoID).thenApplyAsync(video -> {
+            if (video == null) {
+                return badRequest("Video not found.");
+            }
+            List<String> tags = video.getTags();
+            return ok(views.html.videoTags.render(video, tags));
+        }, ec.current());
+    }
 }

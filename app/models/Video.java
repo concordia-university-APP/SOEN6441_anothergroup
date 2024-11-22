@@ -1,7 +1,9 @@
 package models;
 
-import scala.collection.immutable.List;
 import services.TagService;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Laurent Voisard
@@ -16,6 +18,7 @@ public class Video {
     private final String channelName;
     private final String thumbnailUrl;
     private final FleschReadingEaseScore fleschReadingEaseScore;
+    private List<String> tags;
 
     /**
      * @author Laurent Voisard
@@ -27,13 +30,14 @@ public class Video {
      * @param channelName video channel name
      * @param thumbnailUrl video thumbnail url
      */
-    public Video(String id, String title, String description, String channelId, String channelName, String thumbnailUrl) {
+    public Video(String id, String title, String description, String channelId, String channelName, String thumbnailUrl, List<String> tags) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.channelId = channelId;
         this.channelName = channelName;
         this.thumbnailUrl = thumbnailUrl;
+        this.tags = tags;
         this.fleschReadingEaseScore = new FleschReadingEaseScore(this.description);
     }
 
@@ -85,5 +89,14 @@ public class Video {
      * @return flesch score
      */
     public FleschReadingEaseScore getFleschReadingEaseScore() { return fleschReadingEaseScore;}
+    /**
+     * Retrieves the list of tags associated with this video.
+     * @author Ryane
+     * @return a {@code List<String>} containing the tags for this video,
+     *         or a singleton list with "No tags for this video" if no tags are available.
+     */
+    public List<String> getTags() {
+        return tags != null ? tags : Collections.singletonList("No tags for this video");
+    }
 
 }

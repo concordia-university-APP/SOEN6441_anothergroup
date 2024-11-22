@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -253,9 +254,9 @@ public class YoutubeServiceTest {
         when(mockResponse.getItems()).thenReturn(List.of(searchResponse));
 
         Video[] videos = new Video[]{
-                new Video("videoId1", "Sample Video", "Sample Description", "id1", "channel1", "dawkad1"),
-                new Video("videoId2", "title2", "desc2", "id2", "channel2", "dawkad2"),
-                new Video("videoId3", "title3", "desc3", "id3", "channel3", "dawkad3")
+                new Video("videoId1", "Sample Video", "Sample Description", "id1", "channel1", "dawkad1", Arrays.asList("sample", "tutorial")),
+                new Video("videoId2", "title2", "desc2", "id2", "channel2", "dawkad2", Arrays.asList("sample")),
+                new Video("videoId3", "title3", "desc3", "id3", "channel3", "dawkad3", Arrays.asList("description"))
         };
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
@@ -432,7 +433,7 @@ public class YoutubeServiceTest {
      */
     @Test
     public void testGetVideo() throws IOException {
-        Video v = new Video("1", "title","desc","id","channel","dawkad");
+        Video v = new Video("1", "title","desc","id","channel","dawkad", Arrays.asList("java", "programming"));
 
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);
@@ -533,9 +534,9 @@ public class YoutubeServiceTest {
     @Test
     public void testGetVideos() throws IOException {
         Video[] videos = new Video[]{
-                new Video("1", "title1", "desc1", "id1", "channel1", "dawkad1"),
-                new Video("2", "title2", "desc2", "id2", "channel2", "dawkad2"),
-                new Video("3", "title3", "desc3", "id3", "channel3", "dawkad3")
+                new Video("1", "title1", "desc1", "id1", "channel1", "dawkad1", Arrays.asList("java", "programming")),
+                new Video("2", "title2", "desc2", "id2", "channel2", "dawkad2", Arrays.asList("coding", "tutorial")),
+                new Video("3", "title3", "desc3", "id3", "channel3", "dawkad3", Arrays.asList("java", "development"))
         };
         YouTube.Videos videosMock = mock(YouTube.Videos.class);
         YouTube.Videos.List videoListMock = mock(YouTube.Videos.List.class);

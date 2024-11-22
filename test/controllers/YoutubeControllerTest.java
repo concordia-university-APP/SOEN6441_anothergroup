@@ -6,6 +6,9 @@ import models.Video;
 import models.YoutubeChannel;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import play.Application;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -23,15 +26,15 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.GET;
 
 /**
  * Test class for the Youtube Controller
- *
- * author Laurent Voisard,
- * Yehia, Tanveer Reza
+ * @author Laurent Voisard, Yehia, Tanveer Reza
  */
 public class YoutubeControllerTest extends WithApplication {
     private static YoutubeController youtubeController;
@@ -42,6 +45,8 @@ public class YoutubeControllerTest extends WithApplication {
     private static YoutubeChannel testChannel;
     private static List<Video> testVideos;
     private static TagService tagService;
+    private static Video testVideo;
+    private static List<String> testTags;
     private static ActorSystem actorSystem;
     private static Materializer materializer;
 
@@ -64,6 +69,11 @@ public class YoutubeControllerTest extends WithApplication {
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
 
+        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url", Collections.singletonList("tag1")));
+        testTags = new ArrayList<>();
+        testTags.add("tag1");
+        testTags.add("tag2");
+        testTags.add("tag3");
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
     }
@@ -71,8 +81,7 @@ public class YoutubeControllerTest extends WithApplication {
 
     /**
      * Test the getStatistics method of YoutubeController with user session
-     *
-     * author Tanveer Reza
+     * @author Tanveer Reza
      */
     @Test
     public void testGetStatisticsWithUserSession() {
@@ -99,7 +108,7 @@ public class YoutubeControllerTest extends WithApplication {
     /**
      * Test the searchForm method of YoutubeController with no user session
      *
-     * throws Exception
+     * @throws Exception
      */
     @Test
     public void testSearchFormWithoutUserSession() {
