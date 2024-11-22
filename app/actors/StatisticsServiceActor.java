@@ -64,9 +64,7 @@ public class StatisticsServiceActor extends AbstractActor {
         System.out.println("Handling SearchKeywords message: " + message.searchTerms);
         ActorRef sender = getSender();
         CompletableFuture<Map<String, Long>> wordFrequencyFuture = statisticsService.getWordFrequency(message.searchTerms, message.sessionId);
-        wordFrequencyFuture.thenAccept(wordFrequency -> {
-            sender.tell(wordFrequency, getSelf());
-        }).exceptionally(ex -> {
+        wordFrequencyFuture.thenAccept(wordFrequency -> sender.tell(wordFrequency, getSelf())).exceptionally(ex -> {
             sender.tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
         });

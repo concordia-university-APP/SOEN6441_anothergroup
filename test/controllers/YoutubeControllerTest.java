@@ -9,7 +9,6 @@ import org.junit.Test;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.mvc.WebSocket;
 import play.test.Helpers;
 import play.test.WithApplication;
 import services.SearchService;
@@ -19,7 +18,6 @@ import services.YoutubeService;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
