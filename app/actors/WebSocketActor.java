@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import models.VideoSearch;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 import services.SearchService;
 import services.StatisticsService;
 import services.YoutubeService;
@@ -16,17 +17,19 @@ import services.YoutubeService;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Actor class to handle WebSocket connections and messages.
  * @author Tanveer Reza
  */
-public class WebSocketActor extends AbstractActor {
+public class WebSocketActor extends AbstractActorWithTimers {
     private final ActorRef searchServiceActor;
     private final ActorRef youtubeServiceActor;
     private final ActorRef statisticsServiceActor;
     private final String sessionId;
     private final ActorRef out;
+    private final FiniteDuration refreshDuration;
 
     /**
      * Constructor to initialize the WebSocketActor.
@@ -45,6 +48,15 @@ public class WebSocketActor extends AbstractActor {
         searchServiceActor = getContext().actorOf(SearchServiceActor.props(searchService), "searchServiceActor");
         youtubeServiceActor = getContext().actorOf(YoutubeServiceActor.props(youtubeService), "youtubeServiceActor");
         statisticsServiceActor = getContext().actorOf(StatisticsServiceActor.props(statisticsService), "statisticsServiceActor");
+        this.refreshDuration = Duration.create(5, TimeUnit.SECONDS);
+
+    }
+
+    private static final class Tick {}
+
+    @Override
+    public void preStart() {
+        // getTimers().startPeriodicTimer("Refresh",new Tick(), refreshDuration);
     }
 
     /**
@@ -71,6 +83,11 @@ public class WebSocketActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(Tick.class, tick -> {
+                    // change this to update
+                    getContext().getSelf().forward(new SearchServiceActor.UpdateUserSearchList(sessionId), getContext());
+                    // searchServiceActor.tell(, out);
+                })
                 .match(String.class, message -> {
                     // Check if the message is of type "search"
                     if (message.startsWith("{\"type\":\"search\"")) {
@@ -101,7 +118,10 @@ public class WebSocketActor extends AbstractActor {
                             e.printStackTrace();
                             System.out.println("Error parsing message: " + message);
                         }
-                    }else {
+                    } else if (message.startsWith("{\"type\":\"getUserSearchList\"")) {
+                        SearchServiceActor.GetUserSearchList getUserSearchList = new SearchServiceActor.GetUserSearchList(sessionId);
+                        getContext().getSelf().forward(getUserSearchList, getContext());
+                    } else {
                         System.out.println("Received unknown message: " + message);
                     }
                 })
@@ -117,6 +137,60 @@ public class WebSocketActor extends AbstractActor {
                                 // Send the result back to the WebSocket actor
                                 List<VideoSearch> searchResults = (List<VideoSearch>) result.get();
                                 System.out.println("Search completed, sending results to WebSocket.");
+                                String jsonResults = new ObjectMapper().writeValueAsString(searchResults);
+                                out.tell(jsonResults, getSelf());
+                            } else {
+                                // If there is an error, send failure response to the WebSocket actor
+                                Throwable failure = result.failed().get();
+                                System.out.println("Search failed: " + failure.getMessage());
+                                out.tell(new Status.Failure(failure), getSelf());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Exception while processing search result: " + e.getMessage());
+                            out.tell(new Status.Failure(e), getSelf());
+                        }
+                        return null;
+                    }, context().dispatcher());
+                })
+                .match(SearchServiceActor.GetUserSearchList.class, message -> {
+                    System.out.println("sender: " + getSender().toString());
+                    System.out.println("out: " + out.toString());
+                    System.out.println("Forwarding search message to SearchServiceActor.");
+                    Timeout timeout = Timeout.create(java.time.Duration.ofSeconds(20));
+                    Future<Object> futureResult = Patterns.ask(searchServiceActor, message, timeout);
+                    futureResult.onComplete(result -> {
+                        try {
+                            if (result.isSuccess()) {
+                                // Send the result back to the WebSocket actor
+                                List<VideoSearch> searchResults = (List<VideoSearch>) result.get();
+                                System.out.println("Search completed, sending results to WebSocket.");
+                                String jsonResults = new ObjectMapper().writeValueAsString(searchResults);
+                                out.tell(jsonResults, getSelf());
+                            } else {
+                                // If there is an error, send failure response to the WebSocket actor
+                                Throwable failure = result.failed().get();
+                                System.out.println("Search failed: " + failure.getMessage());
+                                out.tell(new Status.Failure(failure), getSelf());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Exception while processing search result: " + e.getMessage());
+                            out.tell(new Status.Failure(e), getSelf());
+                        }
+                        return null;
+                    }, context().dispatcher());
+                })
+                .match(SearchServiceActor.UpdateUserSearchList.class, message -> {
+                    System.out.println("sender: " + getSender().toString());
+                    System.out.println("out: " + out.toString());
+                    System.out.println("Forwarding updated search message to SearchServiceActor.");
+                    Timeout timeout = Timeout.create(java.time.Duration.ofSeconds(20));
+                    Future<Object> futureResult = Patterns.ask(searchServiceActor, message, timeout);
+                    futureResult.onComplete(result -> {
+                        try {
+                            if (result.isSuccess()) {
+                                // Send the result back to the WebSocket actor
+                                List<VideoSearch> searchResults = (List<VideoSearch>) result.get();
+                                System.out.println("Update completed, sending results to WebSocket.");
                                 String jsonResults = new ObjectMapper().writeValueAsString(searchResults);
                                 out.tell(jsonResults, getSelf());
                             } else {
@@ -167,7 +241,7 @@ public class WebSocketActor extends AbstractActor {
                 .match(YoutubeServiceActor.GetChannelVideos.class, message -> youtubeServiceActor.forward(message, getContext()))
                 .match(YoutubeServiceActor.GetChannelById.class, message -> youtubeServiceActor.forward(message, getContext()))
                 .matchAny(message -> {
-                    System.out.println("Received unknown message: " + message);
+                    System.out.println("Any Received unknown message: " + message);
                 })
                 .build();
     }

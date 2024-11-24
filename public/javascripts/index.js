@@ -4,11 +4,23 @@ import {socket} from './websocket.js'; // Import shared WebSocket connection
 socket.onmessage = function (event) {
     try {
         const searchResults = JSON.parse(event.data);
+        console.log("Received search results from WebSocket:", searchResults);
         updateResults(searchResults);
     } catch (error) {
         console.error("Error processing WebSocket message:", error);
     }
 };
+
+document.body.onload = function () {
+    console.log("Fetching User Session Search List", );
+    if (socket.readyState === WebSocket.OPEN) {
+        console.log("Fetching User Session Search List" );
+        socket.send(JSON.stringify({ type: "getUserSearchList" }));
+    } else {
+        console.error("WebSocket is not open.");
+        alert("WebSocket connection not available. Please try again later.");
+    }
+}
 
 // Prevent form submission and send the search query via WebSocket
 document.getElementById('searchForm').addEventListener('submit', function (event) {
@@ -46,11 +58,18 @@ function updateResults(searchResults) {
             for(let i = 0; i < Math.min(item.results.videoList.length, DISPLAY_MAX); i++) {
                 let video = item.results.videoList[i];
                 html += `<li>`;
+                html += `<div class="row">`;
+                html += `<div class="col-10">`;
                 html += `<b>Title: </b> <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a> </br>`
                 html += `<b>Channel: </b> <a href="http://localhost:9000/channel/${video.channelId}" >${video.channelName}</a> </br>`
                 html += `<b>Description: </b> ${video.description}</br>`
                 html += `<b>Flesch-Kincaid Grade Level : </b> ${video.fleschReadingEaseScore.readingEaseScore} <b>Flesch-Kincaid Reading Score : </b> ${video.fleschReadingEaseScore.gradeLevel}</br>`
                 html += `<a href="http://localhost:9000/showVideosByTag/${video.id}"> Tags </a></br>`
+                html += `</div>`;
+                html += `<div class="col-2">`;
+                html += `<img src="${video.thumbnailUrl}" alt="${video.title}"></img>`
+                html += `</div>`
+                html += `</div>`;
                 html += `</li>`;
             };
             html += '</ol>';

@@ -54,6 +54,8 @@ public class SearchServiceActor extends AbstractActor {
                 .match(SearchKeywords.class, this::handleSearchKeywords)
                 .match(GetVideoById.class, this::handleGetVideoById)
                 .match(GetVideosBySearchTerm.class, this::handleGetVideosBySearchTerm)
+                .match(GetUserSearchList.class, this::handleGetUserSearchList)
+                .match(UpdateUserSearchList.class, this::handleUpdateUserSearchList)
                 .build();
     }
 
@@ -73,6 +75,34 @@ public class SearchServiceActor extends AbstractActor {
             System.out.println("Search results: " + results.getClass().getSimpleName());
             System.out.println("GetSender: " + getSender());
             sender.tell(results, getSelf());  // Ensure this is the correct sender (WebSocket actor)
+        }).exceptionally(ex -> {
+            sender.tell(new akka.actor.Status.Failure(ex), getSelf());
+            return null;
+        });
+    }
+
+    private void handleGetUserSearchList(GetUserSearchList message) {
+        System.out.println("Handling Get User Search List message: " + message.sessionId);
+        ActorRef sender = getSender();
+        List<VideoSearch> searchResults = searchService.getSessionSearchList(message.sessionId);
+
+            // Ensure the sender is correctly set here.
+        System.out.println("Sending search results to sender: " + sender.toString());
+        System.out.println("Search results: " + searchResults.getClass().getSimpleName());
+        System.out.println("GetSender: " + getSender());
+        sender.tell(searchResults, getSelf());  // Ensure this is the correct sender (WebSocket actor)
+
+    }
+
+    private void handleUpdateUserSearchList(UpdateUserSearchList message) {
+        System.out.println("Handling SearchKeywords message: " + message.sessionId);
+        ActorRef sender = getSender();
+        searchService.updateSearches(message.sessionId).thenAccept(results -> {
+            System.out.println("sending updated search results to sender: " + sender.toString());
+            System.out.println("Search results: " + results.getClass().getSimpleName());
+            System.out.println("GetSender: " + getSender());
+            sender.tell(results, getSelf());
+
         }).exceptionally(ex -> {
             sender.tell(new akka.actor.Status.Failure(ex), getSelf());
             return null;
@@ -124,6 +154,42 @@ public class SearchServiceActor extends AbstractActor {
          */
         public SearchKeywords(String keywords, String sessionId) {
             this.keywords = keywords;
+            this.sessionId = sessionId;
+        }
+    }
+
+    /**
+     * Message class for search keyword requests.
+     * @author Laurent Voisard
+     */
+    public static class GetUserSearchList {
+        public final String sessionId;
+
+        /**
+         * Constructor for SearchKeywords message.
+         *
+         * @param sessionId the session ID
+         * @author Laurent Voisard
+         */
+        public GetUserSearchList(String sessionId) {
+            this.sessionId = sessionId;
+        }
+    }
+
+    /**
+     * Message class for search keyword requests.
+     * @author Laurent Voisard
+     */
+    public static class UpdateUserSearchList {
+        public final String sessionId;
+
+        /**
+         * Constructor for SearchKeywords message.
+         *
+         * @param sessionId the session ID
+         * @author Laurent Voisard
+         */
+        public UpdateUserSearchList(String sessionId) {
             this.sessionId = sessionId;
         }
     }

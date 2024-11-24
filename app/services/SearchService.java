@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 
 /**
@@ -73,6 +74,26 @@ public class SearchService {
 
             return getSessionSearchList(sessionId);
         });
+    }
+
+    public CompletableFuture<List<VideoSearch>> updateSearches(String sessionId) {
+        if (getSessionSearchList(sessionId).isEmpty()) return CompletableFuture.supplyAsync(() -> getSessionSearchList(sessionId));
+
+        for(VideoSearch videoSearch: getSessionSearchList(sessionId)) {
+            youtubeService.searchResults(videoSearch.getSearchTerms(), 10L).thenApplyAsync(results -> {
+                List<Video> newVideos = results.getVideoList().stream()
+                        .filter(x -> videoSearch.getResults().getVideoList().stream()
+                                .map(Video::getId)
+                                .noneMatch(y -> y.equals(x.getId())))
+                        .collect(Collectors.toList());
+                for(int i = newVideos.size() - 1; i > 0; i--) {
+                    videoSearch.getResults().getVideoList().add(0, newVideos.get(i));
+                    videoSearch.getResults().getVideoList().remove(videoSearch.getResults().getVideoList().size() - 1);
+                }
+                return videoSearch;
+            });
+        }
+        return CompletableFuture.supplyAsync(() -> getSessionSearchList(sessionId));
     }
 
     /**

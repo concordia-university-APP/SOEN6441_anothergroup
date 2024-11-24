@@ -1,5 +1,5 @@
 // websocket.js
-export const socket = new WebSocket("ws://localhost:9000/ws/search");
+export const socket = new WebSocket("ws://localhost:9000/ws");
 
 socket.onopen = function (event) {
     console.log("WebSocket connection established.");
