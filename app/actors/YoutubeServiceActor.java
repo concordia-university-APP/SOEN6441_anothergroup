@@ -111,11 +111,13 @@ public class YoutubeServiceActor extends AbstractActor {
         });
     }
 
+    public interface Message {}
+
     /**
      * Message class for search video requests.
      * @author Tanveer Reza
      */
-    public static class SearchVideos {
+    public static class SearchVideos implements Message {
         public final String keywords;
         public final Long maxResults;
 
@@ -136,7 +138,7 @@ public class YoutubeServiceActor extends AbstractActor {
      * Message class for video requests by ID.
      * @author Tanveer Reza
      */
-    public static class GetVideo {
+    public static class GetVideo implements Message {
         public final String videoId;
 
         /**
@@ -154,7 +156,7 @@ public class YoutubeServiceActor extends AbstractActor {
      * Message class for channel videos requests.
      * @author Tanveer Reza
      */
-    public static class GetChannelVideos {
+    public static class GetChannelVideos implements Message {
         public final String channelId;
 
         /**
@@ -172,7 +174,7 @@ public class YoutubeServiceActor extends AbstractActor {
      * Message class for channel profile requests by ID.
      * @author Tanveer Reza
      */
-    public static class GetChannelById {
+    public static class GetChannelById implements Message{
         public final String channelId;
 
         /**

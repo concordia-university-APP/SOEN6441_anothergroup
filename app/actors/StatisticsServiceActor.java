@@ -70,11 +70,13 @@ public class StatisticsServiceActor extends AbstractActor {
         });
     }
 
+    public interface Message{}
+
     /**
      * Message class for requesting word frequency statistics.
      * @author Tanveer Reza
      */
-    public static class WordFrequency {
+    public static class WordFrequency implements Message {
         public final String searchTerms;
         public final String sessionId;
 
@@ -90,6 +92,7 @@ public class StatisticsServiceActor extends AbstractActor {
             this.sessionId = sessionId;
         }
     }
+
 
     /**
      * Response class for word frequency statistics.

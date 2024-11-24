@@ -125,7 +125,7 @@ public class WebSocketActor extends AbstractActorWithTimers {
                         System.out.println("Received unknown message: " + message);
                     }
                 })
-                .match(SearchServiceActor.SearchKeywords.class, message -> {
+                .match(SearchServiceActor.Message.class, message -> {
                     System.out.println("sender: " + getSender().toString());
                     System.out.println("out: " + out.toString());
                     System.out.println("Forwarding search message to SearchServiceActor.");
@@ -152,61 +152,7 @@ public class WebSocketActor extends AbstractActorWithTimers {
                         return null;
                     }, context().dispatcher());
                 })
-                .match(SearchServiceActor.GetUserSearchList.class, message -> {
-                    System.out.println("sender: " + getSender().toString());
-                    System.out.println("out: " + out.toString());
-                    System.out.println("Forwarding search message to SearchServiceActor.");
-                    Timeout timeout = Timeout.create(java.time.Duration.ofSeconds(20));
-                    Future<Object> futureResult = Patterns.ask(searchServiceActor, message, timeout);
-                    futureResult.onComplete(result -> {
-                        try {
-                            if (result.isSuccess()) {
-                                // Send the result back to the WebSocket actor
-                                List<VideoSearch> searchResults = (List<VideoSearch>) result.get();
-                                System.out.println("Search completed, sending results to WebSocket.");
-                                String jsonResults = new ObjectMapper().writeValueAsString(searchResults);
-                                out.tell(jsonResults, getSelf());
-                            } else {
-                                // If there is an error, send failure response to the WebSocket actor
-                                Throwable failure = result.failed().get();
-                                System.out.println("Search failed: " + failure.getMessage());
-                                out.tell(new Status.Failure(failure), getSelf());
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Exception while processing search result: " + e.getMessage());
-                            out.tell(new Status.Failure(e), getSelf());
-                        }
-                        return null;
-                    }, context().dispatcher());
-                })
-                .match(SearchServiceActor.UpdateUserSearchList.class, message -> {
-                    System.out.println("sender: " + getSender().toString());
-                    System.out.println("out: " + out.toString());
-                    System.out.println("Forwarding updated search message to SearchServiceActor.");
-                    Timeout timeout = Timeout.create(java.time.Duration.ofSeconds(20));
-                    Future<Object> futureResult = Patterns.ask(searchServiceActor, message, timeout);
-                    futureResult.onComplete(result -> {
-                        try {
-                            if (result.isSuccess()) {
-                                // Send the result back to the WebSocket actor
-                                List<VideoSearch> searchResults = (List<VideoSearch>) result.get();
-                                System.out.println("Update completed, sending results to WebSocket.");
-                                String jsonResults = new ObjectMapper().writeValueAsString(searchResults);
-                                out.tell(jsonResults, getSelf());
-                            } else {
-                                // If there is an error, send failure response to the WebSocket actor
-                                Throwable failure = result.failed().get();
-                                System.out.println("Search failed: " + failure.getMessage());
-                                out.tell(new Status.Failure(failure), getSelf());
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Exception while processing search result: " + e.getMessage());
-                            out.tell(new Status.Failure(e), getSelf());
-                        }
-                        return null;
-                    }, context().dispatcher());
-                })
-                .match(StatisticsServiceActor.WordFrequency.class, message -> {
+                .match(StatisticsServiceActor.Message.class, message -> {
                     System.out.println("sender: " + getSender().toString());
                     System.out.println("out: " + out.toString());
                     System.out.println("Forwarding search message to SearchServiceActor.");

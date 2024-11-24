@@ -90,6 +90,7 @@ public class SearchService {
                     videoSearch.getResults().getVideoList().add(0, newVideos.get(i));
                     videoSearch.getResults().getVideoList().remove(videoSearch.getResults().getVideoList().size() - 1);
                 }
+                videoSearch.updateScoresAndSentiment();
                 return videoSearch;
             });
         }

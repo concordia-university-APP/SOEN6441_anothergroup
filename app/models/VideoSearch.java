@@ -1,5 +1,7 @@
 package models;
 
+import services.SentimentAnalyzer;
+
 /**
  *  Represents an instance of a search model containing search terms,
  *  a list of video results, and an overall sentiment analysis.
@@ -8,9 +10,9 @@ package models;
 public class VideoSearch {
     private final String searchTerms;
     private final VideoList results;
-    private final String sentiment;
-    private final double fleschEaseScoreAverage;
-    private final double fleschGradeLevelAverage;
+    private String sentiment;
+    private double fleschEaseScoreAverage;
+    private double fleschGradeLevelAverage;
 
     /**
      * Constructs a VideoSearch object with the specified search terms,
@@ -27,6 +29,12 @@ public class VideoSearch {
         this.sentiment = sentiment;
         this.fleschEaseScoreAverage = getFleschEaseScoreAverage();
         this.fleschGradeLevelAverage = getFleschGradeLevelAverage();
+    }
+
+    public void updateScoresAndSentiment() {
+        this.fleschEaseScoreAverage = getFleschEaseScoreAverage();
+        this.fleschGradeLevelAverage = getFleschGradeLevelAverage();
+        this.sentiment = SentimentAnalyzer.analyzeSentiment(this.getResults().getVideoList());
     }
 
     /**

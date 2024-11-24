@@ -137,11 +137,13 @@ public class SearchServiceActor extends AbstractActor {
         });
     }
 
+    public interface Message {}
+
     /**
      * Message class for search keyword requests.
      * @author Tanveer Reza
      */
-    public static class SearchKeywords {
+    public static class SearchKeywords implements Message{
         public final String keywords;
         public final String sessionId;
 
@@ -162,7 +164,7 @@ public class SearchServiceActor extends AbstractActor {
      * Message class for search keyword requests.
      * @author Laurent Voisard
      */
-    public static class GetUserSearchList {
+    public static class GetUserSearchList implements Message {
         public final String sessionId;
 
         /**
@@ -180,7 +182,7 @@ public class SearchServiceActor extends AbstractActor {
      * Message class for search keyword requests.
      * @author Laurent Voisard
      */
-    public static class UpdateUserSearchList {
+    public static class UpdateUserSearchList implements Message {
         public final String sessionId;
 
         /**
@@ -198,7 +200,7 @@ public class SearchServiceActor extends AbstractActor {
      * Message class for video requests by ID.
      * @author Tanveer Reza
      */
-    public static class GetVideoById {
+    public static class GetVideoById implements Message {
         public final String id;
 
         /**
@@ -216,7 +218,7 @@ public class SearchServiceActor extends AbstractActor {
      * Message class for video requests by search term.
      * @author Tanveer Reza
      */
-    public static class GetVideosBySearchTerm {
+    public static class GetVideosBySearchTerm implements Message {
         public final String keywords;
         public final String sessionId;
 
