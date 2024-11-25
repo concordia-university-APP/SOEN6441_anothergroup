@@ -56,7 +56,7 @@ public class WebSocketActor extends AbstractActorWithTimers {
 
     @Override
     public void preStart() {
-        getTimers().startPeriodicTimer("Refresh",new Tick(), refreshDuration);
+        //getTimers().startPeriodicTimer("Refresh",new Tick(), refreshDuration);
     }
 
     /**
