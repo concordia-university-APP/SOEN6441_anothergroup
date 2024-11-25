@@ -78,20 +78,20 @@ public class YoutubeController extends Controller {
     public WebSocket socket() {
         System.out.println("WebSocket connection initiated.");
 
-        return WebSocket.Text.acceptOrResult(
-                request -> CompletableFuture.completedFuture(
-                                request.session().get("user")
-                                        .map(user -> F.Either.<Result, Flow<String, String, ?>>Right(
-                                                ActorFlow.actorRef(actor ->
-                                                                WebSocketActor.props(searchService,
-                                                                        youtubeService,
-                                                                        statisticsService,
-                                                                        user,
-                                                                        actor),
-                                                        actorSystem, materializer)
-                                        ))
-                                        .orElseGet(() -> F.Either.Left(forbidden())))
-        );
+
+        return WebSocket.Text.accept(request -> {
+            // Now pass sessionId to the WebSocket actor
+            return ActorFlow.actorRef(out ->
+                            WebSocketActor.props(
+                                    searchService,
+                                    youtubeService,
+                                    statisticsService,
+                                    request.session().get("user")
+                                            .orElseGet(searchService::createSessionSearchList),
+                                    out),
+                    actorSystem,
+                    materializer);
+        });
     }
 
 
@@ -99,7 +99,6 @@ public class YoutubeController extends Controller {
      * Search for videos with keywords
      * creates a new session if one doesn't exist
      *
-     * @param query   string query to send to youtube api
      * @param request Http request of the browser
      * @return returns the search page populated with the last 10 or less requests made
      * @author Laurent, Yehia
