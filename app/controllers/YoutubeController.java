@@ -86,8 +86,7 @@ public class YoutubeController extends Controller {
                                     searchService,
                                     youtubeService,
                                     statisticsService,
-                                    request.session().get("user")
-                                            .orElseGet(searchService::createSessionSearchList),
+                                    request.session().get("user").get(),
                                     out),
                     actorSystem,
                     materializer);
@@ -104,6 +103,12 @@ public class YoutubeController extends Controller {
      * @author Laurent, Yehia
      */
     public CompletionStage<Result> search(Http.Request request) {
+        Optional<String> user = request.session().get("user");
+
+        if(user.isEmpty()) {
+            return CompletableFuture.supplyAsync(()
+                    -> redirect(routes.YoutubeController.search()).addingToSession(request,"user", searchService.createSessionSearchList()));
+        }
         return CompletableFuture.supplyAsync(() -> ok(views.html.search.render()));
     }
 
