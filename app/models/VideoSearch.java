@@ -1,5 +1,6 @@
 package models;
 
+import actors.FleschReadingActor;
 import services.SentimentAnalyzer;
 
 /**
@@ -65,8 +66,8 @@ public class VideoSearch {
      */
     public double getFleschEaseScoreAverage() {
         return this.results.getVideoList().stream()
-                .map(Video::getFleschReadingEaseScore)
-                .mapToDouble(FleschReadingEaseScore::getReadingEaseScore)
+                .map(Video::getReadingEaseScore)
+                .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0f);
     }
@@ -78,8 +79,8 @@ public class VideoSearch {
      */
     public double getFleschGradeLevelAverage() {
         return this.results.getVideoList().stream()
-                .map(Video::getFleschReadingEaseScore)
-                .mapToDouble(FleschReadingEaseScore::getGradeLevel)
+                .map(Video::getReadingGradeLevel)
+                .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0f);
     }

@@ -1,5 +1,6 @@
 package models;
 
+import actors.FleschReadingActor;
 import services.TagService;
 
 import java.util.Collections;
@@ -17,7 +18,8 @@ public class Video {
     private final String channelId;
     private final String channelName;
     private final String thumbnailUrl;
-    private final FleschReadingEaseScore fleschReadingEaseScore;
+    private double readingEaseScore;
+    private double readingGradeLevel;
     private List<String> tags;
 
     /**
@@ -38,7 +40,6 @@ public class Video {
         this.channelName = channelName;
         this.thumbnailUrl = thumbnailUrl;
         this.tags = tags;
-        this.fleschReadingEaseScore = new FleschReadingEaseScore(this.description);
     }
 
 
@@ -83,12 +84,32 @@ public class Video {
      */
     public String getThumbnailUrl() { return thumbnailUrl;}
 
+
+    /**
+     * @author Laurent Voisard
+     * @param result actor result
+     * fleschScore setter
+     * @return flesch score
+     */
+    public void setFleschReadingScore(FleschReadingActor.ReadingEaseScoreResult result){
+        this.readingEaseScore = result.easeScore;
+        this.readingGradeLevel = result.gradeLevel;
+    }
+
     /**
      * @author Laurent Voisard
      * fleschScore getter
      * @return flesch score
      */
-    public FleschReadingEaseScore getFleschReadingEaseScore() { return fleschReadingEaseScore;}
+    public double getReadingEaseScore() { return readingEaseScore;}
+
+    /**
+     * @author Laurent Voisard
+     * fleschScore getter
+     * @return flesch score
+     */
+    public double getReadingGradeLevel() { return readingGradeLevel;}
+
     /**
      * Retrieves the list of tags associated with this video.
      * @author Ryane

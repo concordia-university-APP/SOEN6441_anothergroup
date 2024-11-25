@@ -3,6 +3,8 @@ package actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.pattern.Patterns;
+import scala.concurrent.Future;
 import services.SearchService;
 import models.VideoSearch;
 import models.VideoList;
@@ -19,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class SearchServiceActor extends AbstractActor {
     private final SearchService searchService;
+    private final ActorRef fleschReadingActor;
 
     /**
      * Constructor to initialize the SearchServiceActor.
@@ -29,6 +32,7 @@ public class SearchServiceActor extends AbstractActor {
     @Inject
     public SearchServiceActor(SearchService searchService) {
         this.searchService = searchService;
+        this.fleschReadingActor = getContext().actorOf(FleschReadingActor.props(), "fleschReadingActor");
     }
 
     /**
@@ -56,6 +60,7 @@ public class SearchServiceActor extends AbstractActor {
                 .match(GetVideosBySearchTerm.class, this::handleGetVideosBySearchTerm)
                 .match(GetUserSearchList.class, this::handleGetUserSearchList)
                 .match(UpdateUserSearchList.class, this::handleUpdateUserSearchList)
+                .match(FleschReadingActor.Message.class, message -> fleschReadingActor.forward(message, getContext()))
                 .build();
     }
 
@@ -69,11 +74,24 @@ public class SearchServiceActor extends AbstractActor {
         System.out.println("Handling SearchKeywords message: " + message.keywords);
         ActorRef sender = getSender();
         CompletableFuture<List<VideoSearch>> searchResults = searchService.searchKeywords(message.keywords, message.sessionId);
-        searchResults.thenAccept(results -> {
+        searchResults.thenAcceptAsync(results -> {
             // Ensure the sender is correctly set here.
             System.out.println("Sending search results to sender: " + sender.toString());
             System.out.println("Search results: " + results.getClass().getSimpleName());
             System.out.println("GetSender: " + getSender());
+            results.stream().forEach(
+                    res -> res.getResults().getVideoList().stream().forEach( v -> {
+                        FleschReadingActor.GetReadingEaseScore msg = new FleschReadingActor.GetReadingEaseScore(v.getDescription());
+                        Future<Object> r = Patterns.ask(fleschReadingActor,msg,10);
+                        r.onComplete(scores -> {
+                            v.setFleschReadingScore((FleschReadingActor.ReadingEaseScoreResult) scores.get());
+                            return null;
+                        }, context().dispatcher());
+                        res.updateScoresAndSentiment();
+                    })
+            );
+
+
             sender.tell(results, getSelf());  // Ensure this is the correct sender (WebSocket actor)
         }).exceptionally(ex -> {
             sender.tell(new akka.actor.Status.Failure(ex), getSelf());
@@ -86,6 +104,17 @@ public class SearchServiceActor extends AbstractActor {
         ActorRef sender = getSender();
         List<VideoSearch> searchResults = searchService.getSessionSearchList(message.sessionId);
 
+        searchResults.stream().forEach(
+                res -> res.getResults().getVideoList().stream().forEach( v -> {
+                    FleschReadingActor.GetReadingEaseScore msg = new FleschReadingActor.GetReadingEaseScore(v.getDescription());
+                    Future<Object> r = Patterns.ask(fleschReadingActor,msg,10);
+                    r.onComplete(scores -> {
+                        v.setFleschReadingScore((FleschReadingActor.ReadingEaseScoreResult) scores.get());
+                        return null;
+                    }, context().dispatcher());
+                    res.updateScoresAndSentiment();
+                })
+        );
             // Ensure the sender is correctly set here.
         System.out.println("Sending search results to sender: " + sender.toString());
         System.out.println("Search results: " + searchResults.getClass().getSimpleName());
@@ -97,10 +126,21 @@ public class SearchServiceActor extends AbstractActor {
     private void handleUpdateUserSearchList(UpdateUserSearchList message) {
         System.out.println("Handling SearchKeywords message: " + message.sessionId);
         ActorRef sender = getSender();
-        searchService.updateSearches(message.sessionId).thenAccept(results -> {
+        searchService.updateSearches(message.sessionId).thenAcceptAsync(results -> {
             System.out.println("sending updated search results to sender: " + sender.toString());
             System.out.println("Search results: " + results.getClass().getSimpleName());
             System.out.println("GetSender: " + getSender());
+            results.stream().forEach(
+                    res -> res.getResults().getVideoList().stream().forEach( v -> {
+                        FleschReadingActor.GetReadingEaseScore msg = new FleschReadingActor.GetReadingEaseScore(v.getDescription());
+                        Future<Object> r = Patterns.ask(fleschReadingActor,msg,10);
+                        r.onComplete(scores -> {
+                            v.setFleschReadingScore((FleschReadingActor.ReadingEaseScoreResult) scores.get());
+                            return null;
+                        }, context().dispatcher());
+                        res.updateScoresAndSentiment();
+                    })
+            );
             sender.tell(results, getSelf());
 
         }).exceptionally(ex -> {

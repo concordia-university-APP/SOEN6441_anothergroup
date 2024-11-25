@@ -63,7 +63,7 @@ function updateResults(searchResults) {
                 html += `<b>Title: </b> <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a> </br>`
                 html += `<b>Channel: </b> <a href="http://localhost:9000/channel/${video.channelId}" >${video.channelName}</a> </br>`
                 html += `<b>Description: </b> ${video.description}</br>`
-                html += `<b>Flesch-Kincaid Grade Level : </b> ${video.fleschReadingEaseScore.readingEaseScore} <b>Flesch-Kincaid Reading Score : </b> ${video.fleschReadingEaseScore.gradeLevel}</br>`
+                html += `<b>Flesch-Kincaid Grade Level : </b> ${video.readingEaseScore} <b>Flesch-Kincaid Reading Score : </b> ${video.readingGradeLevel}</br>`
                 html += `<a href="http://localhost:9000/showVideosByTag/${video.id}"> Tags </a></br>`
                 html += `</div>`;
                 html += `<div class="col-2">`;
