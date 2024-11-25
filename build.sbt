@@ -8,6 +8,8 @@ scalaVersion := "2.13.15"
 
 libraryDependencies ++= Seq(
   guice,
+  ws,
+  "org.webjars" %% "webjars-play" % "2.8.18",
   // Google API Client Library
   "com.google.api-client" % "google-api-client" % "2.6.0",
 
@@ -22,12 +24,14 @@ libraryDependencies ++= Seq(
 
   "com.typesafe.akka" %% "akka-actor" % "2.6.21",
   "com.typesafe.akka" %% "akka-testkit" % "2.6.21",
-  "com.typesafe.akka" %% "akka-stream" % "2.6.21"
+  "com.typesafe.akka" %% "akka-stream" % "2.6.21",
 )
 
 libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "5.11.0" % Test,
-  "org.mockito" % "mockito-junit-jupiter" % "5.12.0" % Test
+  "org.mockito" % "mockito-junit-jupiter" % "5.12.0" % Test,
+  "org.assertj" % "assertj-core" % "3.26.3" % Test,
+  "org.awaitility" % "awaitility" % "4.2.1" % Test,
 )
 
 jacocoReportSettings := JacocoReportSettings()
@@ -45,4 +49,11 @@ jacocoExcludes := Seq(
   "controllers.routes*",
   "controllers.ReverseAssets",
   "controllers.ReverseYoutubeController",
+)
+
+jacocoIncludes := Seq(
+  "controllers.*",
+  "actors.*",
+  "models.*",
+  "services.*"
 )

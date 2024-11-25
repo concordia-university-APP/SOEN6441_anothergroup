@@ -1,5 +1,6 @@
 package models;
 
+import actors.FleschReadingActor;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -35,6 +36,23 @@ public class VideoTest {
         assertEquals(channelId, video.getChannelId());
         assertEquals(channelName, video.getChannelName());
         assertEquals(thumbnailUrl, video.getThumbnailUrl());
-        assertEquals(FleschReadingEaseScore.class, video.getFleschReadingEaseScore().getClass());
+        assertEquals(tags, video.getTags());
+    }
+
+    @Test
+    public void testSetFleschReadingScore() {
+        final String id = "1";
+        final String title = "2";
+        final String description = "3";
+        final String channelId = "4";
+        final String channelName = "5";
+        final String thumbnailUrl = "6";
+        final List<String> tags = Arrays.asList("java", "programming");
+        Video video = new Video(id, title, description, channelId, channelName, thumbnailUrl, tags);
+        double score = 11.0;
+        double grade = 2.0;
+        video.setFleschReadingScore(new FleschReadingActor.ReadingEaseScoreResult(score, grade));
+        assertEquals(video.getReadingEaseScore(), score, 0.0);
+        assertEquals(video.getReadingGradeLevel(), grade, 0.0);
     }
 }
