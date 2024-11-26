@@ -60,7 +60,6 @@ public class SearchServiceActor extends AbstractActor {
                 .match(GetVideosBySearchTerm.class, this::handleGetVideosBySearchTerm)
                 .match(GetUserSearchList.class, this::handleGetUserSearchList)
                 .match(UpdateUserSearchList.class, this::handleUpdateUserSearchList)
-                .match(FleschReadingActor.Message.class, message -> fleschReadingActor.forward(message, getContext()))
                 .build();
     }
 

@@ -107,7 +107,7 @@ public class YoutubeService {
      * @return youtube search list
      * @author Laurent Voisard, Tanveer Reza
      */
-    YouTube.Search.List getYoutubeSearchList() {
+    public YouTube.Search.List getYoutubeSearchList() {
         YouTube.Search.List request;
         try {
             request = getYoutubeService().search().list(Collections.singletonList("id, snippet"));
