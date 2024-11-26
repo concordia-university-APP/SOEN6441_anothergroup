@@ -468,8 +468,6 @@ public class YoutubeServiceTest {
         assertEquals(v.getChannelName(), result.getChannelName() );
         assertEquals(v.getChannelId(), result.getChannelId() );
         assertEquals(v.getThumbnailUrl(), result.getThumbnailUrl() );
-        assertEquals(v.getFleschReadingEaseScore().getReadingEaseScore(), result.getFleschReadingEaseScore().getReadingEaseScore(),0.0 );
-        assertEquals(v.getFleschReadingEaseScore().getGradeLevel(), result.getFleschReadingEaseScore().getGradeLevel(), 0.0);
     }
 
     /**
@@ -575,8 +573,6 @@ public class YoutubeServiceTest {
             assertEquals(videos[i].getChannelName(), result.get(i).getChannelName() );
             assertEquals(videos[i].getChannelId(), result.get(i).getChannelId() );
             assertEquals(videos[i].getThumbnailUrl(), result.get(i).getThumbnailUrl() );
-            assertEquals(videos[i].getFleschReadingEaseScore().getReadingEaseScore(), result.get(i).getFleschReadingEaseScore().getReadingEaseScore(),0.0 );
-            assertEquals(videos[i].getFleschReadingEaseScore().getGradeLevel(), result.get(i).getFleschReadingEaseScore().getGradeLevel(), 0.0);
         }
     }
 

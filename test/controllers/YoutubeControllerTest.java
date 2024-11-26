@@ -1,18 +1,36 @@
 package controllers;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorRefFactory;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
 import akka.stream.Materializer;
+import akka.stream.javadsl.Flow;
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Video;
 import models.YoutubeChannel;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.awaitility.Awaitility.await;
+
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import play.Application;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
+import play.libs.streams.ActorFlow;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
+import play.shaded.ahc.org.asynchttpclient.AsyncHttpClient;
+import play.shaded.ahc.org.asynchttpclient.AsyncHttpClientConfig;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClient;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import play.shaded.ahc.org.asynchttpclient.netty.ws.NettyWebSocket;
 import play.test.Helpers;
+import play.test.TestServer;
 import play.test.WithApplication;
 import services.SearchService;
 import services.StatisticsService;
@@ -20,17 +38,23 @@ import services.TagService;
 import services.YoutubeService;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+
 import static org.mockito.Mockito.*;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
-import static play.test.Helpers.GET;
+import static play.test.Helpers.*;
 
 /**
  * Test class for the Youtube Controller
@@ -67,7 +91,7 @@ public class YoutubeControllerTest extends WithApplication {
         materializer = mock(Materializer.class);
         youtubeController = new YoutubeController(statisticsService, searchService, ec, mockYoutubeService, tagService, actorSystem, materializer);
         testChannel = new YoutubeChannel(TEST_CHANNEL_ID, "Test Channel", "Test Description", "http://thumbnail.url", null);
-        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url"));
+        testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url", Collections.singletonList("tag2")));
 
         testVideos = Collections.singletonList(new Video("videoId1", "Video Title 1", "Description 1", "channelId", "Channel Title", "http://thumbnail1.url", Collections.singletonList("tag1")));
         testTags = new ArrayList<>();
@@ -77,7 +101,6 @@ public class YoutubeControllerTest extends WithApplication {
         // Mock the HttpExecutionContext to return a direct executor
         when(ec.current()).thenReturn(Runnable::run);
     }
-
 
     /**
      * Test the getStatistics method of YoutubeController with user session
@@ -106,23 +129,20 @@ public class YoutubeControllerTest extends WithApplication {
     }
 
     /**
-     * Test the searchForm method of YoutubeController with no user session
+     * Test the searchForm method of YoutubeController with user session
      *
-     * @throws Exception
+     * throws Exception
      */
     @Test
-    public void testSearchFormWithoutUserSession() {
+    public void testSearchWithUserSession() {
         Http.RequestBuilder requestBuilder = Helpers.fakeRequest()
                 .method(GET)
-                .uri("/searchForm");
+                .uri("/search")
+                .session("user", "1");
 
-        when(searchService.createSessionSearchList()).thenReturn("sessionList");
+        Result result = youtubeController.search(requestBuilder.build()).toCompletableFuture().join();
 
-        Result result = youtubeController.searchForm(requestBuilder.build()).toCompletableFuture().join();
-
-        assertEquals(SEE_OTHER, result.status());
-        assertEquals("/", result.redirectLocation().orElse(null));
-        assertEquals("sessionList", result.session().get("user").orElse(null));
+        assertEquals(OK, result.status());
     }
 
     /**
@@ -131,16 +151,17 @@ public class YoutubeControllerTest extends WithApplication {
      * throws Exception
      */
     @Test
-    public void testSearchFormWithUserSession() {
+    public void testSearchWithoutUserSession() {
         Http.RequestBuilder requestBuilder = Helpers.fakeRequest()
                 .method(GET)
-                .uri("/searchForm")
-                .session("user", "1");
+                .uri("/search")
+                .session("joe", "mama");
 
-        when(searchService.getSessionSearchList(anyString())).thenReturn(List.of());
+        when(searchService.createSessionSearchList()).thenReturn("0");
+        Result result = youtubeController.search(requestBuilder.build()).toCompletableFuture().join();
 
-        Result result = youtubeController.searchForm(requestBuilder.build()).toCompletableFuture().join();
-
-        assertEquals(OK, result.status());
+        assertEquals(SEE_OTHER, result.status());
     }
+
+
 }

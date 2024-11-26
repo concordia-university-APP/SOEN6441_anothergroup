@@ -144,4 +144,50 @@ public class SearchServiceTest {
         assertEquals("9", videoList.getVideoList().get(8).getTitle());
         assertEquals("10", videoList.getVideoList().get(9).getTitle());
     }
+
+    /**
+     * validate that querying a new search returns a result
+     * @author Laurent Voisard
+     */
+    @Test
+    public void testRefreshSearch_noExistingSearches() {
+        List<VideoSearch> res = searchService.updateSearches( "1").join();
+        assertEquals(res.size(), 0);
+    }
+
+    /**
+     * validate that querying a new search returns a result
+     * @author Laurent Voisard
+     */
+    @Test
+    public void testRefreshSearch_withExistingSearches() {
+        searchService.searchKeywords("test", "0").join();
+        List<VideoSearch> res = searchService.updateSearches( "0").join();
+
+        assertNotEquals(res.size(), 0);
+    }
+
+    @Test
+    public void testRefreshSearch_withExistingSearches_newResults() {
+        searchService.searchKeywords("test", "0").join();
+
+        VideoList newVideoList = new VideoList(List.of( new Video[] {
+
+                new Video("11","11","1","1","1","1", List.of("#tag11")),
+                new Video("12","12","1","1","1","1", List.of("#tag12")),
+                new Video("13","13","1","1","1","1", List.of("#tag13")),
+                new Video("1","1","1","1","1","1", List.of("#tag1", "#tag2")),
+                new Video("2","2","1","1","1","1", List.of("#tag3", "#tag4")),
+                new Video("3","3","1","1","1","1", List.of("#tag5")),
+                new Video("4","4","1","1","1","1", List.of("#tag6")),
+                new Video("5","5","1","1","1","1", List.of("#tag7")),
+                new Video("6","6","1","1","1","1", List.of("#tag8")),
+                new Video("7","7","1","1","1","1", List.of("#tag9")),
+        }));
+
+        when(youtubeService.searchResults(anyString(), anyLong())).thenReturn(CompletableFuture.completedFuture(newVideoList));
+        List<VideoSearch> res = searchService.updateSearches( "0").join();
+
+        assertNotEquals(res.size(), 0);
+    }
 }
